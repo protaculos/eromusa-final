@@ -69,7 +69,33 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ direct: true, credits: newCredits });
     }
 
-    // 4. Create Vexutopia payment session for paid plans
+    // 4. Handle "instant" (test) method — add credits directly
+    if (body.payment_method === 'instant') {
+      const { data: profile } = await supabaseAdmin
+        .from('profiles')
+        .select('credits')
+        .eq('id', userId)
+        .single();
+
+      const currentCredits = profile?.credits ?? 0;
+      const newCredits = currentCredits + credits;
+
+      const { error: updateError } = await supabaseAdmin
+        .from('profiles')
+        .update({ credits: newCredits, updated_at: new Date().toISOString() })
+        .eq('id', userId);
+
+      if (updateError) {
+        return NextResponse.json(
+          { error: 'Failed to add credits' },
+          { status: 500 }
+        );
+      }
+
+      return NextResponse.json({ direct: true, credits: newCredits });
+    }
+
+    // 5. Create Vexutopia payment session for paid plans
     const vexutopiaResponse = await fetch(VEXUTOPIA_API_URL, {
       method: 'POST',
       headers: {
@@ -102,7 +128,7 @@ export async function POST(request: NextRequest) {
 
     const vexutopiaData = await vexutopiaResponse.json();
 
-    // 5. Store payment record in database
+    // 6. Store payment record in database
     const { error: insertError } = await supabaseAdmin
       .from('payments')
       .insert({
@@ -119,7 +145,7 @@ export async function POST(request: NextRequest) {
       // The webhook will handle reconciliation
     }
 
-    // 6. Return checkout URL to frontend
+    // 7. Return checkout URL to frontend
     return NextResponse.json({
       checkout_url: vexutopiaData.checkout_url || vexutopiaData.url,
     });

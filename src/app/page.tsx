@@ -14,16 +14,12 @@ const PaymentMethodModal = ({ open, plan, credits, amount, onConfirm, onClose }:
   onConfirm: (method: string) => void;
   onClose: () => void;
 }) => {
-  const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
-
   if (!open) return null;
 
   const methods = [
-    { id: 'credit_card', label: 'Credit Card', icon: '💳' },
-    { id: 'bank_transfer', label: 'Bank Transfer', icon: '🏦' },
-    { id: 'pix', label: 'PIX', icon: '💠' },
-    { id: 'crypto', label: 'Cryptocurrency', icon: '₿' },
-    { id: 'instant', label: 'Instant Credits (Test)', icon: '⚡' },
+    { id: 'card_pix', label: 'Cartão / PIX', icon: '💳', desc: 'Pay with credit card or PIX' },
+    { id: 'crypto', label: 'Cryptocurrency', icon: '₿', desc: 'Pay with Bitcoin, USDT & more' },
+    { id: 'instant', label: 'Instant Credits (Test)', icon: '⚡', desc: 'Add credits instantly — free test' },
   ];
 
   return (
@@ -41,41 +37,29 @@ const PaymentMethodModal = ({ open, plan, credits, amount, onConfirm, onClose }:
           </div>
         </div>
 
-        <div className="space-y-2 mb-6">
+        <div className="space-y-3 mb-6">
           {methods.map(m => (
             <button
               key={m.id}
-              onClick={() => setSelectedMethod(m.id)}
-              className={`w-full flex items-center gap-3 p-4 rounded-xl border transition-all ${
-                selectedMethod === m.id
-                  ? 'border-[#ff7a00] bg-[#ff7a00]/10'
-                  : 'border-white/10 bg-[#141417] hover:border-white/20'
-              }`}
+              onClick={() => onConfirm(m.id)}
+              className="w-full flex items-center gap-4 p-4 rounded-xl border border-white/10 bg-[#141417] hover:border-[#ff7a00] hover:bg-[#ff7a00]/5 transition-all text-left group"
             >
-              <span className="text-xl">{m.icon}</span>
-              <span className="text-white font-medium">{m.label}</span>
-              {selectedMethod === m.id && (
-                <span className="ml-auto text-[#ff7a00]">✓</span>
-              )}
+              <span className="text-2xl">{m.icon}</span>
+              <div className="flex-1">
+                <div className="text-white font-semibold group-hover:text-[#ff7a00] transition-colors">{m.label}</div>
+                <div className="text-white/40 text-sm">{m.desc}</div>
+              </div>
+              <span className="text-white/20 group-hover:text-[#ff7a00] transition-colors">→</span>
             </button>
           ))}
         </div>
 
-        <div className="flex gap-3">
-          <button
-            onClick={onClose}
-            className="flex-1 py-3 rounded-xl font-semibold bg-white/10 text-white hover:bg-white/20 transition-all"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={() => selectedMethod && onConfirm(selectedMethod)}
-            disabled={!selectedMethod}
-            className="flex-1 py-3 rounded-xl font-semibold bg-[#ff7a00] text-white hover:bg-[#e66d00] disabled:opacity-50 transition-all"
-          >
-            Continue
-          </button>
-        </div>
+        <button
+          onClick={onClose}
+          className="w-full py-3 rounded-xl font-semibold bg-white/10 text-white/60 hover:bg-white/20 hover:text-white transition-all"
+        >
+          Cancel
+        </button>
       </div>
     </div>
   );
