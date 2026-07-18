@@ -150,20 +150,14 @@ const LoginModal = ({ open, onClose }: { open: boolean; onClose: () => void }) =
 // ============================================
 // Navbar
 // ============================================
-const Navbar = ({ credits, creditsLoading, onLogin }: {
+const Navbar = ({ user, credits, creditsLoading, onLogin }: {
+  user: any;
   credits: number | null;
   creditsLoading: boolean;
   onLogin: () => void;
 }) => {
-  const [user, setUser] = useState<any>(null);
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUser(data.user));
-  }, []);
-
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    setUser(null);
   };
 
   return (
@@ -181,9 +175,20 @@ const Navbar = ({ credits, creditsLoading, onLogin }: {
       <div className="flex items-center gap-4">
         {user ? (
           <>
-            <span className="hidden sm:block text-sm font-medium text-white/60">
-              Credits: <span className="text-white">{creditsLoading ? '...' : credits ?? 0}</span>
-            </span>
+            {/* Créditos - visível apenas logado */}
+            <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-1.5">
+              <svg className="w-4 h-4 text-[#ff7a00]" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-.5-13v4h-4v2h4v4h2v-4h4v-2h-4V7h-2z"/>
+              </svg>
+              <span className="text-sm font-semibold text-white">
+                {creditsLoading ? (
+                  <span className="inline-block w-4 h-4 border-2 border-[#ff7a00] border-t-transparent rounded-full animate-spin align-middle" />
+                ) : (
+                  credits ?? 0
+                )}
+              </span>
+            </div>
+            {/* Logout */}
             <button
               onClick={handleLogout}
               className="text-sm text-white/40 hover:text-white transition-colors"
@@ -368,6 +373,7 @@ export default function PricingPage() {
     <div className="min-h-screen bg-[#0a0a0b] selection:bg-[#ff7a00]/30">
       {/* Navbar */}
       <Navbar
+        user={user}
         credits={credits}
         creditsLoading={creditsLoading}
         onLogin={() => setShowLogin(true)}
