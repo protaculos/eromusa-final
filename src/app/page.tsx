@@ -6,11 +6,12 @@ import { supabase } from '@/lib/supabase';
 // ============================================
 // Modal de Escolha de Método de Pagamento
 // ============================================
-const PaymentMethodModal = ({ open, plan, credits, amount, onConfirm, onClose }: {
+const PaymentMethodModal = ({ open, plan, credits, amount, error, onConfirm, onClose }: {
   open: boolean;
   plan: string | null;
   credits: number;
   amount: number;
+  error: string | null;
   onConfirm: (method: string) => void;
   onClose: () => void;
 }) => {
@@ -53,6 +54,12 @@ const PaymentMethodModal = ({ open, plan, credits, amount, onConfirm, onClose }:
             </button>
           ))}
         </div>
+
+        {error && (
+          <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm text-center">
+            {error}
+          </div>
+        )}
 
         <button
           onClick={onClose}
@@ -311,6 +318,7 @@ export default function PricingPage() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<{ name: string; credits: number; amount: number } | null>(null);
   const [purchasing, setPurchasing] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
 
   // Carregar usuário e créditos
   useEffect(() => {
@@ -363,6 +371,7 @@ export default function PricingPage() {
   // Confirmar compra com método selecionado
   const handleConfirm = async (method: string) => {
     if (!selectedPlan || !user) return;
+    setPaymentError(null);
     setPurchasing(true);
 
     try {
@@ -387,7 +396,7 @@ export default function PricingPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        console.error('Payment error:', data.error);
+        setPaymentError(data.error || 'Payment request failed');
         return;
       }
 
@@ -404,6 +413,7 @@ export default function PricingPage() {
       }
     } catch (err) {
       console.error('Payment request failed:', err);
+      setPaymentError('Network error — please try again');
     } finally {
       setPurchasing(false);
     }
@@ -426,8 +436,9 @@ export default function PricingPage() {
         plan={selectedPlan?.name ?? null}
         credits={selectedPlan?.credits ?? 0}
         amount={selectedPlan?.amount ?? 0}
+        error={paymentError}
         onConfirm={handleConfirm}
-        onClose={() => { setShowPaymentModal(false); setSelectedPlan(null); }}
+        onClose={() => { setShowPaymentModal(false); setSelectedPlan(null); setPaymentError(null); }}
       />
 
       {/* Loading overlay durante compra */}

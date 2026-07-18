@@ -1,14 +1,14 @@
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 /**
- * Server-side Supabase client.
- * For API routes that need to verify the user session, use createRouteHandlerClient
- * from the auth cookie. For webhooks (no user session), use this client directly.
+ * Server-side Supabase client with SERVICE_ROLE privileges.
+ * Bypasses RLS — use only in trusted server contexts (API routes, webhooks).
+ * For user-scoped operations, use the anon key client from supabase.ts.
  */
-export const supabaseAdmin = createClient(supabaseUrl, supabaseAnonKey, {
+export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
   auth: {
     autoRefreshToken: false,
     persistSession: false,
