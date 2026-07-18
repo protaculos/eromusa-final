@@ -6,14 +6,26 @@ const WEBHOOK_SECRET = process.env.VEXUTOPIA_WEBHOOK_SECRET!;
 
 /**
  * Verify HMAC-SHA256 signature from Vexutopia webhook.
- * The signature is sent in the x-vexutopia-signature header as a hex string.
+ * Header format: X-Vexutopia-Signature: v1={hex},t={unix_timestamp}
+ * HMAC is computed over "{timestamp}.{rawRequestBody}"
  */
-function verifySignature(payload: string, signature: string): boolean {
-  if (!WEBHOOK_SECRET || !signature) return false;
+function verifySignature(payload: string, signatureHeader: string): boolean {
+  if (!WEBHOOK_SECRET || !signatureHeader) return false;
+
+  // Parse the v1=hex,t=timestamp format
+  const v1Match = signatureHeader.match(/v1=([a-f0-9]+)/);
+  const tMatch = signatureHeader.match(/t=(\d+)/);
+  if (!v1Match || !tMatch) return false;
+
+  const signature = v1Match[1];
+  const timestamp = tMatch[1];
+
+  // Compute expected HMAC over "{timestamp}.{rawBody}"
   const expected = crypto
     .createHmac('sha256', WEBHOOK_SECRET)
-    .update(payload)
+    .update(`${timestamp}.${payload}`)
     .digest('hex');
+
   return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature));
 }
 
@@ -21,26 +33,25 @@ export async function POST(request: NextRequest) {
   try {
     // 1. Read raw body for signature verification
     const rawBody = await request.text();
-    const signature = request.headers.get('x-vexutopia-signature') || '';
+    const signatureHeader = request.headers.get('x-vexutopia-signature') || '';
 
     // 2. Verify HMAC signature
-    if (!verifySignature(rawBody, signature)) {
+    if (!verifySignature(rawBody, signatureHeader)) {
       console.error('Invalid webhook signature');
       return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
     }
 
     // 3. Parse event
     const event = JSON.parse(rawBody);
-    const eventType = event.type || event.event;
+    const eventType = event.event;
 
     console.log(`Vexutopia webhook received: ${eventType}`);
 
     // 4. Handle payment events
     switch (eventType) {
       case 'payment.completed': {
-        const payment = event.data || event.payment;
-        const vexutopiaTxId = payment.id;
-        const metadata = payment.metadata || {};
+        const vexutopiaTxId = event.id || event.payment_id;
+        const metadata = event.metadata || {};
         const userId = metadata.user_id;
         const credits = parseInt(metadata.credits || '0', 10);
 
@@ -84,8 +95,7 @@ export async function POST(request: NextRequest) {
       }
 
       case 'payment.failed': {
-        const failedPayment = event.data || event.payment;
-        const failedTxId = failedPayment.id;
+        const failedTxId = event.id || event.payment_id;
 
         if (failedTxId) {
           await supabaseAdmin

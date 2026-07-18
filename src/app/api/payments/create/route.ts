@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-server';
 
-const VEXUTOPIA_API_URL = 'https://api.vexutopia.com/v1/payments';
+const VEXUTOPIA_API_URL = 'https://vexutopia.com/api/v1/payments';
 const VEXUTOPIA_API_KEY = process.env.VEXUTOPIA_API_KEY!;
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
@@ -100,11 +100,11 @@ export async function POST(request: NextRequest) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${VEXUTOPIA_API_KEY}`,
+        'X-API-Key': VEXUTOPIA_API_KEY,
       },
       body: JSON.stringify({
-        amount, // in cents (e.g., 1900 for $19)
-        currency: 'usd',
+        amount: (amount / 100).toString(), // convert cents to dollars (e.g., "19.00")
+        currency: 'USD',
         return_url: `${SITE_URL}/success`,
         cancel_url: `${SITE_URL}/cancel`,
         metadata: {
