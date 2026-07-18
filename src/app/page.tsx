@@ -4,34 +4,61 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
 // ============================================
-// Modal de Confirmação
+// Modal de Escolha de Método de Pagamento
 // ============================================
-const ConfirmModal = ({ open, plan, credits, onConfirm, onClose }: {
+const PaymentMethodModal = ({ open, plan, credits, amount, onConfirm, onClose }: {
   open: boolean;
   plan: string | null;
   credits: number;
-  onConfirm: () => void;
+  amount: number;
+  onConfirm: (method: string) => void;
   onClose: () => void;
 }) => {
+  const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
+
   if (!open) return null;
+
+  const methods = [
+    { id: 'credit_card', label: 'Credit Card', icon: '💳' },
+    { id: 'bank_transfer', label: 'Bank Transfer', icon: '🏦' },
+    { id: 'pix', label: 'PIX', icon: '💠' },
+    { id: 'crypto', label: 'Cryptocurrency', icon: '₿' },
+    { id: 'instant', label: 'Instant Credits (Test)', icon: '⚡' },
+  ];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
       <div className="bg-[#1a1a1e] border border-white/10 rounded-3xl p-8 max-w-md w-full mx-4 shadow-2xl">
-        <h3 className="text-2xl font-bold text-white mb-2">Confirm Purchase</h3>
+        <h3 className="text-2xl font-bold text-white mb-2">Choose Payment Method</h3>
         <p className="text-white/50 mb-6">
-          You are about to purchase the <span className="text-white font-semibold">{plan}</span> plan.
+          <span className="text-white font-semibold">{plan}</span> — {credits} credits
         </p>
 
-        <div className="bg-[#141417] rounded-2xl p-5 mb-6 border border-white/5">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-white/60 text-sm">Plan</span>
-            <span className="text-white font-medium">{plan}</span>
+        <div className="bg-[#141417] rounded-2xl p-4 mb-6 border border-white/5">
+          <div className="flex justify-between">
+            <span className="text-white/60">Amount</span>
+            <span className="text-white font-bold">${(amount / 100).toFixed(2)}</span>
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-white/60 text-sm">Credits</span>
-            <span className="text-[#ff7a00] font-bold text-lg">+{credits}</span>
-          </div>
+        </div>
+
+        <div className="space-y-2 mb-6">
+          {methods.map(m => (
+            <button
+              key={m.id}
+              onClick={() => setSelectedMethod(m.id)}
+              className={`w-full flex items-center gap-3 p-4 rounded-xl border transition-all ${
+                selectedMethod === m.id
+                  ? 'border-[#ff7a00] bg-[#ff7a00]/10'
+                  : 'border-white/10 bg-[#141417] hover:border-white/20'
+              }`}
+            >
+              <span className="text-xl">{m.icon}</span>
+              <span className="text-white font-medium">{m.label}</span>
+              {selectedMethod === m.id && (
+                <span className="ml-auto text-[#ff7a00]">✓</span>
+              )}
+            </button>
+          ))}
         </div>
 
         <div className="flex gap-3">
@@ -42,10 +69,11 @@ const ConfirmModal = ({ open, plan, credits, onConfirm, onClose }: {
             Cancel
           </button>
           <button
-            onClick={onConfirm}
-            className="flex-1 py-3 rounded-xl font-semibold bg-[#ff7a00] text-white hover:bg-[#e66d00] transition-all"
+            onClick={() => selectedMethod && onConfirm(selectedMethod)}
+            disabled={!selectedMethod}
+            className="flex-1 py-3 rounded-xl font-semibold bg-[#ff7a00] text-white hover:bg-[#e66d00] disabled:opacity-50 transition-all"
           >
-            Confirm
+            Continue
           </button>
         </div>
       </div>
@@ -222,7 +250,7 @@ const PricingCard = ({ plan, price, features, credits, isPopular = false, button
   credits: number;
   isPopular?: boolean;
   buttonText?: string;
-  onBuy: (plan: string, credits: number) => void;
+  onBuy: (plan: string, credits: number, amount: number) => void;
 }) => (
   <div className={`relative p-8 rounded-3xl border ${isPopular ? 'border-[#ff7a00] bg-[#1a1a1e]' : 'border-white/10 bg-[#141417]'} flex flex-col h-full transition-transform hover:scale-[1.02]`}>
     {isPopular && (
@@ -250,7 +278,7 @@ const PricingCard = ({ plan, price, features, credits, isPopular = false, button
       ))}
     </ul>
     <button
-      onClick={() => onBuy(plan, credits)}
+      onClick={() => onBuy(plan, credits, parseInt(price) * 100)}
       className={`w-full py-3 rounded-xl font-semibold transition-all ${isPopular ? 'bg-[#ff7a00] text-white hover:bg-[#e66d00]' : 'bg-white/10 text-white hover:bg-white/20'}`}
     >
       {buttonText}
@@ -296,8 +324,8 @@ export default function PricingPage() {
 
   // Modal states
   const [showLogin, setShowLogin] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<{ name: string; credits: number } | null>(null);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<{ name: string; credits: number; amount: number } | null>(null);
   const [purchasing, setPurchasing] = useState(false);
 
   // Carregar usuário e créditos
@@ -338,35 +366,63 @@ export default function PricingPage() {
     return () => listener?.subscription.unsubscribe();
   }, []);
 
-  // Abrir modal de confirmação
-  const handleBuy = (plan: string, planCredits: number) => {
+  // Abrir modal de pagamento
+  const handleBuy = (plan: string, planCredits: number, planAmount: number) => {
     if (!user) {
       setShowLogin(true);
       return;
     }
-    setSelectedPlan({ name: plan, credits: planCredits });
-    setShowConfirm(true);
+    setSelectedPlan({ name: plan, credits: planCredits, amount: planAmount });
+    setShowPaymentModal(true);
   };
 
-  // Confirmar compra
-  const handleConfirm = async () => {
+  // Confirmar compra com método selecionado
+  const handleConfirm = async (method: string) => {
     if (!selectedPlan || !user) return;
     setPurchasing(true);
 
-    const newCredits = (credits ?? 0) + selectedPlan.credits;
+    try {
+      // Get the current session token for authentication
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
 
-    const { error } = await supabase
-      .from('profiles')
-      .update({ credits: newCredits, updated_at: new Date().toISOString() })
-      .eq('id', user.id);
+      const res = await fetch('/api/payments/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          plan: selectedPlan.name,
+          credits: selectedPlan.credits,
+          amount: selectedPlan.amount,
+          payment_method: method,
+        }),
+      });
 
-    if (!error) {
-      setCredits(newCredits);
+      const data = await res.json();
+
+      if (!res.ok) {
+        console.error('Payment error:', data.error);
+        return;
+      }
+
+      if (data.direct) {
+        // Instant/test mode — credits already added, just refresh
+        setCredits(data.credits);
+        setShowPaymentModal(false);
+        setSelectedPlan(null);
+      } else if (data.checkout_url) {
+        // Open checkout in a new tab — don't redirect the current page
+        window.open(data.checkout_url, '_blank');
+        setShowPaymentModal(false);
+        setSelectedPlan(null);
+      }
+    } catch (err) {
+      console.error('Payment request failed:', err);
+    } finally {
+      setPurchasing(false);
     }
-
-    setPurchasing(false);
-    setShowConfirm(false);
-    setSelectedPlan(null);
   };
 
   return (
@@ -381,12 +437,13 @@ export default function PricingPage() {
 
       {/* Modais */}
       <LoginModal open={showLogin} onClose={() => setShowLogin(false)} />
-      <ConfirmModal
-        open={showConfirm}
+      <PaymentMethodModal
+        open={showPaymentModal}
         plan={selectedPlan?.name ?? null}
         credits={selectedPlan?.credits ?? 0}
+        amount={selectedPlan?.amount ?? 0}
         onConfirm={handleConfirm}
-        onClose={() => { setShowConfirm(false); setSelectedPlan(null); }}
+        onClose={() => { setShowPaymentModal(false); setSelectedPlan(null); }}
       />
 
       {/* Loading overlay durante compra */}
