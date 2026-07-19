@@ -15,3 +15,13 @@
 [2026-07-19 10:51:10] [INFO] Iniciando deploy na Vercel...
 [2026-07-19 10:51:10] [INFO] Deploy: <claude-code-hint v="1" type="plugin" value="vercel@claude-plugins-official" /> Vercel CLI 56.2.1 (Node.js 24.18.0) Retrieving projectÔÇª Deploying eromusa/eromusa-final Uploading [--------------------] (0.0B/69.2KB) Uploading [=====---------------] (18.4KB/69.2KB) Uploading [============--------] (43.4KB/69.2KB) Uploading [=================---] (59.4KB/69.2KB) Uploading [====================] (69.2KB/69.2KB)   Inspect         https://vercel.com/eromusa/eromusa-final/CsF8ubNpPuxnHUa43JQDPffva6pL   Production      https://eromusa-final-4qh2pa51x-eromusa.vercel.app BuildingÔÇª BuildingÔÇª Running build in Washington, D.C., USA (East) ÔÇô iad1 Build machine configuration: 2 cores, 8 GB Retrieving list of deployment files... Downloading 41 deployment files... Restored build cache from previous deployment (4TEVJzrsv8V2qTBThZMdfXnNhmqn) Running "vercel build" Vercel CLI 56.2.0 Installing dependencies... up to date in 837ms 146 packages are looking for funding run `npm fund` for details Detected Next.js version: 16.2.10 Running "npm run build" > eromusa-app@0.1.0 build > next build Applying modifyConfig from Vercel Ôû¦ Next.js 16.2.10 (Turbopack) Creating an optimized production build ... {   "id": "dpl_CsF8ubNpPuxnHUa43JQDPffva6pL",   "url": "https://eromusa-final-4qh2pa51x-eromusa.vercel.app",   "inspectorUrl": "https://vercel.com/eromusa/eromusa-final/CsF8ubNpPuxnHUa43JQDPffva6pL",   "readyState": "ERROR",   "target": "production",   "deploymentApiUrl": "https://api.vercel.com/v13/deployments/dpl_CsF8ubNpPuxnHUa43JQDPffva6pL",   "error": {     "name": "BUILD_ERROR",     "message": "Command \"npm run build\" exited with 1"   } }
 [2026-07-19 10:51:10] [ERROR] Erro no deploy Vercel (exit code: 1)
+[2026-07-19 17:04:02] [INFO] === INICIANDO PULL + DEPLOY ===
+[2026-07-19 17:04:02] [INFO] Fazendo git pull...
+[2026-07-19 17:04:02] [INFO] Git pull: From https://github.com/protaculos/eromusa-final  * branch            master     -> FETCH_HEAD Already up to date.
+[2026-07-19 17:04:02] [INFO] Nenhuma mudanca encontrada. Pulando deploy.
+[2026-07-19 17:04:02] [INFO] === FINALIZADO (sem mudancas) ===
+[2026-07-19 17:06:14] [INFO] === INICIANDO PULL + DEPLOY ===
+[2026-07-19 17:06:14] [INFO] Fazendo git pull...
+[2026-07-19 17:06:14] [INFO] Git pull: From https://github.com/protaculos/eromusa-final  * branch            master     -> FETCH_HEAD Already up to date.
+[2026-07-19 17:06:14] [INFO] Nenhuma mudanca encontrada. Pulando deploy.
+[2026-07-19 17:06:14] [INFO] === FINALIZADO (sem mudancas) ===

@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 export default function SupportPage() {
   return (
-    <div className="min-h-screen bg-[#0A0B14]">
+    <div className="min-h-screen">
       <div className="pt-8 pb-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
         <div className="mb-8">
           <Link href="/" className="text-[#F97316] hover:text-[#e66d00] text-sm font-semibold transition-colors">

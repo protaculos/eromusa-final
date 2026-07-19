@@ -193,7 +193,7 @@ export default function DiscoverPage() {
   const mobilePageNumbers = useMemo(() => getMobilePageNumbers(currentPage, totalPages), [currentPage, totalPages]);
 
   return (
-    <div className="min-h-screen bg-[#0A0B14]">
+    <div className="min-h-screen">
       <div className="pt-8 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">

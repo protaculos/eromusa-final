@@ -1,22 +1,2 @@
-{
-  "status": "ok",
-  "deployment": {
-    "id": "dpl_8PBZmkvf5jnZjT2BeydQNWQQiCHf",
-    "url": "https://eromusa-final-edqdjn3ej-eromusa.vercel.app",
-    "inspectorUrl": "https://vercel.com/eromusa/eromusa-final/8PBZmkvf5jnZjT2BeydQNWQQiCHf",
-    "readyState": "READY",
-    "target": "production",
-    "deploymentApiUrl": "https://api.vercel.com/v13/deployments/dpl_8PBZmkvf5jnZjT2BeydQNWQQiCHf"
-  },
-  "message": "Deployment eromusa-final-edqdjn3ej-eromusa.vercel.app ready.",
-  "next": [
-    {
-      "command": "vercel inspect eromusa-final-edqdjn3ej-eromusa.vercel.app",
-      "when": "Inspect deployment"
-    },
-    {
-      "command": "vercel deploy --prod",
-      "when": "Promote to production"
-    }
-  ]
-}
+'deploy.bat' n∆o Ç reconhecido como um comando interno
+ou externo, um programa oper†vel ou um arquivo em lotes.
