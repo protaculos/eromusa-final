@@ -8,46 +8,113 @@ import PaymentMethodModal from '@/components/PaymentMethodModal';
 // ============================================
 // Pricing Card
 // ============================================
-const PricingCard = ({ plan, price, features, credits, amount, isPopular = false, buttonText = "Get Started", onBuy }: {
+interface PlanData {
   plan: string;
   price: string;
-  features: string[];
   credits: number;
   amount: number;
+  templates: string;       // ex: "10 (1/3)"
+  totalVideos: number;     // quantos vídeos consegue fazer
+  costPerVideo: string;   // custo por vídeo com desconto
+  simultaneous: number;   // vídeos simultâneos
+  queue: string;          // fila de prioridade
   isPopular?: boolean;
-  buttonText?: string;
+}
+
+const PricingCard = ({ data, onBuy }: {
+  data: PlanData;
   onBuy: (plan: string, credits: number, amount: number) => void;
 }) => (
-  <div className={`relative p-8 rounded-3xl border ${isPopular ? 'border-[#F97316] bg-[#1a1a1e]' : 'border-white/10 bg-[#141417]'} flex flex-col h-full transition-transform hover:scale-[1.02]`}>
-    {isPopular && (
+  <div className={`relative p-8 rounded-3xl border flex flex-col h-full transition-transform hover:scale-[1.02] ${
+    data.isPopular ? 'border-[#F97316] bg-[#1a1a1e]' : 'border-white/10 bg-[#141417]'
+  }`}>
+    {data.isPopular && (
       <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#F97316] text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
         Most Popular
       </div>
     )}
-    <div className="mb-8">
-      <h3 className="text-xl font-bold text-white mb-2">{plan}</h3>
+
+    {/* Header */}
+    <div className="mb-6">
+      <h3 className="text-xl font-bold text-white mb-2">{data.plan}</h3>
       <div className="flex items-baseline gap-1">
-        <span className="text-4xl font-bold text-white">${price}</span>
-        <span className="text-white/40 text-sm">/month</span>
+        <span className="text-4xl font-bold text-white">${data.price}</span>
       </div>
     </div>
+
+    {/* Features */}
     <ul className="space-y-4 mb-8 flex-1">
-      {features.map((feature, i) => (
-        <li key={i} className="flex items-start gap-3 text-sm text-white/60">
-          <div className="mt-1 flex-shrink-0 w-4 h-4 rounded-full bg-[#F97316]/20 flex items-center justify-center">
-            <svg className="w-3 h-3 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          {feature}
-        </li>
-      ))}
+      {/* 1. Créditos */}
+      <li className="flex items-start gap-3 text-sm text-white/60">
+        <div className="mt-1 flex-shrink-0 w-4 h-4 rounded-full bg-[#F97316]/20 flex items-center justify-center">
+          <svg className="w-3 h-3 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <span><strong className="text-white">{data.credits.toLocaleString()}</strong> credits per month</span>
+      </li>
+
+      {/* 2. Templates */}
+      <li className="flex items-start gap-3 text-sm text-white/60">
+        <div className="mt-1 flex-shrink-0 w-4 h-4 rounded-full bg-[#F97316]/20 flex items-center justify-center">
+          <svg className="w-3 h-3 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <span><strong className="text-white">{data.templates}</strong> templates available</span>
+      </li>
+
+      {/* 3. Vídeos que consegue fazer */}
+      <li className="flex items-start gap-3 text-sm text-white/60">
+        <div className="mt-1 flex-shrink-0 w-4 h-4 rounded-full bg-[#F97316]/20 flex items-center justify-center">
+          <svg className="w-3 h-3 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <span>Up to <strong className="text-white">{data.totalVideos}</strong> videos per month</span>
+      </li>
+
+      {/* 4. Custo por vídeo */}
+      <li className="flex items-start gap-3 text-sm text-white/60">
+        <div className="mt-1 flex-shrink-0 w-4 h-4 rounded-full bg-[#F97316]/20 flex items-center justify-center">
+          <svg className="w-3 h-3 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <span>Just <strong className="text-white">${data.costPerVideo}/video</strong> with package discount</span>
+      </li>
+
+      {/* 5. Vídeos simultâneos */}
+      <li className="flex items-start gap-3 text-sm text-white/60">
+        <div className="mt-1 flex-shrink-0 w-4 h-4 rounded-full bg-[#F97316]/20 flex items-center justify-center">
+          <svg className="w-3 h-3 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <span><strong className="text-white">{data.simultaneous}</strong> simultaneous renders</span>
+      </li>
+
+      {/* 6. Fila de prioridade */}
+      <li className="flex items-start gap-3 text-sm text-white/60">
+        <div className="mt-1 flex-shrink-0 w-4 h-4 rounded-full bg-[#F97316]/20 flex items-center justify-center">
+          <svg className="w-3 h-3 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <span><strong className="text-white">{data.queue}</strong> priority queue</span>
+      </li>
     </ul>
+
+    {/* CTA */}
     <button
-      onClick={() => onBuy(plan, credits, amount)}
-      className={`w-full py-3 rounded-xl font-semibold transition-all ${isPopular ? 'bg-[#F97316] text-white hover:bg-[#e66d00]' : 'bg-white/10 text-white hover:bg-white/20'}`}
+      onClick={() => onBuy(data.plan, data.credits, data.amount)}
+      className={`w-full py-3 rounded-xl font-semibold transition-all ${
+        data.isPopular
+          ? 'bg-[#F97316] text-white hover:bg-[#e66d00]'
+          : 'bg-white/10 text-white hover:bg-white/20'
+      }`}
     >
-      {buttonText}
+      Get Started
     </button>
   </div>
 );
@@ -81,6 +148,46 @@ const FAQItem = ({ question, answer }: { question: string; answer: string }) => 
 };
 
 // ============================================
+// Dados dos Planos
+// ============================================
+const PLANS: PlanData[] = [
+  {
+    plan: 'Basic',
+    price: '9.99',
+    credits: 100,
+    amount: 999,
+    templates: '10 (1/3)',
+    totalVideos: 10,
+    costPerVideo: '1.00',
+    simultaneous: 3,
+    queue: 'Normal',
+  },
+  {
+    plan: 'Plus',
+    price: '29.99',
+    credits: 350,
+    amount: 2999,
+    templates: '20 (2/3)',
+    totalVideos: 35,
+    costPerVideo: '0.86',
+    simultaneous: 10,
+    queue: 'Alta',
+    isPopular: true,
+  },
+  {
+    plan: 'Prime',
+    price: '49.99',
+    credits: 600,
+    amount: 4999,
+    templates: '30 (3/3)',
+    totalVideos: 60,
+    costPerVideo: '0.83',
+    simultaneous: 15,
+    queue: 'Elite',
+  },
+];
+
+// ============================================
 // Página Principal
 // ============================================
 export default function PricingPage() {
@@ -89,7 +196,6 @@ export default function PricingPage() {
   const [showPaymentMethod, setShowPaymentMethod] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<{ name: string; credits: number; amount: number } | null>(null);
 
-  // Abrir modal de escolha de pagamento
   const handleBuy = (plan: string, planCredits: number, planAmount: number) => {
     if (!user) {
       setShowLogin(true);
@@ -101,10 +207,8 @@ export default function PricingPage() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0b] selection:bg-[#F97316]/30">
-      {/* Navbar */}
       <Navbar />
 
-      {/* Modais */}
       <LoginModal open={showLogin} onClose={() => setShowLogin(false)} />
       <PaymentMethodModal
         isOpen={showPaymentMethod}
@@ -115,7 +219,7 @@ export default function PricingPage() {
       />
 
       <main className="max-w-7xl mx-auto px-6 py-20">
-        {/* Hero Section */}
+        {/* Hero */}
         <div className="text-center mb-20">
           <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight">
             Simple, transparent <br />
@@ -129,34 +233,12 @@ export default function PricingPage() {
 
         {/* Pricing Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-32">
-          <PricingCard
-            plan="Basic"
-            price="0"
-            credits={10}
-            amount={0}
-            features={["10 Generations / day", "Standard speed", "Community support", "Public gallery access"]}
-            onBuy={handleBuy}
-          />
-          <PricingCard
-            plan="Plus"
-            price="19"
-            credits={100}
-            amount={1900}
-            isPopular={true}
-            features={["100 Generations / day", "Fast speed", "Priority support", "Private gallery", "Advanced settings"]}
-            onBuy={handleBuy}
-          />
-          <PricingCard
-            plan="Prime"
-            price="49"
-            credits={1000}
-            amount={4900}
-            features={["Unlimited Generations", "Ultra speed", "Personal manager", "API Access", "Commercial license"]}
-            onBuy={handleBuy}
-          />
+          {PLANS.map((plan) => (
+            <PricingCard key={plan.plan} data={plan} onBuy={handleBuy} />
+          ))}
         </div>
 
-        {/* FAQ Section */}
+        {/* FAQ */}
         <div className="max-w-3xl mx-auto">
           <h2 className="text-3xl font-bold text-white text-center mb-12">Frequently Asked Questions</h2>
           <div className="bg-[#141417] rounded-3xl p-8 border border-white/10">
@@ -166,11 +248,11 @@ export default function PricingPage() {
             />
             <FAQItem
               question="How do the generation credits work?"
-              answer="Credits are refreshed daily for Basic and Plus plans. Prime users have unlimited access to our current generation models."
+              answer="Each video generation costs 10 credits. Your credits reset every month on your billing date."
             />
             <FAQItem
               question="What payment methods do you accept?"
-              answer="We accept all major credit cards and PayPal. All payments are processed securely through Stripe."
+              answer="We accept credit cards, bank transfers, and PIX through our secure payment partner Vexutopia."
             />
             <FAQItem
               question="Is there a free trial for Plus and Prime?"
@@ -181,7 +263,7 @@ export default function PricingPage() {
       </main>
 
       <footer className="py-12 border-t border-white/10 text-center text-white/30 text-sm">
-        © {new Date().getFullYear()} EroMusa AI. All rights reserved.
+        &copy; {new Date().getFullYear()} EroMusa AI. All rights reserved.
       </footer>
     </div>
   );
