@@ -12,3 +12,16 @@ body {
   color: var(--foreground);
   font-family: 'Inter', sans-serif;
 }
+
+@keyframes slide-lang {
+  from { transform: translateY(4px) scaleY(0.95); opacity: 0; }
+  to { transform: translateY(0) scaleY(1); opacity: 1; }
+}
+
+@keyframes slide-lang-down {
+  from { transform: translateY(-8px) scaleY(0.95); opacity: 0; }
+  to { transform: translateY(0) scaleY(1); }
+}
+
+.animate-slide-lang { animation: slide-lang 0.15s ease-out; }
+.animate-slide-lang-down { animation: slide-lang-down 0.15s ease-out; }

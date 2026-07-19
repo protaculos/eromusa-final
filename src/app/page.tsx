@@ -4,6 +4,7 @@ import { useSettings } from '@/context/SettingsContext';
 import TemplateCard from '@/components/video/TemplateCard';
 import VideoCreateModal from '@/components/video/VideoCreateModal';
 import LoginModal from '@/components/LoginModal';
+import PaymentModal from '@/components/PaymentModal';
 
 // ============================================
 // Types
@@ -164,6 +165,7 @@ export default function DiscoverPage() {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [loginOpen, setLoginOpen] = useState(false);
+  const [paymentOpen, setPaymentOpen] = useState(false);
 
   const totalPages = Math.ceil(allTemplates.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -271,8 +273,10 @@ export default function DiscoverPage() {
         }}
         onClose={() => setSelectedTemplate(null)}
         onOpenLogin={() => { setSelectedTemplate(null); setLoginOpen(true); }}
+        onOpenPayment={() => { setSelectedTemplate(null); setPaymentOpen(true); }}
       />
       <LoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />
+      <PaymentModal isOpen={paymentOpen} onClose={() => setPaymentOpen(false)} />
     </div>
   );
 }

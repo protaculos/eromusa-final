@@ -9,6 +9,7 @@ export interface VideoCreateModalProps {
   isOpen: boolean;
   onClose: () => void;
   onOpenLogin: () => void;
+  onOpenPayment?: () => void;
   onVideoCreated?: (jobId: string) => void;
   template: {
     id: string;
@@ -88,10 +89,11 @@ export default function VideoCreateModal({
   isOpen,
   onClose,
   onOpenLogin,
+  onOpenPayment,
   onVideoCreated,
   template,
 }: VideoCreateModalProps) {
-  const { user } = useAuth();
+  const { user, credits } = useAuth();
 
   // State
   const [step, setStep] = useState<Step>('upload');
@@ -213,6 +215,16 @@ export default function VideoCreateModal({
       onOpenLogin();
       return;
     }
+
+    if ((credits ?? 0) < (template?.credits ?? 0)) {
+      if (onOpenPayment) {
+        onOpenPayment();
+      } else {
+        alert("Insufficient credits. Please purchase more.");
+      }
+      return;
+    }
+
     setIsCreating(true);
     setError(null);
 
