@@ -74,6 +74,7 @@ export default function Navbar() {
     <div className="relative">
     <nav className="fixed top-0 left-0 right-0 z-40 bg-[#0A0B14]/80 backdrop-blur-xl border-b border-[#1E2130]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Primeira linha: logo, créditos/login, ferramentas */}
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
@@ -88,7 +89,7 @@ export default function Navbar() {
             </span>
           </Link>
 
-          {/* Desktop Nav */}
+          {/* Desktop Nav (escondido em mobile) */}
           <div className="hidden md:flex items-center gap-1">
             {NAV_ITEMS.map((item) => {
               const isActive = pathname === item.href;
@@ -204,15 +205,16 @@ export default function Navbar() {
                   </div>
 
                   {/* Suporte */}
-                  <button
-                    onClick={() => { setMenuOpen(false); /* TODO: open support */ }}
+                  <Link
+                    href="/support"
+                    onClick={() => setMenuOpen(false)}
                     className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white/80 hover:text-white hover:bg-[#161827] transition-colors"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     Suporte
-                  </button>
+                  </Link>
 
                   {/* Auto play */}
                   <div className="flex items-center justify-between px-4 py-3 text-sm text-white/80">
@@ -274,6 +276,26 @@ export default function Navbar() {
               )}
             </div>
           </div>
+        </div>
+
+        {/* Segunda linha: navegação mobile (Discovery, Gallery, Pricing) */}
+        <div className="flex md:hidden items-center justify-center gap-1 pb-2">
+          {NAV_ITEMS.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors ${
+                  isActive
+                    ? 'bg-[#F97316]/10 text-[#F97316]'
+                    : 'text-white/60 hover:text-white hover:bg-[#161827]'
+                }`}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
         </div>
       </div>
     </nav>
