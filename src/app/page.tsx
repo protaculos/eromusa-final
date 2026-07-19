@@ -141,19 +141,32 @@ const allTemplates: Template[] = [
 // ============================================
 const ITEMS_PER_PAGE = 12;
 
-function getPageNumbers(currentPage: number, totalPages: number): (number | "...")[] {
+function getDesktopPageNumbers(totalPages: number): number[] {
+  return Array.from({ length: totalPages }, (_, i) => i + 1);
+}
+
+function getMobilePageNumbers(currentPage: number, totalPages: number): (number | "...")[] {
   const pages: (number | "...")[] = [];
   if (totalPages <= 5) {
     for (let i = 1; i <= totalPages; i++) pages.push(i);
     return pages;
   }
-  pages.push(1);
-  if (currentPage > 3) pages.push("...");
-  const start = Math.max(2, currentPage - 1);
-  const end = Math.min(totalPages - 1, currentPage + 1);
+  // Window of exactly 3 consecutive numbers containing currentPage
+  const start = Math.max(1, Math.min(currentPage, totalPages - 2));
+  const end = start + 2;
+
+  // Leading "1 ..." if window doesn't start at 1
+  if (start > 1) {
+    pages.push(1);
+    if (start > 2) pages.push("...");
+  }
+  // Window
   for (let i = start; i <= end; i++) pages.push(i);
-  if (currentPage < totalPages - 2) pages.push("...");
-  pages.push(totalPages);
+  // Trailing "... N" if window doesn't end at N
+  if (end < totalPages) {
+    if (end < totalPages - 1) pages.push("...");
+    pages.push(totalPages);
+  }
   return pages;
 }
 
@@ -176,11 +189,12 @@ export default function DiscoverPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const pageNumbers = useMemo(() => getPageNumbers(currentPage, totalPages), [currentPage, totalPages]);
+  const desktopPageNumbers = useMemo(() => getDesktopPageNumbers(totalPages), [totalPages]);
+  const mobilePageNumbers = useMemo(() => getMobilePageNumbers(currentPage, totalPages), [currentPage, totalPages]);
 
   return (
     <div className="min-h-screen bg-[#0A0B14]">
-      <div className="pt-32 sm:pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      <div className="pt-8 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4 tracking-tight">
@@ -215,12 +229,32 @@ export default function DiscoverPage() {
             </svg>
           </button>
 
-          {pageNumbers.map((page, i) =>
-            page === "..." ? (
-              <span key={`ellipsis-${i}`} className="w-12 h-12 flex items-center justify-center text-white/30 text-sm">
-                ...
-              </span>
-            ) : (
+          {/* Mobile: 3 numbers + isolated first/last */}
+          <div className="flex items-center gap-2 md:hidden">
+            {mobilePageNumbers.map((page, i) =>
+              page === "..." ? (
+                <span key={`m-ellipsis-${i}`} className="w-10 h-10 flex items-center justify-center text-white/30 text-sm">
+                  ...
+                </span>
+              ) : (
+                <button
+                  key={`m-${page}`}
+                  onClick={() => goToPage(page)}
+                  className={`w-10 h-10 rounded-xl font-semibold text-sm transition-all ${
+                    currentPage === page
+                      ? "bg-[#F97316] text-white"
+                      : "bg-[#161827] border border-[#1E2130] text-white/60 hover:text-white hover:border-[#F97316]/50"
+                  }`}
+                >
+                  {page}
+                </button>
+              )
+            )}
+          </div>
+
+          {/* Desktop: all numbers */}
+          <div className="hidden md:flex items-center gap-2">
+            {desktopPageNumbers.map((page) => (
               <button
                 key={page}
                 onClick={() => goToPage(page)}
@@ -232,8 +266,8 @@ export default function DiscoverPage() {
               >
                 {page}
               </button>
-            )
-          )}
+            ))}
+          </div>
 
           <button
             onClick={() => goToPage(currentPage + 1)}

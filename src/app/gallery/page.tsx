@@ -4,7 +4,7 @@ import React from 'react';
 export default function GalleryPage() {
   return (
     <div className="min-h-screen bg-[#0A0B14]">
-      <div className="pt-32 sm:pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      <div className="pt-8 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4 tracking-tight">

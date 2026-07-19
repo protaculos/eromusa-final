@@ -1,0 +1,22 @@
+{
+  "status": "ok",
+  "deployment": {
+    "id": "dpl_6AvxMujogUecn8zgB4Tr1dDkR2Ct",
+    "url": "https://eromusa-final-ak27ston2-eromusa.vercel.app",
+    "inspectorUrl": "https://vercel.com/eromusa/eromusa-final/6AvxMujogUecn8zgB4Tr1dDkR2Ct",
+    "readyState": "READY",
+    "target": "production",
+    "deploymentApiUrl": "https://api.vercel.com/v13/deployments/dpl_6AvxMujogUecn8zgB4Tr1dDkR2Ct"
+  },
+  "message": "Deployment eromusa-final-ak27ston2-eromusa.vercel.app ready.",
+  "next": [
+    {
+      "command": "vercel inspect eromusa-final-ak27ston2-eromusa.vercel.app",
+      "when": "Inspect deployment"
+    },
+    {
+      "command": "vercel deploy --prod",
+      "when": "Promote to production"
+    }
+  ]
+}

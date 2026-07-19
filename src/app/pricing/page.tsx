@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import Navbar from '@/components/Navbar';
 import LoginModal from '@/components/LoginModal';
@@ -262,8 +263,15 @@ export default function PricingPage() {
         </div>
       </main>
 
-      <footer className="py-12 border-t border-white/10 text-center text-white/30 text-sm">
-        &copy; {new Date().getFullYear()} EroMusa AI. All rights reserved.
+      <footer className="py-8 border-t border-white/10 text-white/40 text-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p>&copy; {new Date().getFullYear()} EroMusa AI. All rights reserved.</p>
+          <div className="flex items-center gap-6">
+            <Link href="/support" className="hover:text-white transition-colors">Support</Link>
+            <Link href="/terms-of-use" className="hover:text-white transition-colors">Terms of Use</Link>
+            <Link href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link>
+          </div>
+        </div>
       </footer>
     </div>
   );
