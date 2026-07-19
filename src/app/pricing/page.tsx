@@ -61,7 +61,7 @@ const PricingCard = ({ data, onBuy }: {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <span><strong className="text-white">{data.templates}</strong> templates available</span>
+        <span><strong className="text-white">{data.templates}</strong> videos on Discovery</span>
       </li>
 
       {/* 3. Vídeos que consegue fazer */}
@@ -154,7 +154,7 @@ const PLANS: PlanData[] = [
   {
     plan: 'Basic',
     price: '9.99',
-    credits: 100,
+    credits: 300,
     amount: 999,
     templates: '10 (1/3)',
     totalVideos: 10,
@@ -165,11 +165,11 @@ const PLANS: PlanData[] = [
   {
     plan: 'Plus',
     price: '29.99',
-    credits: 350,
+    credits: 1500,
     amount: 2999,
     templates: '20 (2/3)',
-    totalVideos: 35,
-    costPerVideo: '0.86',
+    totalVideos: 50,
+    costPerVideo: '0.60',
     simultaneous: 10,
     queue: 'Alta',
     isPopular: true,
@@ -177,11 +177,11 @@ const PLANS: PlanData[] = [
   {
     plan: 'Prime',
     price: '49.99',
-    credits: 600,
+    credits: 3000,
     amount: 4999,
     templates: '30 (3/3)',
-    totalVideos: 60,
-    costPerVideo: '0.83',
+    totalVideos: 100,
+    costPerVideo: '0.50',
     simultaneous: 15,
     queue: 'Elite',
   },
@@ -248,7 +248,7 @@ export default function PricingPage() {
             />
             <FAQItem
               question="How do the generation credits work?"
-              answer="Each video generation costs 10 credits. Your credits reset every month on your billing date."
+              answer="Each video generation costs 30 credits (standard) or 60 credits (premium). Your credits reset every month on your billing date."
             />
             <FAQItem
               question="What payment methods do you accept?"
