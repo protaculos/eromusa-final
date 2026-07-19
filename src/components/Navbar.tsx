@@ -4,6 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import PaymentModal from '@/components/PaymentModal';
+import LoginModal from '@/components/LoginModal';
 
 const NAV_ITEMS = [
   { href: '/', label: 'Discovery' },
@@ -24,6 +25,7 @@ const LANGUAGES = [
 export default function Navbar() {
   const { user, credits, loading } = useAuth();
   const [paymentOpen, setPaymentOpen] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const pathname = usePathname();
@@ -107,8 +109,8 @@ export default function Navbar() {
 
           {/* Right side */}
           <div className="flex items-center gap-3">
-            {/* Credits */}
-            {user && (
+            {/* Credits (logado) / Sign In (deslogado) */}
+            {user ? (
               <button
                 onClick={() => setPaymentOpen(true)}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#161827] border border-[#1E2130] text-sm font-semibold text-white/80 hover:text-white hover:border-[#F97316]/50 transition-all"
@@ -118,6 +120,13 @@ export default function Navbar() {
                   <path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clipRule="evenodd" />
                 </svg>
                 {loading ? '...' : credits ?? 0}
+              </button>
+            ) : (
+              <button
+                onClick={() => setLoginOpen(true)}
+                className="bg-[#F97316] hover:bg-[#e66d00] text-white text-sm font-semibold px-5 py-2 rounded-full transition-colors"
+              >
+                Sign In
               </button>
             )}
 
@@ -250,7 +259,7 @@ export default function Navbar() {
                     <>
                       {/* Entrar na conta */}
                       <button
-                        onClick={() => { setMenuOpen(false); /* TODO: open login modal */ }}
+                        onClick={() => { setMenuOpen(false); setLoginOpen(true); }}
                         className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white/80 hover:text-white hover:bg-[#161827] transition-colors"
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -267,6 +276,7 @@ export default function Navbar() {
         </div>
       </div>
       <PaymentModal isOpen={paymentOpen} onClose={() => setPaymentOpen(false)} />
+      <LoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />
     </nav>
   );
 }
