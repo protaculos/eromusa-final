@@ -241,12 +241,12 @@ export default function VideoCreateModal({
       {/* Overlay */}
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
 
-      {/* Container */}
-      <div className="relative bg-[#0A0B14] border border-[#1E2130] rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl scrollbar-thin scrollbar-thumb-[#1E2130] scrollbar-track-transparent">
-        {/* Header */}
-        <div className="sticky top-0 bg-[#0A0B14] z-10 flex items-center justify-between p-6 border-b border-[#1E2130]">
+      {/* Container — portrait/mobile-like, fixed aspect, responsive */}
+      <div className="relative bg-[#0A0B14] border border-[#1E2130] rounded-2xl w-full max-w-[420px] max-h-[90vh] overflow-y-auto shadow-2xl scrollbar-thin scrollbar-thumb-[#1E2130] scrollbar-track-transparent">
+        {/* Header with title + filters */}
+        <div className="sticky top-0 bg-[#0A0B14] z-10 flex items-center justify-between p-5 border-b border-[#1E2130]">
           <div>
-            <h2 className="text-xl font-bold text-white">Create Video</h2>
+            <h2 className="text-lg font-bold text-white">Create Video</h2>
             <p className="text-xs text-white/40 mt-0.5">
               Style: <span className="text-[#F97316]">{template.name}</span>
             </p>
@@ -261,46 +261,20 @@ export default function VideoCreateModal({
           </button>
         </div>
 
-        {/* Body - unified layout */}
-        <div className="p-6 space-y-6">
-          {/* Row: Template info + Upload zone */}
-          <div className="flex flex-col sm:flex-row gap-6">
-            {/* Template thumbnail + info */}
-            <div className="w-full sm:w-48 shrink-0">
-              <div className="aspect-square rounded-xl overflow-hidden bg-[#0A0B14] border border-[#1E2130]">
-                <img
-                  src={template.thumbnailUrl}
-                  alt={template.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="mt-3 space-y-1">
-                <h3 className="text-sm font-bold text-white">{template.name}</h3>
-                <div className="flex flex-wrap gap-2">
-                  <span className="bg-[#161827] border border-[#1E2130] text-white/60 text-xs px-2.5 py-0.5 rounded-full">
-                    {template.duration}
-                  </span>
-                  <span className="bg-[#161827] border border-[#1E2130] text-[#F97316] text-xs px-2.5 py-0.5 rounded-full font-semibold">
-                    {template.credits} credits
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Upload zone */}
-            <div className="flex-1">
-              <p className="text-xs text-white/40 mb-2 font-semibold uppercase tracking-wider">
-                Upload Photo
-              </p>
+        {/* Body */}
+        <div className="p-5 space-y-5">
+          {/* Side-by-side cards: Upload (left) + Template preview (right) */}
+          <div className="flex gap-3">
+            {/* Upload card — aspect-[3/4] portrait */}
+            <div className="flex-1 min-w-0">
               <div
                 onDrop={onDrop}
                 onDragOver={onDragOver}
                 onDragLeave={onDragLeave}
                 onClick={() => fileInputRef.current?.click()}
                 className={`
-                  relative flex flex-col items-center justify-center
-                  h-36 sm:h-48 rounded-2xl border-2 border-dashed cursor-pointer
-                  transition-all duration-200
+                  relative aspect-[3/4] rounded-2xl border-2 border-dashed cursor-pointer
+                  transition-all duration-200 overflow-hidden
                   ${dragOver
                     ? 'border-[#F97316] bg-[#F97316]/10'
                     : previewUrl
@@ -314,21 +288,21 @@ export default function VideoCreateModal({
                     <img
                       src={previewUrl}
                       alt="Selected"
-                      className="absolute inset-0 w-full h-full object-contain rounded-2xl"
+                      className="absolute inset-0 w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-2xl">
-                      <span className="bg-emerald-500 text-white text-sm font-semibold px-4 py-2 rounded-full">
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                      <span className="bg-emerald-500 text-white text-xs font-semibold px-3 py-1.5 rounded-full">
                         Image Selected
                       </span>
                     </div>
                   </>
                 ) : (
-                  <div className="flex flex-col items-center gap-3 text-white/40">
-                    <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-white/40 p-4 text-center">
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
-                    <p className="text-sm">Drop an image here or click to browse</p>
-                    <p className="text-xs text-white/20">JPEG or PNG</p>
+                    <p className="text-xs">Upload photo</p>
+                    <p className="text-[10px] text-white/20">JPEG or PNG</p>
                   </div>
                 )}
 
@@ -341,28 +315,53 @@ export default function VideoCreateModal({
                 />
               </div>
             </div>
+
+            {/* Template preview card — aspect-[3/4] portrait */}
+            <div className="flex-1 min-w-0">
+              <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-[#0A0B14] border border-[#1E2130] group">
+                <video
+                  src={template.videoUrl}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+                {/* Gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+
+                {/* Top badges */}
+                <div className="absolute top-2 left-2 right-2 flex items-start justify-between">
+                  <span className="bg-black/60 text-white/80 text-[10px] px-2 py-0.5 rounded-md">
+                    {template.duration}
+                  </span>
+                  <span className="bg-black/60 text-[#F97316] text-[10px] font-semibold px-2 py-0.5 rounded-md">
+                    {template.credits} cr
+                  </span>
+                </div>
+
+                {/* Bottom label */}
+                <div className="absolute bottom-2 left-2 right-2">
+                  <p className="text-white text-xs font-semibold truncate">{template.name}</p>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Crop area - only shows when image is selected */}
-          {previewUrl && (
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-xs text-white/40 font-semibold uppercase tracking-wider">
-                  Crop Image
-                </p>
-                {croppedBlob ? (
-                  <span className="text-xs text-emerald-400 font-semibold">✓ Cropped</span>
-                ) : (
-                  <button
-                    onClick={applyCrop}
-                    disabled={isProcessing || !completedCrop}
-                    className="text-xs text-[#F97316] hover:text-orange-400 font-semibold transition-colors disabled:opacity-50"
-                  >
-                    {isProcessing ? 'Processing...' : 'Apply Crop'}
-                  </button>
-                )}
+          {/* Crop controls — only when image is selected */}
+          {previewUrl && !croppedBlob && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-white/40 font-semibold uppercase tracking-wider">Crop Image</p>
+                <button
+                  onClick={applyCrop}
+                  disabled={isProcessing || !completedCrop}
+                  className="text-xs text-[#F97316] hover:text-orange-400 font-semibold transition-colors disabled:opacity-50"
+                >
+                  {isProcessing ? 'Processing...' : 'Apply Crop'}
+                </button>
               </div>
-              <div className="flex items-center justify-center bg-[#0A0B14] rounded-2xl overflow-hidden max-h-[50vh]">
+              <div className="flex items-center justify-center bg-[#0A0B14] rounded-2xl overflow-hidden max-h-[200px]">
                 <ReactCrop
                   crop={crop}
                   onChange={onCropChange}
@@ -370,57 +369,43 @@ export default function VideoCreateModal({
                   aspect={1}
                   minWidth={100}
                   minHeight={100}
-                  className="max-h-[50vh]"
-                  disabled={!!croppedBlob}
+                  className="max-h-[200px]"
                 >
                   <img
                     ref={imgRef}
                     src={previewUrl}
                     alt="Crop preview"
                     onLoad={onImageLoad}
-                    className="max-h-[50vh] w-auto object-contain"
+                    className="max-h-[200px] w-auto object-contain"
                   />
                 </ReactCrop>
               </div>
-              {!croppedBlob && (
-                <p className="text-xs text-white/40 text-center mt-2">
-                  Drag the corners to crop your image to a square, then click Apply Crop
-                </p>
-              )}
+              <p className="text-[10px] text-white/40 text-center">
+                Drag corners to crop square, then Apply Crop
+              </p>
             </div>
           )}
 
-          {/* Cropped result + Instructions */}
+          {/* Cropped confirmation */}
           {croppedBlob && (
-            <div className="flex flex-col sm:flex-row gap-6">
-              {/* Cropped photo */}
-              <div className="w-full sm:w-24 shrink-0">
-                <p className="text-xs text-white/40 mb-2 font-semibold uppercase tracking-wider">Your Photo</p>
-                <div className="w-24 h-24 rounded-xl overflow-hidden border border-[#1E2130]">
-                  <img
-                    src={URL.createObjectURL(croppedBlob)}
-                    alt="Cropped"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
+            <div className="flex items-center gap-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-4 py-3">
+              <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-emerald-500/30">
+                <img
+                  src={URL.createObjectURL(croppedBlob)}
+                  alt="Cropped"
+                  className="w-full h-full object-cover"
+                />
               </div>
-
-              {/* Instructions */}
-              {template.instructions.length > 0 && (
-                <div className="flex-1">
-                  <p className="text-xs text-white/40 mb-2 font-semibold uppercase tracking-wider">Instructions</p>
-                  <ul className="space-y-1">
-                    {template.instructions.map((inst, i) => (
-                      <li key={i} className="flex items-start gap-2 text-xs sm:text-sm text-white/60">
-                        <svg className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                        {inst}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-emerald-400 font-semibold">Photo ready</p>
+                <p className="text-xs text-white/40 truncate">{selectedFile?.name}</p>
+              </div>
+              <button
+                onClick={() => { setCroppedBlob(null); setPreviewUrl(null); setSelectedFile(null); }}
+                className="text-white/40 hover:text-white text-xs shrink-0"
+              >
+                Change
+              </button>
             </div>
           )}
 
@@ -441,33 +426,23 @@ export default function VideoCreateModal({
             </div>
           )}
 
-          {/* Actions */}
-          <div className="flex flex-col sm:flex-row gap-3 pt-2">
-            <button
-              onClick={() => {
-                setSelectedFile(null);
-                setPreviewUrl(null);
-                setCroppedBlob(null);
-                setCrop(undefined);
-                setCompletedCrop(null);
-                setJobId(null);
-                setError(null);
-              }}
-              disabled={!selectedFile && !jobId}
-              className="w-full sm:w-auto flex-1 bg-[#161827] border border-[#1E2130] hover:bg-[#1E2130] text-white/70 rounded-xl px-6 py-3 transition-colors font-semibold disabled:opacity-30 disabled:cursor-not-allowed"
-            >
-              Start Over
-            </button>
+          {/* Bottom bar: Credits (left) + Create button (right) */}
+          <div className="flex items-center justify-between gap-3 pt-1">
+            <div className="flex items-center gap-1.5">
+              <span className="text-white/40 text-sm font-medium">✦</span>
+              <span className="text-white font-bold text-base">{template.credits}</span>
+              <span className="text-white/40 text-sm">Credits</span>
+            </div>
 
             {user ? (
               <button
                 onClick={handleCreate}
                 disabled={isCreating || !!jobId || !croppedBlob}
-                className="w-full sm:w-auto flex-1 bg-[#F97316] hover:bg-orange-600 disabled:opacity-50 text-white font-semibold rounded-xl px-6 py-3 transition-colors flex items-center justify-center gap-2"
+                className="bg-[#F97316] hover:bg-orange-600 disabled:opacity-50 text-white font-semibold rounded-xl px-6 py-3 transition-colors flex items-center gap-2 text-sm"
               >
                 {isCreating ? (
                   <>
-                    <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                     </svg>
@@ -482,7 +457,7 @@ export default function VideoCreateModal({
             ) : (
               <button
                 onClick={onOpenLogin}
-                className="w-full sm:w-auto flex-1 bg-[#F97316] hover:bg-orange-600 text-white font-semibold rounded-xl px-6 py-3 transition-colors"
+                className="bg-[#F97316] hover:bg-orange-600 text-white font-semibold rounded-xl px-6 py-3 transition-colors text-sm"
               >
                 Sign in to Create
               </button>
