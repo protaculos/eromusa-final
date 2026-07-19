@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import PaymentModal from '@/components/PaymentModal';
 import LoginModal from '@/components/LoginModal';
+import DeleteAccountModal from '@/components/DeleteAccountModal';
 
 const NAV_ITEMS = [
   { href: '/', label: 'Discovery' },
@@ -26,6 +27,7 @@ export default function Navbar() {
   const { user, credits, loading } = useAuth();
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
+  const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const pathname = usePathname();
@@ -52,7 +54,6 @@ export default function Navbar() {
   };
 
   const handleDeleteAccount = async () => {
-    if (!confirm('Are you sure you want to delete your account? This action cannot be undone.')) return;
     try {
       const res = await fetch('/api/account/delete', { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to delete account');
@@ -249,7 +250,7 @@ export default function Navbar() {
 
                       {/* Excluir conta */}
                       <button
-                        onClick={handleDeleteAccount}
+                        onClick={() => { setMenuOpen(false); setDeleteAccountOpen(true); }}
                         className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-400 hover:text-red-300 hover:bg-[#161827] transition-colors"
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -301,6 +302,7 @@ export default function Navbar() {
     </nav>
       <PaymentModal isOpen={paymentOpen} onClose={() => setPaymentOpen(false)} />
       <LoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />
+      <DeleteAccountModal open={deleteAccountOpen} onClose={() => setDeleteAccountOpen(false)} onConfirm={handleDeleteAccount} />
     </div>
   );
 }
