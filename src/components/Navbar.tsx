@@ -161,8 +161,9 @@ export default function Navbar() {
                   )}
 
                   {/* Credits / Upgrade */}
-                  <button
-                    onClick={() => { setPaymentOpen(true); setMenuOpen(false); }}
+                  <Link
+                    href="/pricing"
+                    onClick={() => setMenuOpen(false)}
                     className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white/80 hover:text-white hover:bg-[#161827] transition-colors"
                   >
                     <svg className="w-5 h-5 text-[#F97316]" fill="currentColor" viewBox="0 0 20 20">
@@ -170,7 +171,7 @@ export default function Navbar() {
                       <path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clipRule="evenodd" />
                     </svg>
                     {user ? 'Credits / Upgrade' : 'Credits / Upgrade'}
-                  </button>
+                  </Link>
 
                   <div className="border-b border-[#1E2130]" />
 

@@ -155,17 +155,16 @@ function getMobilePageNumbers(currentPage: number, totalPages: number): (number 
   const start = Math.max(1, Math.min(currentPage, totalPages - 2));
   const end = start + 2;
 
-  // Leading "1 ..." if window doesn't start at 1
-  if (start > 1) {
-    pages.push(1);
-    if (start > 2) pages.push("...");
-  }
-  // Window
-  for (let i = start; i <= end; i++) pages.push(i);
-  // Trailing "... N" if window doesn't end at N
-  if (end < totalPages) {
-    if (end < totalPages - 1) pages.push("...");
+  // Se estiver na primeira metade: window + ... + última página
+  // Se estiver na última metade: primeira página + ... + window
+  if (currentPage <= totalPages - 3) {
+    for (let i = start; i <= end; i++) pages.push(i);
+    pages.push("...");
     pages.push(totalPages);
+  } else {
+    pages.push(1);
+    pages.push("...");
+    for (let i = start; i <= end; i++) pages.push(i);
   }
   return pages;
 }
