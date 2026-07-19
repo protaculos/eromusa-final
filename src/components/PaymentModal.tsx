@@ -57,8 +57,9 @@ export default function PaymentModal({ isOpen, onClose }: { isOpen: boolean; onC
         alert(`Successfully added ${plan.credits} credits!`);
         onClose();
       } else if (data.checkout_url) {
-        // Redirect to Vexutopia
-        window.location.href = data.checkout_url;
+        // Open Vexutopia checkout in new tab
+        window.open(data.checkout_url, '_blank', 'noopener,noreferrer');
+        onClose();
       }
     } catch (err: any) {
       setError(err.message);
