@@ -3,19 +3,20 @@ import React, { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import Navbar from '@/components/Navbar';
 import LoginModal from '@/components/LoginModal';
-import PaymentModal from '@/components/PaymentModal';
+import PaymentMethodModal from '@/components/PaymentMethodModal';
 
 // ============================================
 // Pricing Card
 // ============================================
-const PricingCard = ({ plan, price, features, credits, isPopular = false, buttonText = "Get Started", onBuy }: {
+const PricingCard = ({ plan, price, features, credits, amount, isPopular = false, buttonText = "Get Started", onBuy }: {
   plan: string;
   price: string;
   features: string[];
   credits: number;
+  amount: number;
   isPopular?: boolean;
   buttonText?: string;
-  onBuy: (plan: string, credits: number) => void;
+  onBuy: (plan: string, credits: number, amount: number) => void;
 }) => (
   <div className={`relative p-8 rounded-3xl border ${isPopular ? 'border-[#F97316] bg-[#1a1a1e]' : 'border-white/10 bg-[#141417]'} flex flex-col h-full transition-transform hover:scale-[1.02]`}>
     {isPopular && (
@@ -43,7 +44,7 @@ const PricingCard = ({ plan, price, features, credits, isPopular = false, button
       ))}
     </ul>
     <button
-      onClick={() => onBuy(plan, credits)}
+      onClick={() => onBuy(plan, credits, amount)}
       className={`w-full py-3 rounded-xl font-semibold transition-all ${isPopular ? 'bg-[#F97316] text-white hover:bg-[#e66d00]' : 'bg-white/10 text-white hover:bg-white/20'}`}
     >
       {buttonText}
@@ -85,17 +86,17 @@ const FAQItem = ({ question, answer }: { question: string; answer: string }) => 
 export default function PricingPage() {
   const { user } = useAuth();
   const [showLogin, setShowLogin] = useState(false);
-  const [showPayment, setShowPayment] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<{ name: string; credits: number } | null>(null);
+  const [showPaymentMethod, setShowPaymentMethod] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<{ name: string; credits: number; amount: number } | null>(null);
 
-  // Abrir modal de compra
-  const handleBuy = (plan: string, planCredits: number) => {
+  // Abrir modal de escolha de pagamento
+  const handleBuy = (plan: string, planCredits: number, planAmount: number) => {
     if (!user) {
       setShowLogin(true);
       return;
     }
-    setSelectedPlan({ name: plan, credits: planCredits });
-    setShowPayment(true);
+    setSelectedPlan({ name: plan, credits: planCredits, amount: planAmount });
+    setShowPaymentMethod(true);
   };
 
   return (
@@ -105,9 +106,12 @@ export default function PricingPage() {
 
       {/* Modais */}
       <LoginModal open={showLogin} onClose={() => setShowLogin(false)} />
-      <PaymentModal
-        isOpen={showPayment}
-        onClose={() => { setShowPayment(false); setSelectedPlan(null); }}
+      <PaymentMethodModal
+        isOpen={showPaymentMethod}
+        planName={selectedPlan?.name ?? ''}
+        planCredits={selectedPlan?.credits ?? 0}
+        planAmount={selectedPlan?.amount ?? 0}
+        onClose={() => { setShowPaymentMethod(false); setSelectedPlan(null); }}
       />
 
       <main className="max-w-7xl mx-auto px-6 py-20">
@@ -129,6 +133,7 @@ export default function PricingPage() {
             plan="Basic"
             price="0"
             credits={10}
+            amount={0}
             features={["10 Generations / day", "Standard speed", "Community support", "Public gallery access"]}
             onBuy={handleBuy}
           />
@@ -136,6 +141,7 @@ export default function PricingPage() {
             plan="Plus"
             price="19"
             credits={100}
+            amount={1900}
             isPopular={true}
             features={["100 Generations / day", "Fast speed", "Priority support", "Private gallery", "Advanced settings"]}
             onBuy={handleBuy}
@@ -144,6 +150,7 @@ export default function PricingPage() {
             plan="Prime"
             price="49"
             credits={1000}
+            amount={4900}
             features={["Unlimited Generations", "Ultra speed", "Personal manager", "API Access", "Commercial license"]}
             onBuy={handleBuy}
           />
