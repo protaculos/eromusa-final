@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import PaymentModal from '@/components/PaymentModal';
 import LoginModal from '@/components/LoginModal';
 import DeleteAccountModal from '@/components/DeleteAccountModal';
+import ConfirmModal from '@/components/ConfirmModal';
 
 const NAV_ITEMS = [
   { href: '/', label: 'Discovery' },
@@ -28,6 +29,7 @@ export default function Navbar() {
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
+  const [logoutOpen, setLogoutOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const pathname = usePathname();
@@ -237,7 +239,7 @@ export default function Navbar() {
                     <>
                       {/* Sair */}
                       <button
-                        onClick={handleLogout}
+                        onClick={() => { setMenuOpen(false); setLogoutOpen(true); }}
                         className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white/80 hover:text-white hover:bg-[#161827] transition-colors"
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -303,6 +305,14 @@ export default function Navbar() {
       <PaymentModal isOpen={paymentOpen} onClose={() => setPaymentOpen(false)} />
       <LoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />
       <DeleteAccountModal open={deleteAccountOpen} onClose={() => setDeleteAccountOpen(false)} onConfirm={handleDeleteAccount} />
+      <ConfirmModal
+        open={logoutOpen}
+        onClose={() => setLogoutOpen(false)}
+        onConfirm={handleLogout}
+        title="Sign Out"
+        message="Are you sure you want to sign out of your account?"
+        confirmLabel="Sign Out"
+      />
     </div>
   );
 }
