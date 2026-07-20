@@ -8,10 +8,10 @@ const LEAKIFYHUB_KEY = process.env.LEAKIFYHUB_API_KEY!;
 // Returns: { status: "processing" | "completed" | "failed", videoUrl?: string, error?: string }
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { jobId: string } },
+  { params }: { params: Promise<{ jobId: string }> },
 ) {
   try {
-    const { jobId } = params;
+    const { jobId } = await params;
 
     if (!jobId) {
       return NextResponse.json({ error: "Missing jobId" }, { status: 400 });
