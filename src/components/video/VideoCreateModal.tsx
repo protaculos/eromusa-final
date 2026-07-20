@@ -2,8 +2,9 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import ReactCrop, { type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { addCreatedVideo } from '@/lib/storage';
+import { addCreatedVideo, updateVideoStatus } from '@/lib/storage';
 
 // ── Types ──────────────────────────────────────────
 export interface VideoCreateModalProps {
@@ -11,7 +12,6 @@ export interface VideoCreateModalProps {
   onClose: () => void;
   onOpenLogin: () => void;
   onOpenPayment?: () => void;
-  onVideoCreated?: (jobId: string) => void;
   template: {
     id: string;
     name: string;
@@ -90,10 +90,10 @@ export default function VideoCreateModal({
   onClose,
   onOpenLogin,
   onOpenPayment,
-  onVideoCreated,
   template,
 }: VideoCreateModalProps) {
   const { user, credits } = useAuth();
+  const router = useRouter();
 
   // State
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -207,6 +207,43 @@ export default function VideoCreateModal({
     }
   };
 
+  // ── Poll job status ────────────────────────────
+  const pollJobStatus = useCallback(async (jobId: string) => {
+    const maxAttempts = 60; // 5 minutes (5s interval)
+    let attempts = 0;
+
+    const poll = async () => {
+      try {
+        const res = await fetch(`/api/generate/${jobId}`);
+        const data = await res.json();
+
+        if (data.status === "completed") {
+          updateVideoStatus(jobId, "completed", data.videoUrl);
+          return;
+        }
+
+        if (data.status === "failed") {
+          updateVideoStatus(jobId, "failed", "");
+          return;
+        }
+
+        // Still processing — retry
+        attempts++;
+        if (attempts < maxAttempts) {
+          setTimeout(poll, 5000);
+        }
+      } catch {
+        // Network error — retry
+        attempts++;
+        if (attempts < maxAttempts) {
+          setTimeout(poll, 5000);
+        }
+      }
+    };
+
+    poll();
+  }, []);
+
   // ── Create handler ─────────────────────────────
   const handleCreate = async () => {
     if (!user) {
@@ -226,25 +263,62 @@ export default function VideoCreateModal({
     setIsCreating(true);
     setError(null);
 
-    // Simulate creation delay
-    await new Promise((r) => setTimeout(r, 2000));
+    // Convert cropped blob to base64 data URL
+    let imageBase64 = "";
+    if (croppedBlob) {
+      imageBase64 = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(croppedBlob);
+      });
+    }
 
-    const fakeJobId = `job_${Date.now()}`;
-    setJobId(fakeJobId);
-    setIsCreating(false);
+    try {
+      // Call our server-side API route
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          imageBase64,
+          styleId: template.styleId,
+          templateId: template.id,
+          templateName: template.name,
+          templateThumbnail: template.thumbnailUrl,
+          templateDuration: template.duration,
+          templateCredits: template.credits,
+        }),
+      });
 
-    // Persist to localStorage
-    addCreatedVideo({
-      jobId: fakeJobId,
-      templateId: template.id,
-      templateName: template.name,
-      templateThumbnail: template.thumbnailUrl,
-      templateDuration: template.duration,
-      templateCredits: template.credits,
-      createdAt: new Date().toISOString(),
-    });
+      const data = await res.json();
 
-    onVideoCreated?.(fakeJobId);
+      if (!res.ok) {
+        throw new Error(data.error || "Generation failed");
+      }
+
+      // Persist to localStorage — status: processing
+      addCreatedVideo({
+        jobId: data.jobId,
+        templateId: data.templateId,
+        templateName: data.templateName,
+        templateThumbnail: data.templateThumbnail,
+        templateDuration: data.templateDuration,
+        templateCredits: data.templateCredits,
+        status: "processing",
+        videoUrl: "",
+        createdAt: data.createdAt,
+      });
+
+      // Start polling in the background
+      pollJobStatus(data.jobId);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to create video");
+      setIsCreating(false);
+      return;
+    }
+
+    // Close modal and redirect to gallery
+    onClose();
+    router.push("/gallery");
   };
 
   // ── Render ─────────────────────────────────────
