@@ -54,7 +54,8 @@ export async function POST(req: NextRequest) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        style_id: styleId,
+        style: styleId,
+        type: "video",
         image_url: imageUrl,
       }),
     });
