@@ -3,6 +3,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import ReactCrop, { type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { useAuth } from '@/context/AuthContext';
+import { addCreatedVideo } from '@/lib/storage';
 
 // ── Types ──────────────────────────────────────────
 export interface VideoCreateModalProps {
@@ -230,6 +231,18 @@ export default function VideoCreateModal({
     const fakeJobId = `job_${Date.now()}`;
     setJobId(fakeJobId);
     setIsCreating(false);
+
+    // Persist to localStorage
+    addCreatedVideo({
+      jobId: fakeJobId,
+      templateId: template.id,
+      templateName: template.name,
+      templateThumbnail: template.thumbnailUrl,
+      templateDuration: template.duration,
+      templateCredits: template.credits,
+      createdAt: new Date().toISOString(),
+    });
+
     onVideoCreated?.(fakeJobId);
   };
 
@@ -245,11 +258,19 @@ export default function VideoCreateModal({
       <div className="relative bg-[#0A0B14] border border-[#1E2130] rounded-2xl w-full max-w-[420px] max-h-[90vh] overflow-y-auto shadow-2xl scrollbar-thin scrollbar-thumb-[#1E2130] scrollbar-track-transparent">
         {/* Header with title + filters */}
         <div className="sticky top-0 bg-[#0A0B14] z-10 flex items-center justify-between p-5 border-b border-[#1E2130]">
-          <div>
-            <h2 className="text-lg font-bold text-white">Create Video</h2>
-            <p className="text-xs text-white/40 mt-0.5">
-              Style: <span className="text-[#F97316]">{template.name}</span>
-            </p>
+          <div className="min-w-0">
+            <h2
+              className="font-bold text-white whitespace-nowrap"
+              style={{ fontSize: template.name.length > 30 ? '0.9rem' : template.name.length > 20 ? '1.05rem' : '1.125rem' }}
+            >{template.name}</h2>
+            {template.instructions.length > 0 && (
+              <p
+                className="text-white/40 mt-0.5 whitespace-nowrap"
+                style={{ fontSize: template.instructions.join(', ').length > 50 ? '0.65rem' : '0.75rem' }}
+              >
+                Filters: <span className="text-[#F97316]">{template.instructions.join(', ')}</span>
+              </p>
+            )}
           </div>
           <button
             onClick={onClose}
@@ -267,6 +288,7 @@ export default function VideoCreateModal({
           <div className="flex gap-3">
             {/* Upload card — aspect-[3/4] portrait */}
             <div className="flex-1 min-w-0">
+              <p className="text-xs text-white/40 font-semibold uppercase tracking-wider mb-2">Your Image</p>
               <div
                 onDrop={onDrop}
                 onDragOver={onDragOver}
@@ -318,6 +340,7 @@ export default function VideoCreateModal({
 
             {/* Template preview card — aspect-[3/4] portrait */}
             <div className="flex-1 min-w-0">
+              <p className="text-xs text-white/40 font-semibold uppercase tracking-wider mb-2">Output Video</p>
               <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-[#0A0B14] border border-[#1E2130] group">
                 <video
                   src={template.videoUrl}
@@ -426,13 +449,15 @@ export default function VideoCreateModal({
             </div>
           )}
 
-          {/* Bottom bar: Credits (left) + Create button (right) */}
-          <div className="flex items-center justify-between gap-3 pt-1">
-            <div className="flex items-center gap-1.5">
-              <span className="text-white/40 text-sm font-medium">✦</span>
-              <span className="text-white font-bold text-base">{template.credits}</span>
-              <span className="text-white/40 text-sm">Credits</span>
-            </div>
+          {/* Bottom bar: Credits + Create button centered */}
+          <div className="flex items-center justify-center gap-4 pt-1">
+            {user && (
+              <div className="flex items-center gap-1.5">
+                <span className="text-white/40 text-sm font-medium">✦</span>
+                <span className="text-white font-bold text-base">{template.credits}</span>
+                <span className="text-white/40 text-sm">Credits</span>
+              </div>
+            )}
 
             {user ? (
               <button
@@ -459,7 +484,7 @@ export default function VideoCreateModal({
                 onClick={onOpenLogin}
                 className="bg-[#F97316] hover:bg-orange-600 text-white font-semibold rounded-xl px-6 py-3 transition-colors text-sm"
               >
-                Sign in to Create
+                Create Video
               </button>
             )}
           </div>

@@ -72,7 +72,6 @@ export default function DiscoverPage() {
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set());
-  const [favoritesOnly, setFavoritesOnly] = useState(false);
 
   // Filtered templates
   const filteredTemplates = useMemo(() => {
@@ -129,7 +128,7 @@ export default function DiscoverPage() {
   return (
     <div className="min-h-screen">
       <div className="pt-6 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        {/* Row 1: Autoplay, Favorites, Search */}
+        {/* Row 1: Autoplay, Search */}
         <div className="flex items-center gap-3 mb-4">
           {/* Autoplay toggle */}
           <button
@@ -145,21 +144,6 @@ export default function DiscoverPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             Autoplay
-          </button>
-
-          {/* Favorites */}
-          <button
-            onClick={() => setFavoritesOnly(!favoritesOnly)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-              favoritesOnly
-                ? "bg-pink-500/20 text-pink-400 border border-pink-500/40"
-                : "bg-[#161827] text-white/60 border border-[#1E2130] hover:text-white hover:border-[#F97316]/50"
-            }`}
-          >
-            <svg className="w-4 h-4" fill={favoritesOnly ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-            </svg>
-            Favorites
           </button>
 
           {/* Search bar */}
