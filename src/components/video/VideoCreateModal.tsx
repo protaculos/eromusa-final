@@ -1,10 +1,7 @@
 "use client";
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import ReactCrop, { type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
-import 'react-image-crop/dist/ReactCrop.css';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { addCreatedVideo, updateVideoStatus } from '@/lib/storage';
 
 // ── Types ──────────────────────────────────────────
 export interface VideoCreateModalProps {
@@ -26,64 +23,6 @@ export interface VideoCreateModalProps {
   };
 }
 
-// ── Helpers ────────────────────────────────────────
-function centerAspectCrop(
-  mediaWidth: number,
-  mediaHeight: number,
-  aspect: number,
-): PixelCrop {
-  const percentCrop = centerCrop(
-    makeAspectCrop({ unit: '%', width: 80 }, aspect, mediaWidth, mediaHeight),
-    mediaWidth,
-    mediaHeight,
-  );
-  return {
-    unit: 'px',
-    x: (percentCrop.x / 100) * mediaWidth,
-    y: (percentCrop.y / 100) * mediaHeight,
-    width: (percentCrop.width / 100) * mediaWidth,
-    height: (percentCrop.height / 100) * mediaHeight,
-  };
-}
-
-function canvasPreview(
-  image: HTMLImageElement,
-  crop: PixelCrop,
-): Promise<Blob> {
-  return new Promise((resolve, reject) => {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return reject(new Error('No 2d context'));
-
-    const scaleX = image.naturalWidth / image.width;
-    const scaleY = image.naturalHeight / image.height;
-
-    canvas.width = crop.width;
-    canvas.height = crop.height;
-
-    ctx.drawImage(
-      image,
-      crop.x * scaleX,
-      crop.y * scaleY,
-      crop.width * scaleX,
-      crop.height * scaleY,
-      0,
-      0,
-      crop.width,
-      crop.height,
-    );
-
-    canvas.toBlob(
-      (blob) => {
-        if (!blob) return reject(new Error('Canvas toBlob failed'));
-        resolve(blob);
-      },
-      'image/jpeg',
-      0.95,
-    );
-  });
-}
-
 // ── Component ──────────────────────────────────────
 export default function VideoCreateModal({
   isOpen,
@@ -92,22 +31,18 @@ export default function VideoCreateModal({
   onOpenPayment,
   template,
 }: VideoCreateModalProps) {
-  const { user, credits } = useAuth();
+  const { user, session, credits } = useAuth();
   const router = useRouter();
 
   // State
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [croppedBlob, setCroppedBlob] = useState<Blob | null>(null);
-  const [crop, setCrop] = useState<PixelCrop>();
-  const [completedCrop, setCompletedCrop] = useState<PixelCrop | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [imageBlob, setImageBlob] = useState<Blob | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [jobId, setJobId] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
 
-  const imgRef = useRef<HTMLImageElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Reset state when modal opens/closes
@@ -115,10 +50,7 @@ export default function VideoCreateModal({
     if (isOpen) {
       setSelectedFile(null);
       setPreviewUrl(null);
-      setCroppedBlob(null);
-      setCrop(undefined);
-      setCompletedCrop(null);
-      setIsProcessing(false);
+      setImageBlob(null);
       setIsCreating(false);
       setError(null);
       setJobId(null);
@@ -153,7 +85,7 @@ export default function VideoCreateModal({
     setSelectedFile(file);
     const url = URL.createObjectURL(file);
     setPreviewUrl(url);
-    setCroppedBlob(null);
+    setImageBlob(file);
   }, []);
 
   const onFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -178,72 +110,6 @@ export default function VideoCreateModal({
     setDragOver(false);
   };
 
-  // ── Crop handlers ────────────────────────────────
-  const onImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    const { width, height } = e.currentTarget;
-    const centerd = centerAspectCrop(width, height, 1);
-    setCrop(centerd);
-    setCompletedCrop(centerd);
-  };
-
-  const onCropChange = (c: PixelCrop) => {
-    setCrop(c);
-  };
-
-  const onCropComplete = (c: PixelCrop) => {
-    setCompletedCrop(c);
-  };
-
-  const applyCrop = async () => {
-    if (!imgRef.current || !completedCrop) return;
-    setIsProcessing(true);
-    try {
-      const blob = await canvasPreview(imgRef.current, completedCrop);
-      setCroppedBlob(blob);
-    } catch (err) {
-      setError('Failed to crop image. Please try again.');
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  // ── Poll job status ────────────────────────────
-  const pollJobStatus = useCallback(async (jobId: string) => {
-    const maxAttempts = 60; // 5 minutes (5s interval)
-    let attempts = 0;
-
-    const poll = async () => {
-      try {
-        const res = await fetch(`/api/generate/${jobId}`);
-        const data = await res.json();
-
-        if (data.status === "completed") {
-          updateVideoStatus(jobId, "completed", data.videoUrl);
-          return;
-        }
-
-        if (data.status === "failed") {
-          updateVideoStatus(jobId, "failed", "");
-          return;
-        }
-
-        // Still processing — retry
-        attempts++;
-        if (attempts < maxAttempts) {
-          setTimeout(poll, 5000);
-        }
-      } catch {
-        // Network error — retry
-        attempts++;
-        if (attempts < maxAttempts) {
-          setTimeout(poll, 5000);
-        }
-      }
-    };
-
-    poll();
-  }, []);
-
   // ── Create handler ─────────────────────────────
   const handleCreate = async () => {
     if (!user) {
@@ -263,13 +129,13 @@ export default function VideoCreateModal({
     setIsCreating(true);
     setError(null);
 
-    // Convert cropped blob to base64 data URL
+    // Convert image blob to base64 data URL
     let imageBase64 = "";
-    if (croppedBlob) {
+    if (imageBlob) {
       imageBase64 = await new Promise<string>((resolve) => {
         const reader = new FileReader();
         reader.onloadend = () => resolve(reader.result as string);
-        reader.readAsDataURL(croppedBlob);
+        reader.readAsDataURL(imageBlob);
       });
     }
 
@@ -295,21 +161,27 @@ export default function VideoCreateModal({
         throw new Error(data.error || "Generation failed");
       }
 
-      // Persist to localStorage — status: processing
-      addCreatedVideo({
-        jobId: data.jobId,
-        templateId: data.templateId,
-        templateName: data.templateName,
-        templateThumbnail: data.templateThumbnail,
-        templateDuration: data.templateDuration,
-        templateCredits: data.templateCredits,
-        status: "processing",
-        videoUrl: "",
-        createdAt: data.createdAt,
-      });
+      // Persist to Supabase — status: processing
+      const token = session?.access_token;
+      if (token) {
+        await fetch("/api/videos", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            jobId: data.jobId,
+            templateId: data.templateId,
+            templateName: data.templateName,
+            templateThumbnail: data.templateThumbnail,
+            templateDuration: data.templateDuration,
+            templateCredits: data.templateCredits,
+          }),
+        });
+      }
 
-      // Start polling in the background
-      pollJobStatus(data.jobId);
+      // Polling is handled by the Gallery page
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create video");
       setIsCreating(false);
@@ -446,51 +318,13 @@ export default function VideoCreateModal({
             </div>
           </div>
 
-          {/* Crop controls — only when image is selected */}
-          {previewUrl && !croppedBlob && (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <p className="text-xs text-white/40 font-semibold uppercase tracking-wider">Crop Image</p>
-                <button
-                  onClick={applyCrop}
-                  disabled={isProcessing || !completedCrop}
-                  className="text-xs text-[#F97316] hover:text-orange-400 font-semibold transition-colors disabled:opacity-50"
-                >
-                  {isProcessing ? 'Processing...' : 'Apply Crop'}
-                </button>
-              </div>
-              <div className="flex items-center justify-center bg-[#0A0B14] rounded-2xl overflow-hidden max-h-[200px]">
-                <ReactCrop
-                  crop={crop}
-                  onChange={onCropChange}
-                  onComplete={onCropComplete}
-                  aspect={1}
-                  minWidth={100}
-                  minHeight={100}
-                  className="max-h-[200px]"
-                >
-                  <img
-                    ref={imgRef}
-                    src={previewUrl}
-                    alt="Crop preview"
-                    onLoad={onImageLoad}
-                    className="max-h-[200px] w-auto object-contain"
-                  />
-                </ReactCrop>
-              </div>
-              <p className="text-[10px] text-white/40 text-center">
-                Drag corners to crop square, then Apply Crop
-              </p>
-            </div>
-          )}
-
-          {/* Cropped confirmation */}
-          {croppedBlob && (
+          {/* Image selected confirmation */}
+          {previewUrl && (
             <div className="flex items-center gap-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-4 py-3">
               <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-emerald-500/30">
                 <img
-                  src={URL.createObjectURL(croppedBlob)}
-                  alt="Cropped"
+                  src={previewUrl}
+                  alt="Selected"
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -499,7 +333,7 @@ export default function VideoCreateModal({
                 <p className="text-xs text-white/40 truncate">{selectedFile?.name}</p>
               </div>
               <button
-                onClick={() => { setCroppedBlob(null); setPreviewUrl(null); setSelectedFile(null); }}
+                onClick={() => { setImageBlob(null); setPreviewUrl(null); setSelectedFile(null); }}
                 className="text-white/40 hover:text-white text-xs shrink-0"
               >
                 Change
@@ -537,7 +371,7 @@ export default function VideoCreateModal({
             {user ? (
               <button
                 onClick={handleCreate}
-                disabled={isCreating || !!jobId || !croppedBlob}
+                disabled={isCreating || !!jobId || !imageBlob}
                 className="bg-[#F97316] hover:bg-orange-600 disabled:opacity-50 text-white font-semibold rounded-xl px-6 py-3 transition-colors flex items-center gap-2 text-sm"
               >
                 {isCreating ? (

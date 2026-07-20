@@ -3,15 +3,28 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
 import LoginModal from "@/components/LoginModal";
-import { getCreatedVideos, type CreatedVideo } from "@/lib/storage";
+
+// ── Types ─────────────────────────────────────────────
+interface VideoData {
+  id: string;
+  job_id: string;
+  template_id: string;
+  template_name: string;
+  template_thumbnail: string;
+  template_duration: string;
+  template_credits: number;
+  status: "processing" | "completed" | "failed";
+  video_url: string;
+  created_at: string;
+}
 
 // ── Processing card ─────────────────────────────────
-function ProcessingCard({ video }: { video: CreatedVideo }) {
+function ProcessingCard({ video }: { video: VideoData }) {
   return (
     <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-[#0A0B14] border border-[#1E2130] group">
       {/* Template thumbnail, dimmed */}
       <img
-        src={video.templateThumbnail}
+        src={video.template_thumbnail}
         alt=""
         className="absolute inset-0 w-full h-full object-cover brightness-50"
       />
@@ -30,7 +43,7 @@ function ProcessingCard({ video }: { video: CreatedVideo }) {
       {/* Bottom info */}
       <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
         <span className="bg-black/60 text-white/80 text-[10px] px-2 py-0.5 rounded-md">
-          {video.templateDuration}
+          {video.template_duration}
         </span>
         <span className="bg-[#F97316]/80 text-white text-[10px] font-semibold px-2 py-0.5 rounded-md">
           Processing
@@ -41,7 +54,7 @@ function ProcessingCard({ video }: { video: CreatedVideo }) {
 }
 
 // ── Completed card ──────────────────────────────────
-function CompletedCard({ video }: { video: CreatedVideo }) {
+function CompletedCard({ video }: { video: VideoData }) {
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
 
@@ -60,7 +73,7 @@ function CompletedCard({ video }: { video: CreatedVideo }) {
       {/* Video element — hidden until play */}
       <video
         ref={videoRef}
-        src={video.videoUrl}
+        src={video.video_url}
         loop
         muted
         playsInline
@@ -71,7 +84,7 @@ function CompletedCard({ video }: { video: CreatedVideo }) {
       {!playing && (
         <>
           <img
-            src={video.templateThumbnail}
+            src={video.template_thumbnail}
             alt=""
             className="absolute inset-0 w-full h-full object-cover"
           />
@@ -92,7 +105,7 @@ function CompletedCard({ video }: { video: CreatedVideo }) {
       {/* Bottom info */}
       <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
         <span className="bg-black/60 text-white/80 text-[10px] px-2 py-0.5 rounded-md">
-          {video.templateDuration}
+          {video.template_duration}
         </span>
         <span className="bg-emerald-500/80 text-white text-[10px] font-semibold px-2 py-0.5 rounded-md">
           Ready
@@ -104,24 +117,90 @@ function CompletedCard({ video }: { video: CreatedVideo }) {
 
 // ── Gallery page ─────────────────────────────────────
 export default function GalleryPage() {
-  const { user, loading } = useAuth();
+  const { user, session, loading } = useAuth();
   const [loginOpen, setLoginOpen] = useState(false);
-  const [videos, setVideos] = useState<CreatedVideo[]>([]);
+  const [videos, setVideos] = useState<VideoData[]>([]);
 
-  // Load videos from localStorage
+  // Fetch videos from Supabase
+  const fetchVideos = useCallback(async () => {
+    if (!session?.access_token) return;
+    try {
+      const res = await fetch("/api/videos", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setVideos(data.videos ?? []);
+      }
+    } catch {
+      // Silently fail — will retry on next poll
+    }
+  }, [session]);
+
+  // Initial load
   useEffect(() => {
     if (!user) return;
-    setVideos(getCreatedVideos());
-  }, [user]);
+    fetchVideos();
+  }, [user, fetchVideos]);
 
   // Poll for status changes every 5 seconds
   useEffect(() => {
-    if (!user) return;
-    const interval = setInterval(() => {
-      setVideos(getCreatedVideos());
-    }, 5000);
+    if (!user || !session?.access_token) return;
+
+    const poll = async () => {
+      // Fetch current videos from API
+      const res = await fetch("/api/videos", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      const currentVideos: VideoData[] = data.videos ?? [];
+      setVideos(currentVideos);
+
+      // Check API status for each processing video
+      const processing = currentVideos.filter((v) => v.status === "processing");
+      if (processing.length === 0) return;
+
+      await Promise.allSettled(
+        processing.map(async (video) => {
+          if (!video.job_id) return;
+          try {
+            const genRes = await fetch(`/api/generate/${video.job_id}`);
+            const genData = await genRes.json();
+            if (genData.status === "completed" || genData.status === "failed") {
+              // Update via API
+              await fetch("/api/videos", {
+                method: "PATCH",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${session.access_token}`,
+                },
+                body: JSON.stringify({
+                  jobId: video.job_id,
+                  status: genData.status,
+                  videoUrl: genData.videoUrl || "",
+                }),
+              });
+            }
+          } catch {
+            // Network error — will retry next interval
+          }
+        })
+      );
+
+      // Refresh list after updates
+      const refreshRes = await fetch("/api/videos", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (refreshRes.ok) {
+        const refreshData = await refreshRes.json();
+        setVideos(refreshData.videos ?? []);
+      }
+    };
+
+    const interval = setInterval(poll, 5000);
     return () => clearInterval(interval);
-  }, [user]);
+  }, [user, session]);
 
   // Enquanto carrega, mostra placeholder neutro
   if (loading) {
@@ -230,7 +309,7 @@ export default function GalleryPage() {
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
               {processingVideos.map((v) => (
-                <ProcessingCard key={v.jobId} video={v} />
+                <ProcessingCard key={v.id} video={v} />
               ))}
             </div>
           </section>
@@ -244,7 +323,7 @@ export default function GalleryPage() {
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
               {completedVideos.map((v) => (
-                <CompletedCard key={v.jobId} video={v} />
+                <CompletedCard key={v.id} video={v} />
               ))}
             </div>
           </section>
