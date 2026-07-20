@@ -59,12 +59,20 @@ export async function POST(req: NextRequest) {
       }),
     });
 
-    const leakifyData = await leakifyResponse.json();
+    let leakifyData: any;
+    try {
+      leakifyData = await leakifyResponse.json();
+    } catch {
+      leakifyData = { raw: await leakifyResponse.text() };
+    }
+
+    console.log("[Generate] LeakifyHub response:", leakifyResponse.status, JSON.stringify(leakifyData, null, 2));
+    console.log("[Generate] Sent to LeakifyHub:", JSON.stringify({ style_id: styleId, image_url: imageUrl }));
 
     if (!leakifyResponse.ok) {
       console.error("LeakifyHub error:", leakifyData);
       return NextResponse.json(
-        { error: leakifyData.error || "Generation failed" },
+        { error: leakifyData.error || leakifyData.message || leakifyData.detail || "Generation failed", leakifyResponse: leakifyData },
         { status: leakifyResponse.status },
       );
     }
