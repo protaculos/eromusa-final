@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
     const leakifyResponse = await fetch(`${LEAKIFYHUB_BASE}/jobs/generate`, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${LEAKIFYHUB_KEY}`,
+        "X-API-Key": LEAKIFYHUB_KEY,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
