@@ -51,6 +51,7 @@ export async function POST(req: NextRequest) {
       method: "POST",
       headers: {
         "X-API-Key": LEAKIFYHUB_KEY,
+        "X-API-Secret": LEAKIFYHUB_KEY,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
