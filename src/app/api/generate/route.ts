@@ -32,7 +32,11 @@ export async function POST(req: NextRequest) {
 
     if (uploadError) {
       console.error("Supabase upload error:", uploadError);
-      return NextResponse.json({ error: "Failed to upload image" }, { status: 500 });
+      return NextResponse.json({
+        error: "Failed to upload image to storage",
+        detail: uploadError.message,
+        hint: "Make sure the 'generations' bucket exists in Supabase Storage"
+      }, { status: 500 });
     }
 
     // Get public URL
