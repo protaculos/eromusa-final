@@ -20,6 +20,7 @@ export interface VideoCreateModalProps {
     videoUrl: string;
     thumbnailUrl: string;
     instructions: string[];
+    tags: string[];
     gradient: string;
     styleId: string;
   };
@@ -263,12 +264,12 @@ export default function VideoCreateModal({
               className="font-bold text-white whitespace-nowrap"
               style={{ fontSize: template.name.length > 30 ? '0.9rem' : template.name.length > 20 ? '1.05rem' : '1.125rem' }}
             >{template.name}</h2>
-            {template.instructions.length > 0 && (
+            {template.tags.length > 0 && (
               <p
                 className="text-white/40 mt-0.5 whitespace-nowrap"
-                style={{ fontSize: template.instructions.join(', ').length > 50 ? '0.65rem' : '0.75rem' }}
+                style={{ fontSize: template.tags.join(', ').length > 50 ? '0.65rem' : '0.75rem' }}
               >
-                Filters: <span className="text-[#F97316]">{template.instructions.join(', ')}</span>
+                Filters: <span className="text-[#F97316]">{template.tags.join(', ')}</span>
               </p>
             )}
           </div>
