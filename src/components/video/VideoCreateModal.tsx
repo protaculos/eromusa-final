@@ -129,6 +129,19 @@ export default function VideoCreateModal({
     setIsCreating(true);
     setError(null);
 
+    // Validate before sending
+    if (!imageBlob) {
+      setError("Please select an image first");
+      setIsCreating(false);
+      return;
+    }
+
+    if (!template?.styleId) {
+      setError("Invalid template: missing style ID");
+      setIsCreating(false);
+      return;
+    }
+
     // Convert image blob to base64 data URL
     let imageBase64 = "";
     if (imageBlob) {
@@ -140,6 +153,14 @@ export default function VideoCreateModal({
     }
 
     try {
+      // Debug: log what we're sending
+      console.log("[VideoCreateModal] Sending to /api/generate:", {
+        hasImage: !!imageBase64,
+        imageBase64Length: imageBase64.length,
+        styleId: template.styleId,
+        templateId: template.id,
+      });
+
       // Call our server-side API route
       const res = await fetch("/api/generate", {
         method: "POST",
@@ -155,10 +176,17 @@ export default function VideoCreateModal({
         }),
       });
 
-      const data = await res.json();
+      let data: any;
+      try {
+        data = await res.json();
+      } catch {
+        data = { error: "Invalid JSON response from server" };
+      }
+
+      console.log("[VideoCreateModal] Response:", res.status, data);
 
       if (!res.ok) {
-        throw new Error(data.error || "Generation failed");
+        throw new Error(data.error || data.detail || `HTTP ${res.status}: Generation failed`);
       }
 
       // Persist to Supabase — status: processing
