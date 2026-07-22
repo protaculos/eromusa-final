@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
 }
 
 // ── POST /api/videos ─────────────────────────────────
-// Cria um novo registro de vídeo
+// Cria um novo registro de vídeo com expires_at = now + 72h
 // Body: { jobId, templateId, templateName, templateThumbnail, templateDuration, templateCredits }
 // Header: Authorization: Bearer <supabase-access-token>
 export async function POST(req: NextRequest) {
@@ -63,6 +63,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing required fields: jobId, templateId" }, { status: 400 });
     }
 
+    // Expira em 72 horas
+    const expiresAt = new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString();
+
     const { data: video, error } = await supabaseAdmin
       .from("videos")
       .insert({
@@ -76,6 +79,7 @@ export async function POST(req: NextRequest) {
         user_image_url: userImageUrl || "",
         status: "processing",
         video_url: "",
+        expires_at: expiresAt,
       })
       .select()
       .single();

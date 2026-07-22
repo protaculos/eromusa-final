@@ -24,36 +24,16 @@ export async function PATCH(
     }
 
     const { jobId } = await params;
-
-    if (!jobId) {
-      return NextResponse.json({ error: "Missing jobId" }, { status: 400 });
-    }
-
     const body = await req.json();
     const { status, videoUrl } = body;
 
-    if (!status || !["processing", "completed", "failed"].includes(status)) {
-      return NextResponse.json({ error: "Invalid status" }, { status: 400 });
-    }
+    const updateData: Record<string, any> = {};
+    if (status) updateData.status = status;
+    if (videoUrl !== undefined) updateData.video_url = videoUrl;
 
-    // Verifica se o vídeo pertence ao usuário
-    const { data: existing, error: fetchError } = await supabaseAdmin
+    const { data, error } = await supabaseAdmin
       .from("videos")
-      .select("id")
-      .eq("job_id", jobId)
-      .eq("user_id", user.id)
-      .single();
-
-    if (fetchError || !existing) {
-      return NextResponse.json({ error: "Video not found" }, { status: 404 });
-    }
-
-    const { data: video, error } = await supabaseAdmin
-      .from("videos")
-      .update({
-        status,
-        video_url: videoUrl || "",
-      })
+      .update(updateData)
       .eq("job_id", jobId)
       .eq("user_id", user.id)
       .select()
@@ -64,9 +44,92 @@ export async function PATCH(
       return NextResponse.json({ error: "Failed to update video" }, { status: 500 });
     }
 
-    return NextResponse.json({ video });
+    return NextResponse.json({ video: data });
   } catch (err) {
     console.error("PATCH /api/videos/[jobId] error:", err);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
+
+// ── DELETE /api/videos/[jobId] ───────────────────────
+// Deleta o registro do vídeo E a imagem do storage
+// Header: Authorization: Bearer <supabase-access-token>
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ jobId: string }> },
+) {
+  try {
+    const authHeader = req.headers.get("authorization") || "";
+    const token = authHeader.replace("Bearer ", "");
+
+    if (!token) {
+      return NextResponse.json({ error: "Missing authorization token" }, { status: 401 });
+    }
+
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { jobId } = await params;
+
+    // Busca o registro para saber o user_image_url (path no storage)
+    const { data: existing, error: fetchError } = await supabaseAdmin
+      .from("videos")
+      .select("id, user_image_url, video_url")
+      .eq("job_id", jobId)
+      .eq("user_id", user.id)
+      .single();
+
+    if (fetchError || !existing) {
+      return NextResponse.json({ error: "Video not found" }, { status: 404 });
+    }
+
+    // Deleta a imagem do usuário do storage (se for do bucket "generations")
+    if (existing.user_image_url) {
+      try {
+        const url = new URL(existing.user_image_url);
+        const storagePath = url.pathname.replace(/^\/storage\/v1\/object\/public\/generations\//, "");
+        if (storagePath) {
+          await supabaseAdmin.storage
+            .from("generations")
+            .remove([storagePath]);
+        }
+      } catch (e) {
+        console.warn("Could not delete user image from storage:", e);
+      }
+    }
+
+    // Deleta o vídeo do storage (se for do bucket "generations")
+    if (existing.video_url) {
+      try {
+        const url = new URL(existing.video_url);
+        const storagePath = url.pathname.replace(/^\/storage\/v1\/object\/public\/generations\//, "");
+        if (storagePath) {
+          await supabaseAdmin.storage
+            .from("generations")
+            .remove([storagePath]);
+        }
+      } catch (e) {
+        console.warn("Could not delete video from storage:", e);
+      }
+    }
+
+    // Deleta o registro do banco
+    const { error } = await supabaseAdmin
+      .from("videos")
+      .delete()
+      .eq("job_id", jobId)
+      .eq("user_id", user.id);
+
+    if (error) {
+      console.error("Error deleting video:", error);
+      return NextResponse.json({ error: "Failed to delete video" }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error("DELETE /api/videos/[jobId] error:", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
