@@ -129,21 +129,15 @@ export default function VideoCreateModal({
     setIsCreating(true);
     setError(null);
 
-    // Validate before sending
-    if (!imageBlob) {
-      setError("Please select an image first");
-      setIsCreating(false);
-      return;
-    }
-
     if (!template?.styleId) {
       setError("Invalid template: missing style ID");
       setIsCreating(false);
       return;
     }
 
-    // Convert image blob to base64 data URL
+    // Convert image blob to base64 data URL (optional — test mode if no image)
     let imageBase64 = "";
+    const testMode = !imageBlob;
     if (imageBlob) {
       imageBase64 = await new Promise<string>((resolve) => {
         const reader = new FileReader();
@@ -159,6 +153,7 @@ export default function VideoCreateModal({
         imageBase64Length: imageBase64.length,
         styleId: template.styleId,
         templateId: template.id,
+        testMode,
       });
 
       // Call our server-side API route
@@ -173,6 +168,7 @@ export default function VideoCreateModal({
           templateThumbnail: template.thumbnailUrl,
           templateDuration: template.duration,
           templateCredits: template.credits,
+          testMode,
         }),
       });
 
@@ -399,7 +395,7 @@ export default function VideoCreateModal({
             {user ? (
               <button
                 onClick={handleCreate}
-                disabled={isCreating || !!jobId || !imageBlob}
+                disabled={isCreating || !!jobId}
                 className="bg-[#F97316] hover:bg-orange-600 disabled:opacity-50 text-white font-semibold rounded-xl px-6 py-3 transition-colors flex items-center gap-2 text-sm"
               >
                 {isCreating ? (

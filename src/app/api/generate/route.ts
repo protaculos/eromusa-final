@@ -5,48 +5,64 @@ const LEAKIFYHUB_BASE = "https://api.leakifyhub.fun/api/v1";
 const LEAKIFYHUB_KEY = process.env.LEAKIFYHUB_API_KEY!;
 
 // ── POST /api/generate ──────────────────────────────
-// Body: { imageBase64: string, styleId: string, templateId: string, templateName: string, templateThumbnail: string, templateDuration: string, templateCredits: number }
-// 1. Upload image to Supabase Storage
+// Body: { imageBase64?: string, styleId: string, templateId: string, templateName: string, templateThumbnail: string, templateDuration: string, templateCredits: number, testMode?: boolean }
+// 1. If not testMode: upload image to Supabase Storage
 // 2. Call LeakifyHub POST /jobs/generate
 // 3. Return { jobId, leakifyJobId }
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { imageBase64, styleId, templateId, templateName, templateThumbnail, templateDuration, templateCredits } = body;
+    const { imageBase64, styleId, templateId, templateName, templateThumbnail, templateDuration, templateCredits, testMode } = body;
 
-    if (!imageBase64 || !styleId) {
-      return NextResponse.json({ error: "Missing required fields: imageBase64, styleId" }, { status: 400 });
+    if (!styleId) {
+      return NextResponse.json({ error: "Missing required field: styleId" }, { status: 400 });
     }
 
-    // ── 1. Upload image to Supabase Storage ──────────
-    const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, "");
-    const buffer = Buffer.from(base64Data, "base64");
-    const fileName = `uploads/${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`;
+    let imageUrl = "";
 
-    const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
-      .from("generations")
-      .upload(fileName, buffer, {
-        contentType: "image/jpeg",
-        upsert: false,
-      });
+    // ── 1. Upload image to Supabase Storage (skip in test mode) ──
+    if (!testMode) {
+      if (!imageBase64) {
+        return NextResponse.json({ error: "Missing required field: imageBase64" }, { status: 400 });
+      }
 
-    if (uploadError) {
-      console.error("Supabase upload error:", uploadError);
-      return NextResponse.json({
-        error: "Failed to upload image to storage",
-        detail: uploadError.message,
-        hint: "Make sure the 'generations' bucket exists in Supabase Storage"
-      }, { status: 500 });
+      const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, "");
+      const buffer = Buffer.from(base64Data, "base64");
+      const fileName = `uploads/${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`;
+
+      const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
+        .from("generations")
+        .upload(fileName, buffer, {
+          contentType: "image/jpeg",
+          upsert: false,
+        });
+
+      if (uploadError) {
+        console.error("Supabase upload error:", uploadError);
+        return NextResponse.json({
+          error: "Failed to upload image to storage",
+          detail: uploadError.message,
+          hint: "Make sure the 'generations' bucket exists in Supabase Storage"
+        }, { status: 500 });
+      }
+
+      // Get public URL
+      const { data: publicUrlData } = supabaseAdmin.storage
+        .from("generations")
+        .getPublicUrl(fileName);
+
+      imageUrl = publicUrlData.publicUrl;
     }
-
-    // Get public URL
-    const { data: publicUrlData } = supabaseAdmin.storage
-      .from("generations")
-      .getPublicUrl(fileName);
-
-    const imageUrl = publicUrlData.publicUrl;
 
     // ── 2. Call LeakifyHub POST /jobs/generate ──────
+    const leakifyBody: Record<string, any> = {
+      style: styleId,
+      type: "video",
+    };
+    if (imageUrl) {
+      leakifyBody.image_url = imageUrl;
+    }
+
     const leakifyResponse = await fetch(`${LEAKIFYHUB_BASE}/jobs/generate`, {
       method: "POST",
       headers: {
@@ -54,11 +70,7 @@ export async function POST(req: NextRequest) {
         "X-API-Secret": LEAKIFYHUB_KEY,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        style: styleId,
-        type: "video",
-        image_url: imageUrl,
-      }),
+      body: JSON.stringify(leakifyBody),
     });
 
     let leakifyData: any;
