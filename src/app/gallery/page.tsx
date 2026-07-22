@@ -21,23 +21,18 @@ interface VideoData {
 }
 
 // ── Countdown hook ────────────────────────────────────
-function useCountdown(expiresAt: string | undefined): { time: string; days: number } {
+// Returns total hours (not split into days) in format "72h:00m:00s"
+function useCountdown(expiresAt: string | undefined): string {
   const getTimeLeft = useCallback(() => {
-    if (!expiresAt) return { time: "", days: 0 };
+    if (!expiresAt) return "";
     const diff = new Date(expiresAt).getTime() - Date.now();
-    if (diff <= 0) return { time: "00:00:00", days: 0 };
+    if (diff <= 0) return "0h:00m:00s";
 
     const totalHours = Math.floor(diff / (1000 * 60 * 60));
-    const days = Math.floor(totalHours / 24);
-    const hours = totalHours % 24;
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-    const time = [hours, minutes, seconds]
-      .map((n) => n.toString().padStart(2, "0"))
-      .join(":");
-
-    return { time, days };
+    return `${totalHours}h:${minutes.toString().padStart(2, "0")}m:${seconds.toString().padStart(2, "0")}s`;
   }, [expiresAt]);
 
   const [display, setDisplay] = useState(getTimeLeft());
@@ -102,7 +97,7 @@ function CompletedCard({
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [hovering, setHovering] = useState(false);
-  const { time: expiresTime, days: expiresDays } = useCountdown(video.expires_at);
+  const expiresDisplay = useCountdown(video.expires_at);
 
   // Play/pause based on hover
   useEffect(() => {
@@ -164,10 +159,10 @@ function CompletedCard({
       </div>
 
       {/* Expires countdown — top area */}
-      {expiresTime && (
+      {expiresDisplay && (
         <div className="absolute top-2 left-2 right-2 flex justify-center">
           <div className="bg-black/70 text-white/80 text-[10px] px-2 py-0.5 rounded-md">
-            Expira em {expiresTime}{expiresDays > 0 ? ` (${expiresDays} dia${expiresDays > 1 ? "s" : ""})` : ""}
+            Expira em {expiresDisplay}
           </div>
         </div>
       )}
@@ -252,7 +247,7 @@ function VideoPopup({
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmDownload, setConfirmDownload] = useState(false);
-  const { time: expiresTime, days: expiresDays } = useCountdown(video.expires_at);
+  const expiresDisplay = useCountdown(video.expires_at);
 
   // Start playing on mount
   useEffect(() => {
@@ -309,14 +304,14 @@ function VideoPopup({
         onClick={onClose}
       >
         <div
-          className="relative bg-[#0A0B14] border border-[#1E2130] rounded-2xl w-full max-w-[420px] max-h-[90vh] overflow-y-auto shadow-2xl scrollbar-thin scrollbar-thumb-[#1E2130] scrollbar-track-transparent"
+          className="relative bg-[#0A0B14] border border-[#1E2130] rounded-2xl w-full max-w-[360px] max-h-[85vh] overflow-y-auto shadow-2xl scrollbar-thin scrollbar-thumb-[#1E2130] scrollbar-track-transparent"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="sticky top-0 bg-[#0A0B14] z-10 flex items-center justify-between p-5 border-b border-[#1E2130]">
+          <div className="sticky top-0 bg-[#0A0B14] z-10 flex items-center justify-between p-4 border-b border-[#1E2130]">
             <div className="min-w-0">
-              <h2 className="font-bold text-white text-lg truncate">{video.template_name || "Video"}</h2>
-              <p className="text-white/40 text-xs mt-0.5">{video.template_duration}</p>
+              <h2 className="font-bold text-white text-base truncate">{video.template_name || "Video"}</h2>
+              <p className="text-white/40 text-[11px] mt-0.5">{video.template_duration}</p>
             </div>
             <button
               onClick={onClose}
@@ -329,9 +324,9 @@ function VideoPopup({
           </div>
 
           {/* Body */}
-          <div className="p-5 space-y-4">
+          <div className="p-4 space-y-3">
             {/* Video player — portrait aspect */}
-            <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-black border border-[#1E2130]">
+            <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-black border border-[#1E2130]">
               <video
                 ref={videoRef}
                 src={video.video_url}
@@ -348,8 +343,8 @@ function VideoPopup({
                   className="absolute inset-0 flex items-center justify-center cursor-pointer"
                   onClick={togglePlay}
                 >
-                  <div className="w-16 h-16 rounded-full bg-[#F97316]/90 flex items-center justify-center shadow-lg">
-                    <svg className="w-7 h-7 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                  <div className="w-14 h-14 rounded-full bg-[#F97316]/90 flex items-center justify-center shadow-lg">
+                    <svg className="w-6 h-6 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M8 5v14l11-7z" />
                     </svg>
                   </div>
@@ -357,22 +352,22 @@ function VideoPopup({
               )}
 
               {/* Expires countdown — top area */}
-              {expiresTime && (
-                <div className="absolute top-3 left-3 right-3 flex justify-center">
-                  <div className="bg-black/70 text-white/80 text-xs px-2.5 py-1 rounded-lg">
-                    Expira em {expiresTime}{expiresDays > 0 ? ` (${expiresDays} dia${expiresDays > 1 ? "s" : ""})` : ""}
+              {expiresDisplay && (
+                <div className="absolute top-2 left-2 right-2 flex justify-center">
+                  <div className="bg-black/70 text-white/80 text-[10px] px-2 py-0.5 rounded-md">
+                    Expira em {expiresDisplay}
                   </div>
                 </div>
               )}
             </div>
 
             {/* Actions */}
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <button
                 onClick={() => setConfirmDownload(true)}
-                className="flex-1 flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white text-sm font-medium px-4 py-3 rounded-xl transition-colors"
+                className="flex-1 flex items-center justify-center gap-1.5 bg-white/10 hover:bg-white/20 text-white text-xs font-medium px-3 py-2.5 rounded-xl transition-colors"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 Download
@@ -380,12 +375,12 @@ function VideoPopup({
               <button
                 onClick={() => setConfirmDelete(true)}
                 disabled={deleting}
-                className="flex-1 flex items-center justify-center gap-2 bg-red-500/20 hover:bg-red-500/40 text-red-400 text-sm font-medium px-4 py-3 rounded-xl transition-colors disabled:opacity-50"
+                className="flex-1 flex items-center justify-center gap-1.5 bg-red-500/20 hover:bg-red-500/40 text-red-400 text-xs font-medium px-3 py-2.5 rounded-xl transition-colors disabled:opacity-50"
               >
                 {deleting ? (
-                  <div className="w-4 h-4 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
+                  <div className="w-3.5 h-3.5 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
                 ) : (
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                   </svg>
                 )}
