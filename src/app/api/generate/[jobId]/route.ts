@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const LEAKIFYHUB_BASE = "https://api.leakifyhub.fun/api/v1";
-const LEAKIFYHUB_KEY = process.env.LEAKIFYHUB_API_KEY!;
+const LEAKIFYHUB_SECRET_KEY = process.env.LEAKIFYHUB_SECRET_KEY!;
 
 // ── GET /api/generate/[jobId] ────────────────────────
 // Polls LeakifyHub for job status
@@ -19,7 +19,7 @@ export async function GET(
 
     const response = await fetch(`${LEAKIFYHUB_BASE}/jobs/${jobId}`, {
       headers: {
-        "Authorization": `Bearer ${LEAKIFYHUB_KEY}`,
+        "Authorization": `Bearer ${LEAKIFYHUB_SECRET_KEY}`,
       },
     });
 

@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 
 const LEAKIFYHUB_BASE = "https://api.leakifyhub.fun/api/v1";
-const LEAKIFYHUB_KEY = process.env.LEAKIFYHUB_API_KEY!;
+const LEAKIFYHUB_PUBLIC_KEY = process.env.LEAKIFYHUB_PUBLIC_KEY!;
+const LEAKIFYHUB_SECRET_KEY = process.env.LEAKIFYHUB_SECRET_KEY!;
 
 // ── POST /api/generate ──────────────────────────────
 // Body: { imageBase64?: string, styleId: string, templateId: string, templateName: string, templateThumbnail: string, templateDuration: string, templateCredits: number, testMode?: boolean }
@@ -66,8 +67,8 @@ export async function POST(req: NextRequest) {
     const leakifyResponse = await fetch(`${LEAKIFYHUB_BASE}/jobs/generate`, {
       method: "POST",
       headers: {
-        "X-API-Key": LEAKIFYHUB_KEY,
-        "X-API-Secret": LEAKIFYHUB_KEY,
+        "X-API-Key": LEAKIFYHUB_PUBLIC_KEY,
+        "X-API-Secret": LEAKIFYHUB_SECRET_KEY,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(leakifyBody),
