@@ -102,6 +102,7 @@ export async function POST(req: NextRequest) {
       templateThumbnail,
       templateDuration,
       templateCredits,
+      userImageUrl: imageUrl,
       status: "processing",
       createdAt: new Date().toISOString(),
     });

@@ -15,6 +15,7 @@ interface VideoData {
   template_credits: number;
   status: "processing" | "completed" | "failed";
   video_url: string;
+  user_image_url: string;
   created_at: string;
 }
 
@@ -22,20 +23,23 @@ interface VideoData {
 function ProcessingCard({ video }: { video: VideoData }) {
   return (
     <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-[#0A0B14] border border-[#1E2130] group">
-      {/* Template thumbnail, dimmed */}
+      {/* User image, dimmed */}
       <img
-        src={video.template_thumbnail}
+        src={video.user_image_url || video.template_thumbnail}
         alt=""
-        className="absolute inset-0 w-full h-full object-cover brightness-50"
+        className="absolute inset-0 w-full h-full object-cover brightness-[0.35]"
       />
+
+      {/* Dark gradient overlay for depth */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
       {/* Spinner + text overlay */}
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-4">
         <div className="w-10 h-10 border-2 border-[#F97316] border-t-transparent rounded-full animate-spin" />
-        <p className="text-white/80 text-sm font-semibold text-center">
+        <p className="text-white/90 text-sm font-semibold text-center drop-shadow-lg">
           Your video is being created
         </p>
-        <p className="text-white/40 text-xs text-center">
+        <p className="text-white/50 text-xs text-center drop-shadow">
           Please wait 2–5 minutes
         </p>
       </div>
@@ -69,8 +73,11 @@ function CompletedCard({ video }: { video: VideoData }) {
   }, [playing]);
 
   return (
-    <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-[#0A0B14] border border-[#1E2130] group cursor-pointer">
-      {/* Video element — hidden until play */}
+    <div
+      className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-[#0A0B14] border border-[#1E2130] group cursor-pointer"
+      onClick={togglePlay}
+    >
+      {/* Video element */}
       <video
         ref={videoRef}
         src={video.video_url}
@@ -80,20 +87,17 @@ function CompletedCard({ video }: { video: VideoData }) {
         className="absolute inset-0 w-full h-full object-cover"
       />
 
-      {/* Thumbnail overlay — shown when paused */}
+      {/* Thumbnail overlay — user image, shown when paused */}
       {!playing && (
         <>
           <img
-            src={video.template_thumbnail}
+            src={video.user_image_url || video.template_thumbnail}
             alt=""
             className="absolute inset-0 w-full h-full object-cover"
           />
           {/* Play button */}
-          <div
-            className="absolute inset-0 flex items-center justify-center"
-            onClick={togglePlay}
-          >
-            <div className="w-14 h-14 rounded-full bg-[#F97316]/90 flex items-center justify-center transition-transform hover:scale-110">
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-14 h-14 rounded-full bg-[#F97316]/90 flex items-center justify-center transition-transform hover:scale-110 shadow-lg">
               <svg className="w-6 h-6 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M8 5v14l11-7z" />
               </svg>
@@ -168,15 +172,14 @@ export default function GalleryPage() {
             const genRes = await fetch(`/api/generate/${video.job_id}`);
             const genData = await genRes.json();
             if (genData.status === "completed" || genData.status === "failed") {
-              // Update via API
-              await fetch("/api/videos", {
+              // Update via API — PATCH /api/videos/[jobId]
+              await fetch(`/api/videos/${video.job_id}`, {
                 method: "PATCH",
                 headers: {
                   "Content-Type": "application/json",
                   Authorization: `Bearer ${session.access_token}`,
                 },
                 body: JSON.stringify({
-                  jobId: video.job_id,
                   status: genData.status,
                   videoUrl: genData.videoUrl || "",
                 }),

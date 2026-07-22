@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { jobId, templateId, templateName, templateThumbnail, templateDuration, templateCredits } = body;
+    const { jobId, templateId, templateName, templateThumbnail, templateDuration, templateCredits, userImageUrl } = body;
 
     if (!jobId || !templateId) {
       return NextResponse.json({ error: "Missing required fields: jobId, templateId" }, { status: 400 });
@@ -73,6 +73,7 @@ export async function POST(req: NextRequest) {
         template_thumbnail: templateThumbnail || "",
         template_duration: templateDuration || "",
         template_credits: templateCredits || 0,
+        user_image_url: userImageUrl || "",
         status: "processing",
         video_url: "",
       })

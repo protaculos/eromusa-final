@@ -205,6 +205,7 @@ export default function VideoCreateModal({
             templateThumbnail: data.templateThumbnail,
             templateDuration: data.templateDuration,
             templateCredits: data.templateCredits,
+            userImageUrl: data.userImageUrl || "",
           }),
         });
       }
