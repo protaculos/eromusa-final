@@ -22,10 +22,14 @@ interface VideoData {
 
 // ── Countdown hook ────────────────────────────────────
 // Returns total hours (not split into days) in format "72h:00m:00s"
-function useCountdown(expiresAt: string | undefined): string {
+// Falls back to created_at + 72h if expires_at is not set
+function useCountdown(expiresAt: string | undefined, createdAt?: string): string {
   const getTimeLeft = useCallback(() => {
-    if (!expiresAt) return "";
-    const diff = new Date(expiresAt).getTime() - Date.now();
+    const target = expiresAt || (createdAt
+      ? new Date(new Date(createdAt).getTime() + 72 * 60 * 60 * 1000).toISOString()
+      : undefined);
+    if (!target) return "";
+    const diff = new Date(target).getTime() - Date.now();
     if (diff <= 0) return "0h:00m:00s";
 
     const totalHours = Math.floor(diff / (1000 * 60 * 60));
@@ -33,18 +37,21 @@ function useCountdown(expiresAt: string | undefined): string {
     const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
     return `${totalHours}h:${minutes.toString().padStart(2, "0")}m:${seconds.toString().padStart(2, "0")}s`;
-  }, [expiresAt]);
+  }, [expiresAt, createdAt]);
 
   const [display, setDisplay] = useState(getTimeLeft());
 
   useEffect(() => {
-    if (!expiresAt) return;
+    const target = expiresAt || (createdAt
+      ? new Date(new Date(createdAt).getTime() + 72 * 60 * 60 * 1000).toISOString()
+      : undefined);
+    if (!target) return;
     setDisplay(getTimeLeft());
     const interval = setInterval(() => {
       setDisplay(getTimeLeft());
     }, 1000);
     return () => clearInterval(interval);
-  }, [expiresAt, getTimeLeft]);
+  }, [expiresAt, createdAt, getTimeLeft]);
 
   return display;
 }
@@ -97,7 +104,7 @@ function CompletedCard({
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [hovering, setHovering] = useState(false);
-  const expiresDisplay = useCountdown(video.expires_at);
+  const expiresDisplay = useCountdown(video.expires_at, video.created_at);
 
   // Play/pause based on hover
   useEffect(() => {
@@ -247,7 +254,7 @@ function VideoPopup({
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmDownload, setConfirmDownload] = useState(false);
-  const expiresDisplay = useCountdown(video.expires_at);
+  const expiresDisplay = useCountdown(video.expires_at, video.created_at);
 
   // Start playing on mount
   useEffect(() => {
@@ -304,7 +311,7 @@ function VideoPopup({
         onClick={onClose}
       >
         <div
-          className="relative bg-[#0A0B14] border border-[#1E2130] rounded-2xl w-full max-w-[360px] max-h-[85vh] overflow-y-auto shadow-2xl scrollbar-thin scrollbar-thumb-[#1E2130] scrollbar-track-transparent"
+          className="relative bg-[#0A0B14] border border-[#1E2130] rounded-2xl w-full max-w-[420px] max-h-[90vh] overflow-y-auto shadow-2xl scrollbar-thin scrollbar-thumb-[#1E2130] scrollbar-track-transparent"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
@@ -325,8 +332,8 @@ function VideoPopup({
 
           {/* Body */}
           <div className="p-4 space-y-3">
-            {/* Video player — portrait aspect */}
-            <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-black border border-[#1E2130]">
+            {/* Video player — portrait aspect, capped so modal fits without scroll */}
+            <div className="relative aspect-[3/4] max-h-[55vh] rounded-2xl overflow-hidden bg-black border border-[#1E2130]">
               <video
                 ref={videoRef}
                 src={video.video_url}
