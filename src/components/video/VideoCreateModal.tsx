@@ -192,7 +192,7 @@ export default function VideoCreateModal({
       // Persist to Supabase — status: processing
       const token = session?.access_token;
       if (token) {
-        await fetch("/api/videos", {
+        const persistRes = await fetch("/api/videos", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -208,6 +208,11 @@ export default function VideoCreateModal({
             userImageUrl: data.userImageUrl || "",
           }),
         });
+        if (!persistRes.ok) {
+          const persistErr = await persistRes.json().catch(() => ({}));
+          console.error("[VideoCreateModal] Failed to persist video:", persistErr);
+          throw new Error(persistErr.error || "Failed to save video to database");
+        }
       }
 
       // Polling is handled by the Gallery page
