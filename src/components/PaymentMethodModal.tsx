@@ -108,7 +108,7 @@ export default function PaymentMethodModal({
           <div>
             <h2 className="text-xl font-bold text-white">Choose Payment Method</h2>
             <p className="text-sm text-white/50 mt-1">
-              {planName} • <span className="text-[#F97316] font-semibold">+{planCredits} credits</span>
+              {planName} • <span className="text-[#EE5F96] font-semibold">+{planCredits} credits</span>
               {planAmount > 0 && (
                 <span className="text-white/40"> — ${(planAmount / 100).toFixed(2)}</span>
               )}
@@ -139,11 +139,11 @@ export default function PaymentMethodModal({
                 ${opt.comingSoon
                   ? 'bg-[#161827] border-[#1E2130] opacity-50 cursor-not-allowed'
                   : loading
-                    ? 'bg-[#161827] border-[#F97316] opacity-70 cursor-not-allowed'
-                    : 'bg-[#161827] border-[#1E2130] hover:border-[#F97316]/50 hover:bg-[#1E2130]'}
+                    ? 'bg-[#161827] border-[#EE5F96] opacity-70 cursor-not-allowed'
+                    : 'bg-[#161827] border-[#1E2130] hover:border-[#EE5F96]/50 hover:bg-[#1E2130]'}
               `}
             >
-              <div className="w-12 h-12 rounded-full bg-[#0A0B14] flex items-center justify-center text-2xl border border-[#1E2130] group-hover:border-[#F97316]/50 transition-colors shrink-0">
+              <div className="w-12 h-12 rounded-full bg-[#0A0B14] flex items-center justify-center text-2xl border border-[#1E2130] group-hover:border-[#EE5F96]/50 transition-colors shrink-0">
                 {opt.icon}
               </div>
 
@@ -160,7 +160,7 @@ export default function PaymentMethodModal({
               </div>
 
               {loading && opt.id === 'fiat' && (
-                <div className="w-5 h-5 border-2 border-[#F97316] border-t-transparent rounded-full animate-spin shrink-0" />
+                <div className="w-5 h-5 border-2 border-[#EE5F96] border-t-transparent rounded-full animate-spin shrink-0" />
               )}
             </button>
           ))}

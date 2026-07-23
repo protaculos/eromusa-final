@@ -98,18 +98,18 @@ export default function PaymentModal({ isOpen, onClose }: { isOpen: boolean; onC
                 className={`
                   group relative flex items-center gap-4 p-4 rounded-2xl border transition-all text-left
                   ${loadingPlan === plan.id
-                    ? 'bg-[#161827] border-[#F97316] opacity-70 cursor-not-allowed'
-                    : 'bg-[#161827] border-[#1E2130] hover:border-[#F97316]/50 hover:bg-[#1E2130]'}
+                    ? 'bg-[#161827] border-[#EE5F96] opacity-70 cursor-not-allowed'
+                    : 'bg-[#161827] border-[#1E2130] hover:border-[#EE5F96]/50 hover:bg-[#1E2130]'}
                 `}
               >
-                <div className="w-12 h-12 rounded-full bg-[#0A0B14] flex items-center justify-center text-2xl border border-[#1E2130] group-hover:border-[#F97316]/50 transition-colors">
+                <div className="w-12 h-12 rounded-full bg-[#0A0B14] flex items-center justify-center text-2xl border border-[#1E2130] group-hover:border-[#EE5F96]/50 transition-colors">
                   {plan.icon}
                 </div>
 
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <span className="text-white font-bold">{plan.label}</span>
-                    <span className="text-[#F97316] font-bold">
+                    <span className="text-[#EE5F96] font-bold">
                       {plan.amount === 0 ? 'FREE' : `$${(plan.amount / 100).toFixed(2)}`}
                     </span>
                   </div>
@@ -117,7 +117,7 @@ export default function PaymentModal({ isOpen, onClose }: { isOpen: boolean; onC
                 </div>
 
                 {loadingPlan === plan.id && (
-                  <div className="w-5 h-5 border-2 border-[#F97316] border-t-transparent rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-[#EE5F96] border-t-transparent rounded-full animate-spin" />
                 )}
               </button>
             ))}

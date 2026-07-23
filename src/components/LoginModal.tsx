@@ -147,7 +147,7 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
             value={email}
             onChange={e => setEmail(e.target.value)}
             required
-            className="w-full px-4 py-3 rounded-xl bg-[#161827] border border-[#1E2130] text-white placeholder-white/30 focus:outline-none focus:border-[#F97316] transition-colors"
+            className="w-full px-4 py-3 rounded-xl bg-[#161827] border border-[#1E2130] text-white placeholder-white/30 focus:outline-none focus:border-[#EE5F96] transition-colors"
           />
           <input
             type="password"
@@ -156,7 +156,7 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
             onChange={e => setPassword(e.target.value)}
             required
             minLength={6}
-            className="w-full px-4 py-3 rounded-xl bg-[#161827] border border-[#1E2130] text-white placeholder-white/30 focus:outline-none focus:border-[#F97316] transition-colors"
+            className="w-full px-4 py-3 rounded-xl bg-[#161827] border border-[#1E2130] text-white placeholder-white/30 focus:outline-none focus:border-[#EE5F96] transition-colors"
           />
 
           {message && (
@@ -172,7 +172,7 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded-xl font-semibold bg-[#F97316] hover:bg-[#e66d00] text-white disabled:opacity-50 transition-all"
+            className="w-full py-3 rounded-xl font-semibold bg-[#EE5F96] hover:bg-[#d94d7e] text-white disabled:opacity-50 transition-all"
           >
             {loading ? 'Loading...' : 'Continue'}
           </button>

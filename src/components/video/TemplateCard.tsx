@@ -44,7 +44,7 @@ export default function TemplateCard({ template, isAutoPlay = false, onClick }: 
       onClick={onClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className="group relative rounded-2xl overflow-hidden bg-[#161827] border border-[#1E2130] hover:border-[#F97316]/50 transition-all duration-300 text-left w-full focus:outline-none focus:ring-2 focus:ring-[#F97316]/50"
+      className="group relative rounded-2xl overflow-hidden bg-[#161827] border border-[#1E2130] hover:border-[#EE5F96]/50 transition-all duration-300 text-left w-full focus:outline-none focus:ring-2 focus:ring-[#EE5F96]/50"
     >
       {/* Thumbnail */}
       <div className="relative aspect-[3/4] overflow-hidden">
@@ -78,7 +78,7 @@ export default function TemplateCard({ template, isAutoPlay = false, onClick }: 
             </span>
           )}
           {template.isPopular && (
-            <span className="bg-[#F97316] text-white text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider">
+            <span className="bg-[#EE5F96] text-white text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider">
               Popular
             </span>
           )}
@@ -93,7 +93,7 @@ export default function TemplateCard({ template, isAutoPlay = false, onClick }: 
 
         {/* Credits badge */}
         <div className="absolute bottom-3 right-3">
-          <span className="bg-black/60 text-[#F97316] text-[10px] font-semibold px-2 py-0.5 rounded-md">
+          <span className="bg-black/60 text-[#EE5F96] text-[10px] font-semibold px-2 py-0.5 rounded-md">
             {template.credits} cr
           </span>
         </div>
@@ -101,7 +101,7 @@ export default function TemplateCard({ template, isAutoPlay = false, onClick }: 
 
       {/* Info */}
       <div className="p-3">
-        <h3 className="text-sm font-semibold text-white truncate group-hover:text-[#F97316] transition-colors">
+        <h3 className="text-sm font-semibold text-white truncate group-hover:text-[#EE5F96] transition-colors">
           {template.title}
         </h3>
         <div className="flex flex-wrap gap-1.5 mt-2">

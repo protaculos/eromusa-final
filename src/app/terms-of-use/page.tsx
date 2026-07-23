@@ -7,7 +7,7 @@ export default function TermsOfUsePage() {
     <div className="min-h-screen">
       <div className="pt-8 pb-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
         <div className="mb-8">
-          <Link href="/" className="text-[#F97316] hover:text-[#e66d00] text-sm font-semibold transition-colors">
+          <Link href="/" className="text-[#EE5F96] hover:text-[#d94d7e] text-sm font-semibold transition-colors">
             &larr; Back to Home
           </Link>
         </div>
@@ -163,7 +163,7 @@ export default function TermsOfUsePage() {
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">13. Contact</h2>
             <p>
-              For questions about these Terms, please contact us at <a href="mailto:support@eromusa.com" className="text-[#F97316] hover:text-[#e66d00] transition-colors">support@eromusa.com</a>.
+              For questions about these Terms, please contact us at <a href="mailto:support@eromusa.com" className="text-[#EE5F96] hover:text-[#d94d7e] transition-colors">support@eromusa.com</a>.
             </p>
           </section>
         </div>

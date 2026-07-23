@@ -7,7 +7,7 @@ export default function SupportPage() {
     <div className="min-h-screen">
       <div className="pt-8 pb-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
         <div className="mb-8">
-          <Link href="/" className="text-[#F97316] hover:text-[#e66d00] text-sm font-semibold transition-colors">
+          <Link href="/" className="text-[#EE5F96] hover:text-[#d94d7e] text-sm font-semibold transition-colors">
             &larr; Back to Home
           </Link>
         </div>
@@ -23,7 +23,7 @@ export default function SupportPage() {
             <div className="flex flex-col sm:flex-row gap-4">
               <a
                 href="mailto:support@eromusa.com"
-                className="inline-flex items-center justify-center gap-2 bg-[#F97316] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#e66d00] transition-colors"
+                className="inline-flex items-center justify-center gap-2 bg-[#EE5F96] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#d94d7e] transition-colors"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />

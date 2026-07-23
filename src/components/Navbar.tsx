@@ -81,14 +81,14 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#F97316] to-[#ea580c] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#EE5F96] to-[#d94d7e] flex items-center justify-center">
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
             <span className="text-xl font-bold text-white">
-              Ero<span className="text-[#F97316]">Musa</span>
+              Ero<span className="text-[#EE5F96]">Musa</span>
             </span>
           </Link>
 
@@ -102,7 +102,7 @@ export default function Navbar() {
                   href={item.href}
                   className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors ${
                     isActive
-                      ? 'bg-[#F97316]/10 text-[#F97316]'
+                      ? 'bg-[#EE5F96]/10 text-[#EE5F96]'
                       : 'text-white/60 hover:text-white hover:bg-[#161827]'
                   }`}
                 >
@@ -118,9 +118,9 @@ export default function Navbar() {
             {user ? (
               <button
                 onClick={() => setPaymentOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#161827] border border-[#1E2130] text-sm font-semibold text-white/80 hover:text-white hover:border-[#F97316]/50 transition-all"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#161827] border border-[#1E2130] text-sm font-semibold text-white/80 hover:text-white hover:border-[#EE5F96]/50 transition-all"
               >
-                <svg className="w-4 h-4 text-[#F97316]" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-4 h-4 text-[#EE5F96]" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
                   <path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clipRule="evenodd" />
                 </svg>
@@ -129,7 +129,7 @@ export default function Navbar() {
             ) : (
               <button
                 onClick={() => setLoginOpen(true)}
-                className="bg-[#F97316] hover:bg-[#e66d00] text-white text-sm font-semibold px-5 py-2 rounded-full transition-colors"
+                className="bg-[#EE5F96] hover:bg-[#d94d7e] text-white text-sm font-semibold px-5 py-2 rounded-full transition-colors"
               >
                 Sign In
               </button>
@@ -139,7 +139,7 @@ export default function Navbar() {
             <div className="relative" ref={menuRef}>
               <button
                 onClick={() => { setMenuOpen(!menuOpen); setLangOpen(false); }}
-                className="w-9 h-9 rounded-full bg-[#161827] border border-[#1E2130] flex items-center justify-center text-white/60 hover:text-white hover:border-[#F97316]/50 transition-all"
+                className="w-9 h-9 rounded-full bg-[#161827] border border-[#1E2130] flex items-center justify-center text-white/60 hover:text-white hover:border-[#EE5F96]/50 transition-all"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -166,7 +166,7 @@ export default function Navbar() {
                     onClick={() => setMenuOpen(false)}
                     className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white/80 hover:text-white hover:bg-[#161827] transition-colors"
                   >
-                    <svg className="w-5 h-5 text-[#F97316]" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-5 h-5 text-[#EE5F96]" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
                       <path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clipRule="evenodd" />
                     </svg>
@@ -230,7 +230,7 @@ export default function Navbar() {
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" defaultChecked />
-                      <div className="w-9 h-5 bg-[#1E2130] rounded-full peer peer-checked:bg-[#F97316] transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-4" />
+                      <div className="w-9 h-5 bg-[#1E2130] rounded-full peer peer-checked:bg-[#EE5F96] transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-4" />
                     </label>
                   </div>
 
@@ -292,7 +292,7 @@ export default function Navbar() {
                 href={item.href}
                 className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors ${
                   isActive
-                    ? 'bg-[#F97316]/10 text-[#F97316]'
+                    ? 'bg-[#EE5F96]/10 text-[#EE5F96]'
                     : 'text-white/60 hover:text-white hover:bg-[#161827]'
                 }`}
               >

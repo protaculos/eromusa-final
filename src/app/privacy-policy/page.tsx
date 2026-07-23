@@ -7,7 +7,7 @@ export default function PrivacyPolicyPage() {
     <div className="min-h-screen">
       <div className="pt-8 pb-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
         <div className="mb-8">
-          <Link href="/" className="text-[#F97316] hover:text-[#e66d00] text-sm font-semibold transition-colors">
+          <Link href="/" className="text-[#EE5F96] hover:text-[#d94d7e] text-sm font-semibold transition-colors">
             &larr; Back to Home
           </Link>
         </div>
@@ -18,7 +18,7 @@ export default function PrivacyPolicyPage() {
         <div className="space-y-8 text-white/70 leading-relaxed">
           <section>
             <p>
-              This Privacy Policy explains how <strong className="text-white">EroMusa</strong> (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) collects, uses, stores, and protects your personal data when you use our website and services at <a href="https://eromusa.com" className="text-[#F97316] hover:text-[#e66d00] transition-colors">eromusa.com</a> (the &quot;Service&quot;). We are committed to protecting your privacy and handling your data with transparency and care.
+              This Privacy Policy explains how <strong className="text-white">EroMusa</strong> (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) collects, uses, stores, and protects your personal data when you use our website and services at <a href="https://eromusa.com" className="text-[#EE5F96] hover:text-[#d94d7e] transition-colors">eromusa.com</a> (the &quot;Service&quot;). We are committed to protecting your privacy and handling your data with transparency and care.
             </p>
           </section>
 
@@ -120,7 +120,7 @@ export default function PrivacyPolicyPage() {
               <li>Withdraw consent at any time (processing prior to withdrawal remains lawful).</li>
             </ul>
             <p className="mt-2">
-              You can exercise these rights by contacting us at <a href="mailto:privacy@eromusa.com" className="text-[#F97316] hover:text-[#e66d00] transition-colors">privacy@eromusa.com</a>.
+              You can exercise these rights by contacting us at <a href="mailto:privacy@eromusa.com" className="text-[#EE5F96] hover:text-[#d94d7e] transition-colors">privacy@eromusa.com</a>.
             </p>
           </section>
 
@@ -150,7 +150,7 @@ export default function PrivacyPolicyPage() {
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">12. Contact Us</h2>
             <p>
-              For questions about privacy, please email <a href="mailto:privacy@eromusa.com" className="text-[#F97316] hover:text-[#e66d00] transition-colors">privacy@eromusa.com</a>.
+              For questions about privacy, please email <a href="mailto:privacy@eromusa.com" className="text-[#EE5F96] hover:text-[#d94d7e] transition-colors">privacy@eromusa.com</a>.
             </p>
           </section>
         </div>

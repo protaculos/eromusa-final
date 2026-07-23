@@ -25,10 +25,10 @@ const PricingCard = ({ data, onBuy }: {
   onBuy: (plan: string, credits: number, amount: number) => void;
 }) => (
   <div className={`relative p-8 rounded-3xl border flex flex-col h-full transition-transform hover:scale-[1.02] ${
-    data.isPopular ? 'border-[#F97316] bg-[#1a1a1e]' : 'border-white/10 bg-[#141417]'
+    data.isPopular ? 'border-[#EE5F96] bg-[#1a1a1e]' : 'border-white/10 bg-[#141417]'
   }`}>
     {data.isPopular && (
-      <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#F97316] text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+      <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#EE5F96] text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
         Most Popular
       </div>
     )}
@@ -45,8 +45,8 @@ const PricingCard = ({ data, onBuy }: {
     <ul className="space-y-4 mb-8 flex-1">
       {/* 1. Créditos */}
       <li className="flex items-start gap-3 text-sm text-white/60">
-        <div className="mt-1 flex-shrink-0 w-4 h-4 rounded-full bg-[#F97316]/20 flex items-center justify-center">
-          <svg className="w-3 h-3 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="mt-1 flex-shrink-0 w-4 h-4 rounded-full bg-[#EE5F96]/20 flex items-center justify-center">
+          <svg className="w-3 h-3 text-[#EE5F96]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
           </svg>
         </div>
@@ -55,8 +55,8 @@ const PricingCard = ({ data, onBuy }: {
 
       {/* 2. Templates */}
       <li className="flex items-start gap-3 text-sm text-white/60">
-        <div className="mt-1 flex-shrink-0 w-4 h-4 rounded-full bg-[#F97316]/20 flex items-center justify-center">
-          <svg className="w-3 h-3 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="mt-1 flex-shrink-0 w-4 h-4 rounded-full bg-[#EE5F96]/20 flex items-center justify-center">
+          <svg className="w-3 h-3 text-[#EE5F96]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
           </svg>
         </div>
@@ -65,8 +65,8 @@ const PricingCard = ({ data, onBuy }: {
 
       {/* 3. Vídeos que consegue fazer */}
       <li className="flex items-start gap-3 text-sm text-white/60">
-        <div className="mt-1 flex-shrink-0 w-4 h-4 rounded-full bg-[#F97316]/20 flex items-center justify-center">
-          <svg className="w-3 h-3 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="mt-1 flex-shrink-0 w-4 h-4 rounded-full bg-[#EE5F96]/20 flex items-center justify-center">
+          <svg className="w-3 h-3 text-[#EE5F96]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
           </svg>
         </div>
@@ -75,8 +75,8 @@ const PricingCard = ({ data, onBuy }: {
 
       {/* 4. Custo por vídeo */}
       <li className="flex items-start gap-3 text-sm text-white/60">
-        <div className="mt-1 flex-shrink-0 w-4 h-4 rounded-full bg-[#F97316]/20 flex items-center justify-center">
-          <svg className="w-3 h-3 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="mt-1 flex-shrink-0 w-4 h-4 rounded-full bg-[#EE5F96]/20 flex items-center justify-center">
+          <svg className="w-3 h-3 text-[#EE5F96]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
           </svg>
         </div>
@@ -85,8 +85,8 @@ const PricingCard = ({ data, onBuy }: {
 
       {/* 5. Vídeos simultâneos */}
       <li className="flex items-start gap-3 text-sm text-white/60">
-        <div className="mt-1 flex-shrink-0 w-4 h-4 rounded-full bg-[#F97316]/20 flex items-center justify-center">
-          <svg className="w-3 h-3 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="mt-1 flex-shrink-0 w-4 h-4 rounded-full bg-[#EE5F96]/20 flex items-center justify-center">
+          <svg className="w-3 h-3 text-[#EE5F96]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
           </svg>
         </div>
@@ -95,8 +95,8 @@ const PricingCard = ({ data, onBuy }: {
 
       {/* 6. Fila de prioridade */}
       <li className="flex items-start gap-3 text-sm text-white/60">
-        <div className="mt-1 flex-shrink-0 w-4 h-4 rounded-full bg-[#F97316]/20 flex items-center justify-center">
-          <svg className="w-3 h-3 text-[#F97316]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="mt-1 flex-shrink-0 w-4 h-4 rounded-full bg-[#EE5F96]/20 flex items-center justify-center">
+          <svg className="w-3 h-3 text-[#EE5F96]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
           </svg>
         </div>
@@ -109,7 +109,7 @@ const PricingCard = ({ data, onBuy }: {
       onClick={() => onBuy(data.plan, data.credits, data.amount)}
       className={`w-full py-3 rounded-xl font-semibold transition-all ${
         data.isPopular
-          ? 'bg-[#F97316] text-white hover:bg-[#e66d00]'
+          ? 'bg-[#EE5F96] text-white hover:bg-[#d94d7e]'
           : 'bg-white/10 text-white hover:bg-white/20'
       }`}
     >
@@ -205,7 +205,7 @@ export default function PricingPage() {
   };
 
   return (
-    <div className="min-h-screen selection:bg-[#F97316]/30">
+    <div className="min-h-screen selection:bg-[#EE5F96]/30">
       <LoginModal open={showLogin} onClose={() => setShowLogin(false)} />
       <PaymentMethodModal
         isOpen={showPaymentMethod}
@@ -216,18 +216,6 @@ export default function PricingPage() {
       />
 
       <main className="max-w-7xl mx-auto px-6 py-20">
-        {/* Hero */}
-        <div className="text-center mb-20">
-          <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight">
-            Simple, transparent <br />
-            <span className="text-[#F97316]">pricing plans</span>
-          </h1>
-          <p className="text-white/50 text-lg max-w-2xl mx-auto">
-            Choose the plan that best fits your needs. From hobbyists to professionals,
-            we have a plan for everyone.
-          </p>
-        </div>
-
         {/* Pricing Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-32">
           {PLANS.map((plan) => (

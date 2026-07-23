@@ -18,7 +18,7 @@ export default function ConfirmModal({
   title,
   message,
   confirmLabel = 'Confirm',
-  confirmColor = 'bg-[#F97316] hover:bg-[#e66d00]',
+  confirmColor = 'bg-[#EE5F96] hover:bg-[#d94d7e]',
 }: ConfirmModalProps) {
   if (!open) return null;
 

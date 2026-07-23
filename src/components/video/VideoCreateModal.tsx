@@ -249,7 +249,7 @@ export default function VideoCreateModal({
                 className="text-white/40 mt-0.5 whitespace-nowrap"
                 style={{ fontSize: template.tags.join(', ').length > 50 ? '0.65rem' : '0.75rem' }}
               >
-                Filters: <span className="text-[#F97316]">{template.tags.join(', ')}</span>
+                Filters: <span className="text-[#EE5F96]">{template.tags.join(', ')}</span>
               </p>
             )}
           </div>
@@ -279,10 +279,10 @@ export default function VideoCreateModal({
                   relative aspect-[3/4] rounded-2xl border-2 border-dashed cursor-pointer
                   transition-all duration-200 overflow-hidden
                   ${dragOver
-                    ? 'border-[#F97316] bg-[#F97316]/10'
+                    ? 'border-[#EE5F96] bg-[#EE5F96]/10'
                     : previewUrl
                       ? 'border-emerald-500/50 bg-emerald-500/5'
-                      : 'border-[#1E2130] bg-[#0A0B14] hover:border-[#F97316]/50'
+                      : 'border-[#1E2130] bg-[#0A0B14] hover:border-[#EE5F96]/50'
                   }
                 `}
               >
@@ -339,7 +339,7 @@ export default function VideoCreateModal({
                   <span className="bg-black/60 text-white/80 text-[10px] px-2 py-0.5 rounded-md">
                     {template.duration}
                   </span>
-                  <span className="bg-black/60 text-[#F97316] text-[10px] font-semibold px-2 py-0.5 rounded-md">
+                  <span className="bg-black/60 text-[#EE5F96] text-[10px] font-semibold px-2 py-0.5 rounded-md">
                     {template.credits} cr
                   </span>
                 </div>
@@ -406,7 +406,7 @@ export default function VideoCreateModal({
               <button
                 onClick={handleCreate}
                 disabled={isCreating || !!jobId || !imageBlob}
-                className="bg-[#F97316] hover:bg-orange-600 disabled:opacity-50 text-white font-semibold rounded-xl px-6 py-3 transition-colors flex items-center gap-2 text-sm"
+                className="bg-[#EE5F96] hover:bg-pink-600 disabled:opacity-50 text-white font-semibold rounded-xl px-6 py-3 transition-colors flex items-center gap-2 text-sm"
               >
                 {isCreating ? (
                   <>
@@ -425,7 +425,7 @@ export default function VideoCreateModal({
             ) : (
               <button
                 onClick={onOpenLogin}
-                className="bg-[#F97316] hover:bg-orange-600 text-white font-semibold rounded-xl px-6 py-3 transition-colors text-sm"
+                className="bg-[#EE5F96] hover:bg-pink-600 text-white font-semibold rounded-xl px-6 py-3 transition-colors text-sm"
               >
                 Create Video
               </button>

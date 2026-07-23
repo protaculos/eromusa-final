@@ -72,7 +72,7 @@ function ProcessingCard({ video }: { video: VideoData }) {
 
       {/* Spinner + text overlay */}
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-4">
-        <div className="w-10 h-10 border-2 border-[#F97316] border-t-transparent rounded-full animate-spin" />
+        <div className="w-10 h-10 border-2 border-[#EE5F96] border-t-transparent rounded-full animate-spin" />
         <p className="text-white/90 text-sm font-semibold text-center drop-shadow-lg">
           Your video is being created
         </p>
@@ -86,7 +86,7 @@ function ProcessingCard({ video }: { video: VideoData }) {
         <span className="bg-black/60 text-white/80 text-[10px] px-2 py-0.5 rounded-md">
           {video.template_duration}
         </span>
-        <span className="bg-[#F97316]/80 text-white text-[10px] font-semibold px-2 py-0.5 rounded-md">
+        <span className="bg-[#EE5F96]/80 text-white text-[10px] font-semibold px-2 py-0.5 rounded-md">
           Processing
         </span>
       </div>
@@ -147,7 +147,7 @@ function CompletedCard({
       {/* Play icon hint on thumbnail */}
       {!hovering && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-14 h-14 rounded-full bg-[#F97316]/90 flex items-center justify-center transition-transform hover:scale-110 shadow-lg">
+          <div className="w-14 h-14 rounded-full bg-[#EE5F96]/90 flex items-center justify-center transition-transform hover:scale-110 shadow-lg">
             <svg className="w-6 h-6 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24">
               <path d="M8 5v14l11-7z" />
             </svg>
@@ -222,7 +222,7 @@ function ConfirmModal({
             className={`px-4 py-2 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 ${
               confirmDanger
                 ? "bg-red-500 hover:bg-red-600 text-white"
-                : "bg-[#F97316] hover:bg-orange-600 text-white"
+                : "bg-[#EE5F96] hover:bg-pink-600 text-white"
             }`}
           >
             {loading ? (
@@ -350,7 +350,7 @@ function VideoPopup({
                   className="absolute inset-0 flex items-center justify-center cursor-pointer"
                   onClick={togglePlay}
                 >
-                  <div className="w-14 h-14 rounded-full bg-[#F97316]/90 flex items-center justify-center shadow-lg">
+                  <div className="w-14 h-14 rounded-full bg-[#EE5F96]/90 flex items-center justify-center shadow-lg">
                     <svg className="w-6 h-6 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M8 5v14l11-7z" />
                     </svg>
@@ -519,13 +519,8 @@ export default function GalleryPage() {
     return (
       <div className="min-h-screen">
         <div className="pt-8 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4 tracking-tight">
-              <span className="text-[#F97316]">Gallery</span>
-            </h1>
-          </div>
           <div className="flex flex-col items-center justify-center py-24 text-white/30">
-            <div className="w-10 h-10 border-2 border-[#F97316] border-t-transparent rounded-full animate-spin" />
+            <div className="w-10 h-10 border-2 border-[#EE5F96] border-t-transparent rounded-full animate-spin" />
           </div>
         </div>
       </div>
@@ -537,15 +532,6 @@ export default function GalleryPage() {
     return (
       <div className="min-h-screen">
         <div className="pt-8 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4 tracking-tight">
-              <span className="text-[#F97316]">Gallery</span>
-            </h1>
-            <p className="text-white/50 text-lg max-w-2xl mx-auto">
-              Your personal video gallery
-            </p>
-          </div>
-
           <div className="flex flex-col items-center justify-center py-24 text-white/50">
             <svg className="w-20 h-20 mb-6 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -554,7 +540,7 @@ export default function GalleryPage() {
             <p className="text-sm mb-6">Log in to see all the videos you&apos;ve created</p>
             <button
               onClick={() => setLoginOpen(true)}
-              className="bg-[#F97316] hover:bg-[#e66d00] text-white font-semibold px-8 py-3 rounded-xl transition-colors"
+              className="bg-[#EE5F96] hover:bg-[#d94d7e] text-white font-semibold px-8 py-3 rounded-xl transition-colors"
             >
               Sign In
             </button>
@@ -570,12 +556,10 @@ export default function GalleryPage() {
     return (
       <div className="min-h-screen">
         <div className="pt-8 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4 tracking-tight">
-              <span className="text-[#F97316]">Gallery</span>
-            </h1>
-            <p className="text-white/50 text-lg max-w-2xl mx-auto">
-              Your personal video gallery
+          {/* Info banner */}
+          <div className="bg-[#EE5F96]/10 border border-[#EE5F96]/20 rounded-2xl p-4 mb-8 text-center">
+            <p className="text-white/70 text-sm">
+              Videos are automatically deleted <strong>72 hours</strong> after creation.
             </p>
           </div>
 
@@ -587,7 +571,7 @@ export default function GalleryPage() {
             <p className="text-sm mb-6">Create your first video and it will appear here</p>
             <Link
               href="/"
-              className="bg-[#F97316] hover:bg-[#e66d00] text-white font-semibold px-8 py-3 rounded-xl transition-colors"
+              className="bg-[#EE5F96] hover:bg-[#d94d7e] text-white font-semibold px-8 py-3 rounded-xl transition-colors"
             >
               Create a Video
             </Link>
@@ -601,12 +585,10 @@ export default function GalleryPage() {
   return (
     <div className="min-h-screen">
       <div className="pt-8 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4 tracking-tight">
-            <span className="text-[#F97316]">Gallery</span>
-          </h1>
-          <p className="text-white/50 text-lg max-w-2xl mx-auto">
-            Your personal video gallery
+        {/* Info banner */}
+        <div className="bg-[#EE5F96]/10 border border-[#EE5F96]/20 rounded-2xl p-4 mb-8 text-center">
+          <p className="text-white/70 text-sm">
+            Videos are automatically deleted <strong>72 hours</strong> after creation.
           </p>
         </div>
 
