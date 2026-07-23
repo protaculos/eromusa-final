@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 export default function CancelPage() {
   return (
-    <div className="min-h-screen bg-[#0a0a0b] flex items-center justify-center px-6">
+    <div className="min-h-screen bg-[#232323] flex items-center justify-center px-6">
       <div className="bg-[#141417] border border-white/10 rounded-3xl p-10 max-w-md w-full text-center">
         {/* Cancel icon */}
         <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-6">
