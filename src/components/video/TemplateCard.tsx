@@ -75,6 +75,13 @@ export default function TemplateCard({ template, isAutoPlay = false, onClick }: 
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
 
+        {/* Duration badge — bottom right */}
+        <div className="absolute bottom-2 right-2">
+          <span className="bg-black/60 text-white/80 text-[10px] px-2 py-0.5 rounded-md">
+            {template.duration}
+          </span>
+        </div>
+
         {/* Title overlay at bottom */}
         <div className="absolute bottom-0 left-0 right-0 p-3">
           <h3 className="text-sm font-semibold text-white truncate group-hover:text-[#EE5F96] transition-colors">

@@ -347,46 +347,16 @@ export default function VideoCreateModal({
                 {/* Gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
-                {/* Top badges */}
-                <div className="absolute top-2 left-2 right-2 flex items-start justify-between">
-                  <span className="bg-black/60 text-white/80 text-[10px] px-2 py-0.5 rounded-md">
+                {/* Bottom badges */}
+                <div className="absolute bottom-2 left-2 right-2 flex items-end justify-between">
+                  <p className="text-white text-xs font-semibold truncate">{template.name}</p>
+                  <span className="bg-black/60 text-white/80 text-[10px] px-2 py-0.5 rounded-md shrink-0 ml-2">
                     {template.duration}
                   </span>
-                  <span className="bg-black/60 text-[#EE5F96] text-[10px] font-semibold px-2 py-0.5 rounded-md">
-                    {template.credits} cr
-                  </span>
-                </div>
-
-                {/* Bottom label */}
-                <div className="absolute bottom-2 left-2 right-2">
-                  <p className="text-white text-xs font-semibold truncate">{template.name}</p>
                 </div>
               </div>
             </div>
           </div>
-
-          {/* Image selected confirmation */}
-          {previewUrl && (
-            <div className="flex items-center gap-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-4 py-3">
-              <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-emerald-500/30">
-                <img
-                  src={previewUrl}
-                  alt="Selected"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm text-emerald-400 font-semibold">Photo ready</p>
-                <p className="text-xs text-white/40 truncate">{selectedFile?.name}</p>
-              </div>
-              <button
-                onClick={() => { setImageBlob(null); setPreviewUrl(null); setSelectedFile(null); }}
-                className="text-white/40 hover:text-white text-xs shrink-0"
-              >
-                Change
-              </button>
-            </div>
-          )}
 
           {/* Error */}
           {error && (

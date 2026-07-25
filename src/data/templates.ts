@@ -116,7 +116,7 @@ export const allTemplates: Template[] = heteroStyles.map((style, index) => {
     tags: generateTags(style.name),
     videoUrl: `/videos/${folderName}/video.webm`,
     gradient: gradients[index % gradients.length],
-    duration: '15s',
+    duration: '5s',
     credits: Math.round(style.cost * 100),
     instructions: ['Upper body photo', 'Good lighting', 'Facing camera', 'Natural pose'],
     styleId: style.id,
