@@ -56,8 +56,54 @@ function useCountdown(expiresAt: string | undefined, createdAt?: string): string
   return display;
 }
 
-// ── Processing card ─────────────────────────────────
+// ── Processing / Failed card ─────────────────────────
 function ProcessingCard({ video }: { video: VideoData }) {
+  const isFailed = video.status === "failed";
+
+  if (isFailed) {
+    return (
+      <div className="relative aspect-[9/16] rounded-2xl overflow-hidden bg-[#0A0B14] border border-red-500/30 group">
+        {/* User image, dimmed */}
+        <img
+          src={video.user_image_url || video.template_thumbnail}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover brightness-[0.25]"
+        />
+
+        {/* Dark gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+
+        {/* Error icon + message */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 p-4">
+          <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
+            <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          <p className="text-red-400 text-sm font-semibold text-center drop-shadow-lg">
+            Generation failed
+          </p>
+          <p className="text-white/50 text-[10px] text-center drop-shadow">
+            Your credits have been refunded. Please contact support.
+          </p>
+        </div>
+
+        {/* Bottom info */}
+        <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
+          <span className="bg-black/60 text-white/80 text-[10px] px-2 py-0.5 rounded-md">
+            {video.template_duration}
+          </span>
+          <a
+            href="/support"
+            className="bg-red-500/80 hover:bg-red-500 text-white text-[10px] font-semibold px-2 py-0.5 rounded-md transition-colors"
+          >
+            Support
+          </a>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative aspect-[9/16] rounded-2xl overflow-hidden bg-[#0A0B14] border border-[#1E2130] group">
       {/* User image, dimmed */}
@@ -421,7 +467,7 @@ function VideoPopup({
 
 // ── Gallery page ─────────────────────────────────────
 export default function GalleryPage() {
-  const { user, session, loading } = useAuth();
+  const { user, session, loading, refreshCredits } = useAuth();
   const [loginOpen, setLoginOpen] = useState(false);
   const [videos, setVideos] = useState<VideoData[]>([]);
   const [selectedVideo, setSelectedVideo] = useState<VideoData | null>(null);
@@ -474,7 +520,7 @@ export default function GalleryPage() {
             const genData = await genRes.json();
             if (genData.status === "completed" || genData.status === "failed") {
               // Update via API — PATCH /api/videos/[jobId]
-              await fetch(`/api/videos/${video.job_id}`, {
+              const patchRes = await fetch(`/api/videos/${video.job_id}`, {
                 method: "PATCH",
                 headers: {
                   "Content-Type": "application/json",
@@ -485,6 +531,10 @@ export default function GalleryPage() {
                   videoUrl: genData.videoUrl || "",
                 }),
               });
+              // Refresh credits if video failed (refund was processed server-side)
+              if (genData.status === "failed" && patchRes.ok) {
+                refreshCredits();
+              }
             }
           } catch {
             // Network error — will retry next interval

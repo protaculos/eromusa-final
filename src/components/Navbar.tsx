@@ -57,9 +57,16 @@ export default function Navbar() {
 
   const handleDeleteAccount = async () => {
     try {
-      const res = await fetch('/api/account/delete', { method: 'DELETE' });
-      if (!res.ok) throw new Error('Failed to delete account');
       const { supabase } = await import('@/lib/supabase');
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      if (!token) throw new Error('No session');
+
+      const res = await fetch('/api/account/delete', {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error('Failed to delete account');
       await supabase.auth.signOut();
       setMenuOpen(false);
     } catch (err) {

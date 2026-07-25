@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from 'react';
+import { useToast } from '@/components/Toast';
 
 interface Plan {
   id: string;
@@ -29,6 +30,7 @@ const FINAL_PLANS: Plan[] = [
 export default function PaymentModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   if (!isOpen) return null;
 
@@ -54,7 +56,7 @@ export default function PaymentModal({ isOpen, onClose }: { isOpen: boolean; onC
 
       if (data.direct) {
         // Credits added instantly (test mode)
-        alert(`Successfully added ${plan.credits} credits!`);
+        toast(`Successfully added ${plan.credits} credits!`, "success");
         onClose();
       } else if (data.checkout_url) {
         // Open Vexutopia checkout in new tab

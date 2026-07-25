@@ -16,12 +16,20 @@ export default function CancelPage() {
           Your payment was not processed. No charges have been made. You can try again whenever you&apos;re ready.
         </p>
 
-        <Link
-          href="/"
-          className="inline-block w-full py-3 rounded-xl font-semibold bg-white/10 text-white hover:bg-white/20 transition-all"
-        >
-          Back to Home
-        </Link>
+        <div className="flex flex-col gap-3">
+          <Link
+            href="/pricing"
+            className="w-full py-3 rounded-xl font-semibold bg-[#EE5F96] text-white hover:bg-[#d94d7e] transition-all"
+          >
+            Try Again
+          </Link>
+          <Link
+            href="/"
+            className="w-full py-3 rounded-xl font-semibold bg-white/10 text-white hover:bg-white/20 transition-all"
+          >
+            Back to Home
+          </Link>
+        </div>
       </div>
     </div>
   );

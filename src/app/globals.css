@@ -33,3 +33,8 @@ body {
 
 .animate-slide-lang { animation: slide-lang 0.15s ease-out; }
 .animate-slide-lang-down { animation: slide-lang-down 0.15s ease-out; }
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}

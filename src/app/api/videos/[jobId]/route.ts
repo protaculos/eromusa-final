@@ -44,6 +44,27 @@ export async function PATCH(
       return NextResponse.json({ error: "Failed to update video" }, { status: 500 });
     }
 
+    // Se o status for "failed", devolve os créditos para o usuário
+    if (status === "failed" && data?.template_credits) {
+      const creditsToRefund = data.template_credits;
+
+      const { data: profile } = await supabaseAdmin
+        .from("profiles")
+        .select("credits")
+        .eq("id", user.id)
+        .single();
+
+      const currentCredits = profile?.credits ?? 0;
+      const newCredits = currentCredits + creditsToRefund;
+
+      await supabaseAdmin
+        .from("profiles")
+        .update({ credits: newCredits, updated_at: new Date().toISOString() })
+        .eq("id", user.id);
+
+      console.log(`[Refund] User ${user.id} received ${creditsToRefund} credits back (failed video ${jobId})`);
+    }
+
     return NextResponse.json({ video: data });
   } catch (err) {
     console.error("PATCH /api/videos/[jobId] error:", err);

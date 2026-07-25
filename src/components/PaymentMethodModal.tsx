@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useToast } from '@/components/Toast';
 
 interface PaymentMethodModalProps {
   isOpen: boolean;
@@ -44,6 +45,7 @@ export default function PaymentMethodModal({
 }: PaymentMethodModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   if (!isOpen) return null;
 
@@ -85,7 +87,7 @@ export default function PaymentMethodModal({
       if (!res.ok) throw new Error(data.error || 'Payment failed');
 
       if (data.direct) {
-        alert(`Successfully added ${planCredits} credits!`);
+        toast(`Successfully added ${planCredits} credits!`, "success");
         onClose();
       } else if (data.checkout_url) {
         window.open(data.checkout_url, '_blank', 'noopener,noreferrer');
