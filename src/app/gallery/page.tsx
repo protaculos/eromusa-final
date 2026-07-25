@@ -86,9 +86,7 @@ function ProcessingCard({ video }: { video: VideoData }) {
         <span className="bg-black/60 text-white/80 text-[10px] px-2 py-0.5 rounded-md">
           {video.template_duration}
         </span>
-        <span className="bg-[#EE5F96]/80 text-white text-[10px] font-semibold px-2 py-0.5 rounded-md">
-          Processing
-        </span>
+        {/* Processing badge removed */}
       </div>
     </div>
   );
@@ -160,9 +158,7 @@ function CompletedCard({
         <span className="bg-black/60 text-white/80 text-[10px] px-2 py-0.5 rounded-md">
           {video.template_duration}
         </span>
-        <span className="bg-emerald-500/80 text-white text-[10px] font-semibold px-2 py-0.5 rounded-md">
-          Ready
-        </span>
+        {/* Ready badge removed */}
       </div>
 
       {/* Expires countdown — top area */}
@@ -311,7 +307,7 @@ function VideoPopup({
         onClick={onClose}
       >
         <div
-          className="relative bg-[#0A0B14] border border-[#1E2130] rounded-2xl w-full max-w-[420px] max-h-[90vh] overflow-y-auto shadow-2xl scrollbar-thin scrollbar-thumb-[#1E2130] scrollbar-track-transparent"
+          className="relative bg-[#0A0B14] border border-[#1E2130] rounded-2xl w-full max-w-[360px] max-h-[90vh] overflow-y-auto shadow-2xl scrollbar-thin scrollbar-thumb-[#1E2130] scrollbar-track-transparent"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}

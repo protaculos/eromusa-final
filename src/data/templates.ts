@@ -110,11 +110,11 @@ export const allTemplates: Template[] = heteroStyles.map((style, index) => {
   return {
     id: String(index + 1),
     title: style.name,
-    thumbnail: `/videos/${folderName}/poster.webp`,
+    thumbnail: `/videos/${folderName}/video.webm`,
     isFree: index < 15,
     isPopular: index % 3 === 0,
     tags: generateTags(style.name),
-    videoUrl: `/videos/${folderName}/loop.mp4`,
+    videoUrl: `/videos/${folderName}/video.webm`,
     gradient: gradients[index % gradients.length],
     duration: '15s',
     credits: Math.round(style.cost * 100),

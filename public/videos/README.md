@@ -7,8 +7,7 @@ Cada cena tem sua própria pasta com o nome da cena.
 ```
 public/videos/
   {nome_da_cena}/
-    loop.mp4    — vídeo em loop da cena
-    poster.webp — thumbnail estática (aparece quando o vídeo não está rodando)
+    video.webm  — vídeo em loop da cena (usado como preview e thumbnail — o primeiro frame é capturado automaticamente)
 ```
 
 ## Lista completa de pastas (92 cenas hétero)

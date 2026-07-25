@@ -116,16 +116,18 @@ export default function Navbar() {
           <div className="flex items-center gap-3">
             {/* Credits (logado) / Sign In (deslogado) */}
             {user ? (
-              <button
-                onClick={() => setPaymentOpen(true)}
+              <Link
+                href="/pricing"
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#161827] border border-[#1E2130] text-sm font-semibold text-white/80 hover:text-white hover:border-[#EE5F96]/50 transition-all"
               >
-                <svg className="w-4 h-4 text-[#EE5F96]" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
-                  <path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clipRule="evenodd" />
+                <svg className="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12z" />
+                  <path d="M10 5a1 1 0 011 1v.5a2.5 2.5 0 010 5v.5a1 1 0 11-2 0v-.5a2.5 2.5 0 010-5V6a1 1 0 011-1z" />
+                  <path d="M9.5 8.5a.5.5 0 01.5-.5h.5a.5.5 0 010 1H10a.5.5 0 01-.5-.5z" />
+                  <path d="M9.5 11a.5.5 0 01.5-.5h.5a.5.5 0 010 1H10a.5.5 0 01-.5-.5z" />
                 </svg>
                 {loading ? '...' : credits ?? 0}
-              </button>
+              </Link>
             ) : (
               <button
                 onClick={() => setLoginOpen(true)}
@@ -166,9 +168,11 @@ export default function Navbar() {
                     onClick={() => setMenuOpen(false)}
                     className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white/80 hover:text-white hover:bg-[#161827] transition-colors"
                   >
-                    <svg className="w-5 h-5 text-[#EE5F96]" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
-                      <path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clipRule="evenodd" />
+                    <svg className="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12z" />
+                      <path d="M10 5a1 1 0 011 1v.5a2.5 2.5 0 010 5v.5a1 1 0 11-2 0v-.5a2.5 2.5 0 010-5V6a1 1 0 011-1z" />
+                      <path d="M9.5 8.5a.5.5 0 01.5-.5h.5a.5.5 0 010 1H10a.5.5 0 01-.5-.5z" />
+                      <path d="M9.5 11a.5.5 0 01.5-.5h.5a.5.5 0 010 1H10a.5.5 0 01-.5-.5z" />
                     </svg>
                     {user ? 'Credits / Upgrade' : 'Credits / Upgrade'}
                   </Link>

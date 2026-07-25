@@ -1,10 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  --background: #232323;
+  --background: #0a0a0b;
   --foreground: #ededed;
   --card-bg: #141417;
   --accent-pink: #EE5F96;
+}
+
+@utility scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 body {
