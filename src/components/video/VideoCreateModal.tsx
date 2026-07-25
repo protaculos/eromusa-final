@@ -276,7 +276,7 @@ export default function VideoCreateModal({
                 onDragLeave={onDragLeave}
                 onClick={() => fileInputRef.current?.click()}
                 className={`
-                  relative aspect-[3/4] rounded-2xl border-2 border-dashed cursor-pointer
+                  relative aspect-[9/16] rounded-2xl border-2 border-dashed cursor-pointer
                   transition-all duration-200 overflow-hidden
                   ${dragOver
                     ? 'border-[#EE5F96] bg-[#EE5F96]/10'
@@ -301,11 +301,14 @@ export default function VideoCreateModal({
                   </>
                 ) : (
                   <>
-                    {/* Template thumbnail as dimmed background reference */}
-                    <img
+                    {/* Template thumbnail (first frame, paused) as dimmed background reference */}
+                    <video
                       src={template.videoUrl}
-                      alt={template.name}
+                      muted
+                      playsInline
+                      preload="metadata"
                       className="absolute inset-0 w-full h-full object-cover opacity-40"
+                      onLoadedMetadata={(e) => { (e.target as HTMLVideoElement).currentTime = 0; }}
                     />
                     {/* Dark overlay */}
                     <div className="absolute inset-0 bg-black/50" />
@@ -332,7 +335,7 @@ export default function VideoCreateModal({
             {/* Template preview card — aspect-[3/4] portrait */}
             <div className="flex-1 min-w-0">
               <p className="text-xs text-white/40 font-semibold uppercase tracking-wider mb-2">Output Video</p>
-              <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-[#0A0B14] border border-[#1E2130] group">
+              <div className="relative aspect-[9/16] rounded-2xl overflow-hidden bg-[#0A0B14] border border-[#1E2130] group">
                 <video
                   src={template.videoUrl}
                   autoPlay

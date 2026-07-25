@@ -59,7 +59,7 @@ function useCountdown(expiresAt: string | undefined, createdAt?: string): string
 // ── Processing card ─────────────────────────────────
 function ProcessingCard({ video }: { video: VideoData }) {
   return (
-    <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-[#0A0B14] border border-[#1E2130] group">
+    <div className="relative aspect-[9/16] rounded-2xl overflow-hidden bg-[#0A0B14] border border-[#1E2130] group">
       {/* User image, dimmed */}
       <img
         src={video.user_image_url || video.template_thumbnail}
@@ -117,7 +117,7 @@ function CompletedCard({
 
   return (
     <div
-      className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-[#0A0B14] border border-[#1E2130] group cursor-pointer"
+      className="relative aspect-[9/16] rounded-2xl overflow-hidden bg-[#0A0B14] border border-[#1E2130] group cursor-pointer"
       onMouseEnter={() => setHovering(true)}
       onMouseLeave={() => setHovering(false)}
       onClick={() => onSelect(video)}
@@ -329,7 +329,7 @@ function VideoPopup({
           {/* Body */}
           <div className="p-4 space-y-3">
             {/* Video player — portrait aspect, capped so modal fits without scroll */}
-            <div className="relative aspect-[3/4] max-h-[55vh] rounded-2xl overflow-hidden bg-black border border-[#1E2130]">
+            <div className="relative aspect-[9/16] max-h-[55vh] rounded-2xl overflow-hidden bg-black border border-[#1E2130]">
               <video
                 ref={videoRef}
                 src={video.video_url}
