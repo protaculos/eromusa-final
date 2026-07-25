@@ -85,6 +85,7 @@ export default function DiscoverPage() {
             key={section.title}
             title={section.title}
             templates={section.templates}
+            isAutoPlay={true}
             onTemplateClick={handleTemplateClick}
           />
         ))}

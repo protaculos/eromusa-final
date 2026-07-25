@@ -301,13 +301,10 @@ export default function VideoCreateModal({
                   </>
                 ) : (
                   <>
-                    {/* Template video as dimmed background reference */}
-                    <video
+                    {/* Template thumbnail as dimmed background reference */}
+                    <img
                       src={template.videoUrl}
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
+                      alt={template.name}
                       className="absolute inset-0 w-full h-full object-cover opacity-40"
                     />
                     {/* Dark overlay */}
