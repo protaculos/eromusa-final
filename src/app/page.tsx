@@ -52,7 +52,6 @@ export default function DiscoverPage() {
 
   // Admin state
   const [categories, setCategories] = useState<CategoryData[]>([]);
-  const [allScenes, setAllScenes] = useState<SceneData[]>([]);
   const [loading, setLoading] = useState(true);
   const [editScene, setEditScene] = useState<SceneData | null>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -74,48 +73,25 @@ export default function DiscoverPage() {
     }
   };
 
-  // Fetch all scenes directly (fallback for when categories have no links)
-  const fetchAllScenes = async () => {
-    try {
-      const res = await fetch('/api/scenes');
-      if (res.ok) {
-        const data = await res.json();
-        setAllScenes(Array.isArray(data) ? data : []);
-      }
-    } catch (err) {
-      console.error('Failed to fetch scenes:', err);
-    }
-  };
-
   useEffect(() => {
-    Promise.all([fetchCategories(), fetchAllScenes()]).finally(() => setLoading(false));
+    fetchCategories().finally(() => setLoading(false));
   }, []);
 
-  // Build carousel sections: DB categories first, then fallback
+  // Build carousel sections: show ALL categories (even empty ones for admin)
   const carouselSections = useMemo(() => {
     const sections: { title: string; templates: Template[]; categoryId?: string }[] = [];
 
-    // DB categories with scenes
+    // Show all categories — even empty ones (admin needs to see them to add scenes)
     for (const cat of categories) {
-      if (cat.scenes && cat.scenes.length > 0) {
-        sections.push({
-          title: cat.name,
-          templates: cat.scenes.map(sceneToTemplate),
-          categoryId: cat.id,
-        });
-      }
-    }
-
-    // If no categories have linked scenes yet, show all scenes as "All Scenes"
-    if (sections.length === 0 && allScenes.length > 0) {
       sections.push({
-        title: 'All Scenes',
-        templates: allScenes.map(sceneToTemplate),
+        title: cat.name,
+        templates: (cat.scenes || []).map(sceneToTemplate),
+        categoryId: cat.id,
       });
     }
 
     // Fallback: static sections from templates.ts (only if no DB data at all)
-    if (categories.length === 0 && allScenes.length === 0) {
+    if (categories.length === 0) {
       const popular = allTemplates.filter((t) => t.isPopular);
       if (popular.length > 0) {
         sections.push({ title: '🔥 Popular', templates: popular });
@@ -128,7 +104,7 @@ export default function DiscoverPage() {
     }
 
     return sections;
-  }, [categories, allScenes]);
+  }, [categories]);
 
   const handleTemplateClick = (template: Template) => {
     setSelectedTemplate(template);
