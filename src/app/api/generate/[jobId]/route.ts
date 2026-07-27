@@ -27,6 +27,8 @@ export async function GET(
 
     const data = await response.json();
 
+    console.log(`[Poll ${jobId}] LeakifyHub response:`, JSON.stringify(data, null, 2));
+
     if (!response.ok) {
       return NextResponse.json(
         { error: data.error || "Failed to fetch job status" },
@@ -39,9 +41,14 @@ export async function GET(
       : data.status === "failed" ? "failed"
       : "processing";
 
+    // Try every possible field name for the video URL
+    const videoUrl = data.result_url || data.video_url || data.output_url || data.url || data.download_url || data.video || data.result || "";
+
+    console.log(`[Poll ${jobId}] Mapped status: ${status}, videoUrl: ${videoUrl ? videoUrl.substring(0, 80) + '...' : 'EMPTY'}`);
+
     return NextResponse.json({
       status,
-      videoUrl: data.result_url || data.video_url || data.output_url || "",
+      videoUrl,
       error: data.error || null,
     });
   } catch (err) {
