@@ -171,7 +171,7 @@ function CompletedCard({
       {/* Video element — always rendered, plays on hover */}
       <video
         ref={videoRef}
-        src={`/api/video-proxy?url=${encodeURIComponent(video.video_url)}`}
+        src={video.video_url}
         loop
         muted
         playsInline
@@ -338,7 +338,7 @@ function VideoPopup({
 
   const handleDownload = useCallback(() => {
     const a = document.createElement("a");
-    a.href = `/api/video-proxy?url=${encodeURIComponent(video.video_url)}`;
+    a.href = video.video_url;
     a.download = `${video.template_name || "video"}.mp4`;
     document.body.appendChild(a);
     a.click();
@@ -378,7 +378,7 @@ function VideoPopup({
             <div className="relative aspect-[9/16] max-h-[55vh] rounded-2xl overflow-hidden bg-black border border-[#1E2130]">
               <video
                 ref={videoRef}
-                src={`/api/video-proxy?url=${encodeURIComponent(video.video_url)}`}
+                src={video.video_url}
                 loop
                 muted
                 playsInline
