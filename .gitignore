@@ -44,3 +44,6 @@ next-env.d.ts
 
 .vercel
 .env*
+
+# video assets (now served from Supabase Storage)
+/public/videos/
