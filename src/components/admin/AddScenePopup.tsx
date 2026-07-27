@@ -17,6 +17,7 @@ interface AddScenePopupProps {
   onClose: () => void;
   categoryId: string;
   categoryName: string;
+  existingSceneIds: string[];
   onAdded: () => void;
 }
 
@@ -25,6 +26,7 @@ export default function AddScenePopup({
   onClose,
   categoryId,
   categoryName,
+  existingSceneIds,
   onAdded,
 }: AddScenePopupProps) {
   const { session } = useAuth();
@@ -59,8 +61,10 @@ export default function AddScenePopup({
     }
   }, [isOpen]);
 
-  const filteredScenes = allScenes.filter((s) =>
-    s.name.toLowerCase().includes(search.toLowerCase())
+  const filteredScenes = allScenes.filter(
+    (s) =>
+      !existingSceneIds.includes(s.id) &&
+      s.name.toLowerCase().includes(search.toLowerCase())
   );
 
   const handleLinkScene = async (sceneId: string) => {

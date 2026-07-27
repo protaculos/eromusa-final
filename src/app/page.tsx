@@ -194,6 +194,34 @@ export default function DiscoverPage() {
     }
   };
 
+  const handleMoveSceneToCategory = async (sceneId: string, toCategoryId: string) => {
+    if (!session?.access_token) return;
+
+    // Find which category the scene is currently in
+    const fromCategory = categories.find((c) => c.scenes.some((s) => s.id === sceneId));
+    if (!fromCategory) return;
+
+    try {
+      const res = await fetch('/api/admin/category-scenes/move-to-category', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          scene_id: sceneId,
+          from_category_id: fromCategory.id,
+          to_category_id: toCategoryId,
+        }),
+      });
+      if (res.ok) {
+        fetchCategories();
+      }
+    } catch (err) {
+      console.error('Failed to move scene to category:', err);
+    }
+  };
+
   const handleCreateCategory = async () => {
     if (!session?.access_token || !newCategoryName.trim()) return;
     setCategoryError(null);
@@ -278,7 +306,7 @@ export default function DiscoverPage() {
             </svg>
           </div>
         ) : (
-          carouselSections.map((section) => (
+          carouselSections.map((section, idx) => (
             <CarouselSection
               key={section.title}
               title={section.title}
@@ -290,7 +318,11 @@ export default function DiscoverPage() {
               onDeleteCategory={isAdmin && section.categoryId ? () => setConfirmDelete({ id: section.categoryId!, name: section.title }) : undefined}
               onRenameCategory={isAdmin && section.categoryId ? (newName) => handleRenameCategory(section.categoryId!, newName) : undefined}
               onReorderScene={isAdmin && section.categoryId ? (sceneId, dir) => handleReorderScene(section.categoryId!, sceneId, dir) : undefined}
+              onMoveToCategory={isAdmin ? handleMoveSceneToCategory : undefined}
               categoryId={section.categoryId}
+              categoryIndex={idx}
+              totalCategories={carouselSections.length}
+              allCategories={categories.map((c) => ({ id: c.id, name: c.name }))}
             />
           ))
         )}
@@ -333,6 +365,7 @@ export default function DiscoverPage() {
           onClose={() => setAddSceneCategory(null)}
           categoryId={addSceneCategory.id}
           categoryName={addSceneCategory.name}
+          existingSceneIds={categories.find((c) => c.id === addSceneCategory.id)?.scenes.map((s) => s.id) ?? []}
           onAdded={fetchCategories}
         />
       )}

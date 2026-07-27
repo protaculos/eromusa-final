@@ -15,7 +15,11 @@ interface CarouselSectionProps {
   onDeleteCategory?: () => void;
   onRenameCategory?: (newName: string) => void;
   onReorderScene?: (sceneId: string, direction: 'up' | 'down') => void;
+  onMoveToCategory?: (sceneId: string, toCategoryId: string) => void;
   categoryId?: string;
+  categoryIndex?: number;
+  totalCategories?: number;
+  allCategories?: { id: string; name: string }[];
 }
 
 export default function CarouselSection({
@@ -28,7 +32,11 @@ export default function CarouselSection({
   onDeleteCategory,
   onRenameCategory,
   onReorderScene,
+  onMoveToCategory,
   categoryId,
+  categoryIndex = 0,
+  totalCategories = 0,
+  allCategories = [],
 }: CarouselSectionProps) {
   const { isAdmin } = useAuth();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -103,13 +111,26 @@ export default function CarouselSection({
               className="bg-[#161827] border border-[#EE5F96] rounded-lg px-3 py-1 text-lg font-semibold text-white focus:outline-none max-w-[250px]"
             />
           ) : (
-            <h2
-              className="text-lg font-semibold text-white cursor-pointer hover:text-[#EE5F96] transition-colors"
-              onDoubleClick={() => isAdmin && setEditingTitle(true)}
-              title={isAdmin ? "Double-click to rename" : undefined}
-            >
-              {title}
-            </h2>
+            <div className="flex items-center gap-1.5">
+              <h2
+                className="text-lg font-semibold text-white cursor-pointer hover:text-[#EE5F96] transition-colors"
+                onDoubleClick={() => isAdmin && setEditingTitle(true)}
+                title={isAdmin ? "Double-click to rename" : undefined}
+              >
+                {title}
+              </h2>
+              {isAdmin && onRenameCategory && (
+                <button
+                  onClick={() => { setNewTitle(title); setEditingTitle(true); }}
+                  className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#EE5F96] transition-colors shrink-0 opacity-0 group-hover/section:opacity-100"
+                  title="Rename category"
+                >
+                  <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                </button>
+              )}
+            </div>
           )}
           {/* Admin: Add scene button */}
           {isAdmin && onAddScene && (
@@ -181,28 +202,62 @@ export default function CarouselSection({
         >
           {templates.map((template, index) => (
             <div key={template.id} className="shrink-0 w-[130px] sm:w-[200px] relative group/card">
-              {/* Reorder arrows — admin only, on hover */}
-              {isAdmin && onReorderScene && templates.length > 1 && (
-                <div className="absolute -left-1 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-0.5 opacity-0 group-hover/card:opacity-100 transition-opacity">
-                  {index > 0 && (
+              {/* 4-directional arrows — admin only, on hover */}
+              {isAdmin && (
+                <div className="absolute inset-0 z-20 opacity-0 group-hover/card:opacity-100 transition-opacity pointer-events-none">
+                  {/* ← Left — reorder up (previous position) */}
+                  {onReorderScene && index > 0 && (
                     <button
                       onClick={(e) => { e.stopPropagation(); onReorderScene(template.id, 'up'); }}
-                      className="w-5 h-5 rounded-full bg-black/70 flex items-center justify-center hover:bg-[#EE5F96] transition-colors"
-                      title="Move up"
+                      className="pointer-events-auto absolute left-1 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-black/80 flex items-center justify-center hover:bg-[#EE5F96] transition-colors shadow-lg"
+                      title="Move left (reorder up)"
                     >
-                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                      <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
                       </svg>
                     </button>
                   )}
-                  {index < templates.length - 1 && (
+                  {/* → Right — reorder down (next position) */}
+                  {onReorderScene && index < templates.length - 1 && (
                     <button
                       onClick={(e) => { e.stopPropagation(); onReorderScene(template.id, 'down'); }}
-                      className="w-5 h-5 rounded-full bg-black/70 flex items-center justify-center hover:bg-[#EE5F96] transition-colors"
-                      title="Move down"
+                      className="pointer-events-auto absolute right-1 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-black/80 flex items-center justify-center hover:bg-[#EE5F96] transition-colors shadow-lg"
+                      title="Move right (reorder down)"
                     >
-                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  )}
+                  {/* ↑ Up — move to previous category, position 1 */}
+                  {onMoveToCategory && categoryIndex > 0 && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const prevCat = allCategories[categoryIndex - 1];
+                        if (prevCat) onMoveToCategory(template.id, prevCat.id);
+                      }}
+                      className="pointer-events-auto absolute top-1 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-black/80 flex items-center justify-center hover:bg-emerald-500 transition-colors shadow-lg"
+                      title={`Move to "${allCategories[categoryIndex - 1]?.name || 'previous'}" category`}
+                    >
+                      <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 15l7-7 7 7" />
+                      </svg>
+                    </button>
+                  )}
+                  {/* ↓ Down — move to next category, position 1 */}
+                  {onMoveToCategory && categoryIndex < totalCategories - 1 && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const nextCat = allCategories[categoryIndex + 1];
+                        if (nextCat) onMoveToCategory(template.id, nextCat.id);
+                      }}
+                      className="pointer-events-auto absolute bottom-1 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-black/80 flex items-center justify-center hover:bg-emerald-500 transition-colors shadow-lg"
+                      title={`Move to "${allCategories[categoryIndex + 1]?.name || 'next'}" category`}
+                    >
+                      <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
                       </svg>
                     </button>
                   )}
