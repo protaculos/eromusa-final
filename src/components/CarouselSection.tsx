@@ -111,50 +111,51 @@ export default function CarouselSection({
               className="bg-[#161827] border border-[#EE5F96] rounded-lg px-3 py-1 text-lg font-semibold text-white focus:outline-none max-w-[250px]"
             />
           ) : (
+            <h2
+              className="text-lg font-semibold text-white cursor-pointer hover:text-[#EE5F96] transition-colors"
+              onDoubleClick={() => isAdmin && setEditingTitle(true)}
+              title={isAdmin ? "Double-click to rename" : undefined}
+            >
+              {title}
+            </h2>
+          )}
+          {/* Admin action buttons: pencil, add, delete */}
+          {isAdmin && (
             <div className="flex items-center gap-1.5">
-              <h2
-                className="text-lg font-semibold text-white cursor-pointer hover:text-[#EE5F96] transition-colors"
-                onDoubleClick={() => isAdmin && setEditingTitle(true)}
-                title={isAdmin ? "Double-click to rename" : undefined}
-              >
-                {title}
-              </h2>
-              {isAdmin && onRenameCategory && (
+              {onRenameCategory && (
                 <button
                   onClick={() => { setNewTitle(title); setEditingTitle(true); }}
-                  className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#EE5F96] transition-colors shrink-0 opacity-0 group-hover/section:opacity-100"
+                  className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#EE5F96] transition-colors shrink-0"
                   title="Rename category"
                 >
-                  <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                   </svg>
                 </button>
               )}
+              {onAddScene && (
+                <button
+                  onClick={onAddScene}
+                  className="w-7 h-7 rounded-full bg-[#EE5F96]/20 border border-[#EE5F96]/40 flex items-center justify-center hover:bg-[#EE5F96]/40 transition-colors shrink-0"
+                  title="Add scene to this category"
+                >
+                  <svg className="w-4 h-4 text-[#EE5F96]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                </button>
+              )}
+              {onDeleteCategory && (
+                <button
+                  onClick={onDeleteCategory}
+                  className="w-7 h-7 rounded-full bg-red-500/20 border border-red-500/40 flex items-center justify-center hover:bg-red-500/40 transition-colors shrink-0"
+                  title="Delete this category"
+                >
+                  <svg className="w-3.5 h-3.5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              )}
             </div>
-          )}
-          {/* Admin: Add scene button */}
-          {isAdmin && onAddScene && (
-            <button
-              onClick={onAddScene}
-              className="w-7 h-7 rounded-full bg-[#EE5F96]/20 border border-[#EE5F96]/40 flex items-center justify-center hover:bg-[#EE5F96]/40 transition-colors shrink-0"
-              title="Add scene to this category"
-            >
-              <svg className="w-4 h-4 text-[#EE5F96]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-            </button>
-          )}
-          {/* Admin: Delete category button */}
-          {isAdmin && onDeleteCategory && (
-            <button
-              onClick={onDeleteCategory}
-              className="w-7 h-7 rounded-full bg-red-500/20 border border-red-500/40 flex items-center justify-center hover:bg-red-500/40 transition-colors shrink-0"
-              title="Delete this category"
-            >
-              <svg className="w-3.5 h-3.5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-            </button>
           )}
         </div>
         <div className="flex gap-2">
@@ -204,12 +205,12 @@ export default function CarouselSection({
             <div key={template.id} className="shrink-0 w-[130px] sm:w-[200px] relative group/card">
               {/* 4-directional arrows — admin only, on hover */}
               {isAdmin && (
-                <div className="absolute inset-0 z-20 opacity-0 group-hover/card:opacity-100 transition-opacity pointer-events-none">
+                <>
                   {/* ← Left — reorder up (previous position) */}
                   {onReorderScene && index > 0 && (
                     <button
                       onClick={(e) => { e.stopPropagation(); onReorderScene(template.id, 'up'); }}
-                      className="pointer-events-auto absolute left-1 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-black/80 flex items-center justify-center hover:bg-[#EE5F96] transition-colors shadow-lg"
+                      className="absolute left-1 top-1/2 -translate-y-1/2 z-20 w-6 h-6 rounded-full bg-black/80 flex items-center justify-center hover:bg-[#EE5F96] transition-colors shadow-lg opacity-0 group-hover/card:opacity-100"
                       title="Move left (reorder up)"
                     >
                       <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -221,7 +222,7 @@ export default function CarouselSection({
                   {onReorderScene && index < templates.length - 1 && (
                     <button
                       onClick={(e) => { e.stopPropagation(); onReorderScene(template.id, 'down'); }}
-                      className="pointer-events-auto absolute right-1 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-black/80 flex items-center justify-center hover:bg-[#EE5F96] transition-colors shadow-lg"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 z-20 w-6 h-6 rounded-full bg-black/80 flex items-center justify-center hover:bg-[#EE5F96] transition-colors shadow-lg opacity-0 group-hover/card:opacity-100"
                       title="Move right (reorder down)"
                     >
                       <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -237,7 +238,7 @@ export default function CarouselSection({
                         const prevCat = allCategories[categoryIndex - 1];
                         if (prevCat) onMoveToCategory(template.id, prevCat.id);
                       }}
-                      className="pointer-events-auto absolute top-1 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-black/80 flex items-center justify-center hover:bg-emerald-500 transition-colors shadow-lg"
+                      className="absolute top-1 left-1/2 -translate-x-1/2 z-20 w-6 h-6 rounded-full bg-black/80 flex items-center justify-center hover:bg-emerald-500 transition-colors shadow-lg opacity-0 group-hover/card:opacity-100"
                       title={`Move to "${allCategories[categoryIndex - 1]?.name || 'previous'}" category`}
                     >
                       <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -253,7 +254,7 @@ export default function CarouselSection({
                         const nextCat = allCategories[categoryIndex + 1];
                         if (nextCat) onMoveToCategory(template.id, nextCat.id);
                       }}
-                      className="pointer-events-auto absolute bottom-1 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-black/80 flex items-center justify-center hover:bg-emerald-500 transition-colors shadow-lg"
+                      className="absolute bottom-1 left-1/2 -translate-x-1/2 z-20 w-6 h-6 rounded-full bg-black/80 flex items-center justify-center hover:bg-emerald-500 transition-colors shadow-lg opacity-0 group-hover/card:opacity-100"
                       title={`Move to "${allCategories[categoryIndex + 1]?.name || 'next'}" category`}
                     >
                       <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -261,7 +262,7 @@ export default function CarouselSection({
                       </svg>
                     </button>
                   )}
-                </div>
+                </>
               )}
               <TemplateCard
                 template={template}
