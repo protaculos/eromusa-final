@@ -47,3 +47,7 @@ next-env.d.ts
 
 # video assets (now served from Supabase Storage)
 /public/videos/
+
+# deploy helper scripts
+deploy-fix*.bat
+deploy-fix*.sh

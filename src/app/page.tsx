@@ -9,6 +9,7 @@ import PaymentModal from '@/components/PaymentModal';
 import CarouselSection from '@/components/CarouselSection';
 import SceneEditModal from '@/components/admin/SceneEditModal';
 import AddScenePopup from '@/components/admin/AddScenePopup';
+import ConfirmModal from '@/components/ConfirmModal';
 
 interface CategoryData {
   id: string;
@@ -60,6 +61,9 @@ export default function DiscoverPage() {
   const [showNewCategory, setShowNewCategory] = useState(false);
   const [categoryError, setCategoryError] = useState<string | null>(null);
 
+  // Confirm delete state
+  const [confirmDelete, setConfirmDelete] = useState<{ id: string; name: string } | null>(null);
+
   // Fetch categories from Supabase
   const fetchCategories = async () => {
     try {
@@ -81,7 +85,6 @@ export default function DiscoverPage() {
   const carouselSections = useMemo(() => {
     const sections: { title: string; templates: Template[]; categoryId?: string }[] = [];
 
-    // Show all categories — even empty ones (admin needs to see them to add scenes)
     for (const cat of categories) {
       sections.push({
         title: cat.name,
@@ -90,13 +93,11 @@ export default function DiscoverPage() {
       });
     }
 
-    // Fallback: static sections from templates.ts (only if no DB data at all)
     if (categories.length === 0) {
       const popular = allTemplates.filter((t) => t.isPopular);
       if (popular.length > 0) {
         sections.push({ title: '🔥 Popular', templates: popular });
       }
-
       const free = allTemplates.filter((t) => t.isFree);
       if (free.length > 0) {
         sections.push({ title: '🎯 Free', templates: free });
@@ -120,7 +121,8 @@ export default function DiscoverPage() {
     setPaymentOpen(true);
   };
 
-  // Admin handlers
+  // ── Admin handlers ──────────────────────────────
+
   const handleEditTemplate = (template: Template) => {
     const scene = categories
       .flatMap((c) => c.scenes)
@@ -135,16 +137,16 @@ export default function DiscoverPage() {
     setAddSceneCategory({ id: categoryId, name: categoryName });
   };
 
-  const handleDeleteCategory = async (categoryId: string, categoryName: string) => {
-    if (!session?.access_token) return;
-    if (!confirm(`Delete category "${categoryName}"? Scenes will be unlinked but not deleted.`)) return;
+  const handleDeleteCategory = async () => {
+    if (!session?.access_token || !confirmDelete) return;
 
     try {
-      const res = await fetch(`/api/admin/categories?id=${categoryId}`, {
+      const res = await fetch(`/api/admin/categories?id=${confirmDelete.id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
       if (res.ok) {
+        setConfirmDelete(null);
         fetchCategories();
       }
     } catch (err) {
@@ -152,9 +154,48 @@ export default function DiscoverPage() {
     }
   };
 
+  const handleRenameCategory = async (categoryId: string, newName: string) => {
+    if (!session?.access_token) return;
+
+    try {
+      const res = await fetch(`/api/admin/categories/${categoryId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ name: newName }),
+      });
+      if (res.ok) {
+        fetchCategories();
+      }
+    } catch (err) {
+      console.error('Failed to rename category:', err);
+    }
+  };
+
+  const handleReorderScene = async (categoryId: string, sceneId: string, direction: 'up' | 'down') => {
+    if (!session?.access_token) return;
+
+    try {
+      const res = await fetch('/api/admin/category-scenes/reorder', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ category_id: categoryId, scene_id: sceneId, direction }),
+      });
+      if (res.ok) {
+        fetchCategories();
+      }
+    } catch (err) {
+      console.error('Failed to reorder scene:', err);
+    }
+  };
+
   const handleCreateCategory = async () => {
     if (!session?.access_token || !newCategoryName.trim()) return;
-
     setCategoryError(null);
 
     try {
@@ -246,7 +287,9 @@ export default function DiscoverPage() {
               onTemplateClick={handleTemplateClick}
               onEditTemplate={isAdmin ? handleEditTemplate : undefined}
               onAddScene={isAdmin && section.categoryId ? () => handleAddScene(section.categoryId!, section.title) : undefined}
-              onDeleteCategory={isAdmin && section.categoryId ? () => handleDeleteCategory(section.categoryId!, section.title) : undefined}
+              onDeleteCategory={isAdmin && section.categoryId ? () => setConfirmDelete({ id: section.categoryId!, name: section.title }) : undefined}
+              onRenameCategory={isAdmin && section.categoryId ? (newName) => handleRenameCategory(section.categoryId!, newName) : undefined}
+              onReorderScene={isAdmin && section.categoryId ? (sceneId, dir) => handleReorderScene(section.categoryId!, sceneId, dir) : undefined}
               categoryId={section.categoryId}
             />
           ))
@@ -293,6 +336,17 @@ export default function DiscoverPage() {
           onAdded={fetchCategories}
         />
       )}
+
+      {/* Confirm delete modal */}
+      <ConfirmModal
+        open={!!confirmDelete}
+        onClose={() => setConfirmDelete(null)}
+        onConfirm={handleDeleteCategory}
+        title="Delete Category"
+        message={`Are you sure you want to delete "${confirmDelete?.name}"? Scenes will be unlinked but not deleted.`}
+        confirmLabel="Delete"
+        confirmColor="bg-red-500 hover:bg-red-600"
+      />
     </div>
   );
 }

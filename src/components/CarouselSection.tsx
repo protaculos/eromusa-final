@@ -13,6 +13,8 @@ interface CarouselSectionProps {
   onEditTemplate?: (template: Template) => void;
   onAddScene?: () => void;
   onDeleteCategory?: () => void;
+  onRenameCategory?: (newName: string) => void;
+  onReorderScene?: (sceneId: string, direction: 'up' | 'down') => void;
   categoryId?: string;
 }
 
@@ -24,12 +26,17 @@ export default function CarouselSection({
   onEditTemplate,
   onAddScene,
   onDeleteCategory,
+  onRenameCategory,
+  onReorderScene,
   categoryId,
 }: CarouselSectionProps) {
   const { isAdmin } = useAuth();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+  const [editingTitle, setEditingTitle] = useState(false);
+  const [newTitle, setNewTitle] = useState(title);
+  const titleInputRef = useRef<HTMLInputElement>(null);
 
   const updateScrollButtons = useCallback(() => {
     const el = scrollRef.current;
@@ -42,33 +49,73 @@ export default function CarouselSection({
     const el = scrollRef.current;
     if (!el) return;
     el.addEventListener('scroll', updateScrollButtons, { passive: true });
-    // Check initial state
     updateScrollButtons();
     return () => el.removeEventListener('scroll', updateScrollButtons);
   }, [updateScrollButtons]);
 
+  useEffect(() => {
+    setNewTitle(title);
+  }, [title]);
+
+  useEffect(() => {
+    if (editingTitle && titleInputRef.current) {
+      titleInputRef.current.focus();
+      titleInputRef.current.select();
+    }
+  }, [editingTitle]);
+
   const scroll = (direction: 'left' | 'right') => {
     const el = scrollRef.current;
     if (!el) return;
-    // Scroll by 1 card: card width + gap
     const firstCard = el.querySelector('div') as HTMLElement | null;
     if (!firstCard) return;
-    const cardWidth = firstCard.offsetWidth + 16; // 16 = gap-4
+    const cardWidth = firstCard.offsetWidth + 16;
     const scrollAmount = direction === 'left' ? -cardWidth : cardWidth;
     el.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+  };
+
+  const handleTitleSubmit = () => {
+    const trimmed = newTitle.trim();
+    if (trimmed && trimmed !== title && onRenameCategory) {
+      onRenameCategory(trimmed);
+    } else {
+      setNewTitle(title);
+    }
+    setEditingTitle(false);
   };
 
   return (
     <section className="mb-10">
       {/* Section header */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <h2 className="text-lg font-semibold text-white">{title}</h2>
+        <div className="flex items-center gap-2 min-w-0">
+          {editingTitle ? (
+            <input
+              ref={titleInputRef}
+              type="text"
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+              onBlur={handleTitleSubmit}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleTitleSubmit();
+                if (e.key === 'Escape') { setNewTitle(title); setEditingTitle(false); }
+              }}
+              className="bg-[#161827] border border-[#EE5F96] rounded-lg px-3 py-1 text-lg font-semibold text-white focus:outline-none max-w-[250px]"
+            />
+          ) : (
+            <h2
+              className="text-lg font-semibold text-white cursor-pointer hover:text-[#EE5F96] transition-colors"
+              onDoubleClick={() => isAdmin && setEditingTitle(true)}
+              title={isAdmin ? "Double-click to rename" : undefined}
+            >
+              {title}
+            </h2>
+          )}
           {/* Admin: Add scene button */}
           {isAdmin && onAddScene && (
             <button
               onClick={onAddScene}
-              className="w-7 h-7 rounded-full bg-[#EE5F96]/20 border border-[#EE5F96]/40 flex items-center justify-center hover:bg-[#EE5F96]/40 transition-colors"
+              className="w-7 h-7 rounded-full bg-[#EE5F96]/20 border border-[#EE5F96]/40 flex items-center justify-center hover:bg-[#EE5F96]/40 transition-colors shrink-0"
               title="Add scene to this category"
             >
               <svg className="w-4 h-4 text-[#EE5F96]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -80,7 +127,7 @@ export default function CarouselSection({
           {isAdmin && onDeleteCategory && (
             <button
               onClick={onDeleteCategory}
-              className="w-7 h-7 rounded-full bg-red-500/20 border border-red-500/40 flex items-center justify-center hover:bg-red-500/40 transition-colors"
+              className="w-7 h-7 rounded-full bg-red-500/20 border border-red-500/40 flex items-center justify-center hover:bg-red-500/40 transition-colors shrink-0"
               title="Delete this category"
             >
               <svg className="w-3.5 h-3.5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -123,7 +170,6 @@ export default function CarouselSection({
 
       {/* Carousel track */}
       <div className="relative">
-        {/* Scrollable container */}
         <div
           ref={scrollRef}
           className="flex gap-4 overflow-x-auto px-4 sm:px-6 lg:px-8 pb-2"
@@ -133,8 +179,35 @@ export default function CarouselSection({
             WebkitOverflowScrolling: 'touch',
           }}
         >
-          {templates.map((template) => (
-            <div key={template.id} className="shrink-0 w-[130px] sm:w-[200px]">
+          {templates.map((template, index) => (
+            <div key={template.id} className="shrink-0 w-[130px] sm:w-[200px] relative group/card">
+              {/* Reorder arrows — admin only, on hover */}
+              {isAdmin && onReorderScene && templates.length > 1 && (
+                <div className="absolute -left-1 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-0.5 opacity-0 group-hover/card:opacity-100 transition-opacity">
+                  {index > 0 && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onReorderScene(template.id, 'up'); }}
+                      className="w-5 h-5 rounded-full bg-black/70 flex items-center justify-center hover:bg-[#EE5F96] transition-colors"
+                      title="Move up"
+                    >
+                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                      </svg>
+                    </button>
+                  )}
+                  {index < templates.length - 1 && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onReorderScene(template.id, 'down'); }}
+                      className="w-5 h-5 rounded-full bg-black/70 flex items-center justify-center hover:bg-[#EE5F96] transition-colors"
+                      title="Move down"
+                    >
+                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+              )}
               <TemplateCard
                 template={template}
                 isAutoPlay={isAutoPlay}
@@ -144,7 +217,6 @@ export default function CarouselSection({
             </div>
           ))}
         </div>
-
       </div>
     </section>
   );

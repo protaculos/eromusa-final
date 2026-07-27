@@ -42,8 +42,10 @@ export default function TemplateCard({ template, isAutoPlay = false, onClick, on
 
   const handleMouseEnter = () => {
     setIsHovered(true);
-    if (isAutoPlay && videoRef.current) {
-      videoRef.current.play().catch(() => {});
+    if (videoRef.current) {
+      videoRef.current.play().catch((err) => {
+        console.warn('[TemplateCard] play error:', err);
+      });
     }
   };
 

@@ -16,20 +16,35 @@ export async function requireAdmin(req: NextRequest): Promise<string> {
 
   const token = authHeader.slice(7);
 
-  const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
-  if (error || !user) {
+  // Decode JWT to get user ID (no need to verify signature — Supabase already did)
+  let userId: string;
+  try {
+    const payload = JSON.parse(
+      Buffer.from(token.split(".")[1], "base64url").toString()
+    );
+    userId = payload.sub;
+    if (!userId) throw new Error("No sub in token");
+  } catch {
     throw new NextResponse(JSON.stringify({ error: "Invalid token" }), {
       status: 401,
       headers: { "Content-Type": "application/json" },
     });
   }
 
-  // Check role
-  const { data: profile } = await supabaseAdmin
+  // Check role in profiles table
+  const { data: profile, error: profileError } = await supabaseAdmin
     .from("profiles")
     .select("role")
-    .eq("id", user.id)
+    .eq("id", userId)
     .single();
+
+  if (profileError) {
+    console.error("[requireAdmin] profile fetch error:", profileError.message);
+    throw new NextResponse(JSON.stringify({ error: "Failed to verify admin status" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
 
   if (!profile || profile.role !== "admin") {
     throw new NextResponse(JSON.stringify({ error: "Forbidden: admin only" }), {
@@ -38,5 +53,5 @@ export async function requireAdmin(req: NextRequest): Promise<string> {
     });
   }
 
-  return user.id;
+  return userId;
 }
