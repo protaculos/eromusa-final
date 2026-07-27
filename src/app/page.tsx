@@ -124,8 +124,7 @@ export default function DiscoverPage() {
   const handleEditTemplate = (template: Template) => {
     const scene = categories
       .flatMap((c) => c.scenes)
-      .find((s) => s.id === template.id)
-      || allScenes.find((s) => s.id === template.id);
+      .find((s) => s.id === template.id);
     if (scene) {
       setEditScene(scene);
       setEditModalOpen(true);
