@@ -43,19 +43,37 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: "Already at the edge" }, { status: 400 });
   }
 
-  // Swap orders
-  const { error: update1 } = await supabaseAdmin
+  // Three-step swap to avoid unique constraint violations
+  const { error: step1 } = await supabaseAdmin
     .from("category_scenes")
-    .update({ order: adjacentLink.order })
+    .update({ order: -1 })
     .eq("id", currentLink.id);
 
-  const { error: update2 } = await supabaseAdmin
+  if (step1) {
+    return NextResponse.json({ error: step1.message }, { status: 500 });
+  }
+
+  const { error: step2 } = await supabaseAdmin
     .from("category_scenes")
     .update({ order: currentOrder })
     .eq("id", adjacentLink.id);
 
-  if (update1 || update2) {
-    return NextResponse.json({ error: "Failed to reorder" }, { status: 500 });
+  if (step2) {
+    // Rollback step1
+    await supabaseAdmin.from("category_scenes").update({ order: currentOrder }).eq("id", currentLink.id);
+    return NextResponse.json({ error: step2.message }, { status: 500 });
+  }
+
+  const { error: step3 } = await supabaseAdmin
+    .from("category_scenes")
+    .update({ order: adjacentLink.order })
+    .eq("id", currentLink.id);
+
+  if (step3) {
+    // Rollback step2
+    await supabaseAdmin.from("category_scenes").update({ order: adjacentLink.order }).eq("id", adjacentLink.id);
+    await supabaseAdmin.from("category_scenes").update({ order: currentOrder }).eq("id", currentLink.id);
+    return NextResponse.json({ error: step3.message }, { status: 500 });
   }
 
   return NextResponse.json({ success: true });
