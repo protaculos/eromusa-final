@@ -19,11 +19,27 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { data: videos, error } = await supabaseAdmin
+    // Check if user is admin
+    const { data: profile } = await supabaseAdmin
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    const isAdmin = profile?.role === "admin";
+
+    let query = supabaseAdmin
       .from("videos")
       .select("*")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
+
+    // Clients: only show non-expired videos
+    if (!isAdmin) {
+      query = query.gte("expires_at", new Date().toISOString());
+    }
+
+    const { data: videos, error } = await query;
 
     if (error) {
       console.error("Error fetching videos:", error);

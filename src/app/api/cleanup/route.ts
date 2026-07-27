@@ -16,10 +16,10 @@ export async function POST(req: NextRequest) {
 
     const now = new Date().toISOString();
 
-    // Busca todos os registros expirados
+    // Busca registros expirados com o role do usuário
     const { data: expired, error: fetchError } = await supabaseAdmin
       .from("videos")
-      .select("id, job_id, user_image_url, video_url")
+      .select("id, job_id, user_image_url, video_url, user_id")
       .lt("expires_at", now);
 
     if (fetchError) {
@@ -31,9 +31,27 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ deleted: 0 });
     }
 
+    // Separa admins (não deletar) de clients (deletar)
+    const { data: profiles } = await supabaseAdmin
+      .from("profiles")
+      .select("id, role")
+      .in("id", expired.map((e) => e.user_id));
+
+    const adminIds = new Set(
+      (profiles || []).filter((p) => p.role === "admin").map((p) => p.id)
+    );
+
+    const toDelete = expired.filter((e) => !adminIds.has(e.user_id));
+    const skipped = expired.length - toDelete.length;
+
+    if (toDelete.length === 0) {
+      console.log(`[Cleanup] Skipped ${skipped} admin videos, none to delete`);
+      return NextResponse.json({ deleted: 0, skipped });
+    }
+
     // Deleta arquivos do storage
     const storagePaths: string[] = [];
-    for (const item of expired) {
+    for (const item of toDelete) {
       for (const url of [item.user_image_url, item.video_url]) {
         if (!url) continue;
         try {
@@ -50,8 +68,8 @@ export async function POST(req: NextRequest) {
         .remove(storagePaths);
     }
 
-    // Deleta os registros do banco
-    const jobIds = expired.map((e) => e.job_id);
+    // Deleta os registros do banco (apenas clients)
+    const jobIds = toDelete.map((e) => e.job_id);
     const { error: deleteError } = await supabaseAdmin
       .from("videos")
       .delete()
@@ -62,8 +80,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Failed to delete expired records" }, { status: 500 });
     }
 
-    console.log(`[Cleanup] Deleted ${expired.length} expired records`);
-    return NextResponse.json({ deleted: expired.length });
+    console.log(`[Cleanup] Deleted ${toDelete.length} expired records, skipped ${skipped} admin videos`);
+    return NextResponse.json({ deleted: toDelete.length, skipped });
   } catch (err) {
     console.error("Cleanup error:", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
