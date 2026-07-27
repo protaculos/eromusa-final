@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const LEAKIFYHUB_BASE = "https://api.leakifyhub.fun/api/v1";
-const LEAKIFYHUB_SECRET_KEY = process.env.LEAKIFYHUB_SECRET_KEY!;
+const LEAKIFYHUB_SECRET_KEY = process.env.LEAKIFYHUB_LIVE_SECRET_KEY || process.env.LEAKIFYHUB_SECRET_KEY!;
 
 // ── GET /api/generate/[jobId] ────────────────────────
 // Polls LeakifyHub for job status
