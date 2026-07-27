@@ -17,33 +17,32 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: "category_id, scene_id, and direction (up/down) are required" }, { status: 400 });
   }
 
-  // Get current link
-  const { data: currentLink, error: fetchError } = await supabaseAdmin
+  // Get all links for this category ordered by position
+  const { data: allLinks, error: listError } = await supabaseAdmin
     .from("category_scenes")
     .select("*")
     .eq("category_id", category_id)
-    .eq("scene_id", scene_id)
-    .single();
+    .order("order", { ascending: true });
 
-  if (fetchError || !currentLink) {
+  if (listError) {
+    return NextResponse.json({ error: listError.message }, { status: 500 });
+  }
+
+  // Find current link by scene_id
+  const currentIdx = allLinks.findIndex((l) => l.scene_id === scene_id);
+  if (currentIdx === -1) {
     return NextResponse.json({ error: "Link not found" }, { status: 404 });
   }
 
-  const currentOrder = currentLink.order;
-
-  // Find the adjacent link to swap with
-  const { data: adjacentLink } = await supabaseAdmin
-    .from("category_scenes")
-    .select("*")
-    .eq("category_id", category_id)
-    .eq(direction === "up" ? "order" : "order", direction === "up" ? currentOrder - 1 : currentOrder + 1)
-    .single();
-
-  if (!adjacentLink) {
+  const adjacentIdx = direction === "up" ? currentIdx - 1 : currentIdx + 1;
+  if (adjacentIdx < 0 || adjacentIdx >= allLinks.length) {
     return NextResponse.json({ error: "Already at the edge" }, { status: 400 });
   }
 
-  // Three-step swap to avoid unique constraint violations
+  const currentLink = allLinks[currentIdx];
+  const adjacentLink = allLinks[adjacentIdx];
+
+  // Swap orders (3-step to avoid unique constraint)
   const { error: step1 } = await supabaseAdmin
     .from("category_scenes")
     .update({ order: -1 })
@@ -55,12 +54,11 @@ export async function PATCH(req: NextRequest) {
 
   const { error: step2 } = await supabaseAdmin
     .from("category_scenes")
-    .update({ order: currentOrder })
+    .update({ order: currentLink.order })
     .eq("id", adjacentLink.id);
 
   if (step2) {
-    // Rollback step1
-    await supabaseAdmin.from("category_scenes").update({ order: currentOrder }).eq("id", currentLink.id);
+    await supabaseAdmin.from("category_scenes").update({ order: currentLink.order }).eq("id", currentLink.id);
     return NextResponse.json({ error: step2.message }, { status: 500 });
   }
 
@@ -70,9 +68,8 @@ export async function PATCH(req: NextRequest) {
     .eq("id", currentLink.id);
 
   if (step3) {
-    // Rollback step2
     await supabaseAdmin.from("category_scenes").update({ order: adjacentLink.order }).eq("id", adjacentLink.id);
-    await supabaseAdmin.from("category_scenes").update({ order: currentOrder }).eq("id", currentLink.id);
+    await supabaseAdmin.from("category_scenes").update({ order: currentLink.order }).eq("id", currentLink.id);
     return NextResponse.json({ error: step3.message }, { status: 500 });
   }
 
