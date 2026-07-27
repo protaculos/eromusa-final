@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const LEAKIFYHUB_BASE = "https://api.leakifyhub.fun/api/v1";
+const LEAKIFYHUB_PUBLIC_KEY = process.env.LEAKIFYHUB_LIVE_PUBLIC_KEY!;
 const LEAKIFYHUB_SECRET_KEY = process.env.LEAKIFYHUB_LIVE_SECRET_KEY!;
 
 // ── GET /api/generate/[jobId] ────────────────────────
@@ -19,7 +20,8 @@ export async function GET(
 
     const response = await fetch(`${LEAKIFYHUB_BASE}/jobs/${jobId}`, {
       headers: {
-        "Authorization": `Bearer ${LEAKIFYHUB_SECRET_KEY}`,
+        "X-API-Key": LEAKIFYHUB_PUBLIC_KEY,
+        "X-API-Secret": LEAKIFYHUB_SECRET_KEY,
       },
     });
 
@@ -39,7 +41,7 @@ export async function GET(
 
     return NextResponse.json({
       status,
-      videoUrl: data.result_url || data.video_url || "",
+      videoUrl: data.result_url || data.video_url || data.output_url || "",
       error: data.error || null,
     });
   } catch (err) {
