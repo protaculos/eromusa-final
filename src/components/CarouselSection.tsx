@@ -203,14 +203,14 @@ export default function CarouselSection({
         >
           {templates.map((template, index) => (
             <div key={template.id} className="shrink-0 w-[130px] sm:w-[200px] relative group/card">
-              {/* 4-directional arrows — admin only, on hover */}
+              {/* 4-directional arrows — admin only, always visible */}
               {isAdmin && (
-                <>
+                <div className="absolute inset-0 z-30 pointer-events-none">
                   {/* ← Left — reorder up (previous position) */}
                   {onReorderScene && index > 0 && (
                     <button
-                      onClick={(e) => { e.stopPropagation(); onReorderScene(template.id, 'up'); }}
-                      className="absolute left-1 top-1/2 -translate-y-1/2 z-20 w-6 h-6 rounded-full bg-black/80 flex items-center justify-center hover:bg-[#EE5F96] transition-colors shadow-lg opacity-0 group-hover/card:opacity-100"
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); onReorderScene(template.id, 'up'); }}
+                      className="pointer-events-auto absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-black/90 flex items-center justify-center hover:bg-[#EE5F96] transition-colors shadow-lg border border-white/20"
                       title="Move left (reorder up)"
                     >
                       <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -221,8 +221,8 @@ export default function CarouselSection({
                   {/* → Right — reorder down (next position) */}
                   {onReorderScene && index < templates.length - 1 && (
                     <button
-                      onClick={(e) => { e.stopPropagation(); onReorderScene(template.id, 'down'); }}
-                      className="absolute right-1 top-1/2 -translate-y-1/2 z-20 w-6 h-6 rounded-full bg-black/80 flex items-center justify-center hover:bg-[#EE5F96] transition-colors shadow-lg opacity-0 group-hover/card:opacity-100"
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); onReorderScene(template.id, 'down'); }}
+                      className="pointer-events-auto absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-7 h-7 rounded-full bg-black/90 flex items-center justify-center hover:bg-[#EE5F96] transition-colors shadow-lg border border-white/20"
                       title="Move right (reorder down)"
                     >
                       <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -234,11 +234,11 @@ export default function CarouselSection({
                   {onMoveToCategory && categoryIndex > 0 && (
                     <button
                       onClick={(e) => {
-                        e.stopPropagation();
+                        e.preventDefault(); e.stopPropagation();
                         const prevCat = allCategories[categoryIndex - 1];
                         if (prevCat) onMoveToCategory(template.id, prevCat.id);
                       }}
-                      className="absolute top-1 left-1/2 -translate-x-1/2 z-20 w-6 h-6 rounded-full bg-black/80 flex items-center justify-center hover:bg-emerald-500 transition-colors shadow-lg opacity-0 group-hover/card:opacity-100"
+                      className="pointer-events-auto absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/90 flex items-center justify-center hover:bg-emerald-500 transition-colors shadow-lg border border-white/20"
                       title={`Move to "${allCategories[categoryIndex - 1]?.name || 'previous'}" category`}
                     >
                       <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -250,11 +250,11 @@ export default function CarouselSection({
                   {onMoveToCategory && categoryIndex < totalCategories - 1 && (
                     <button
                       onClick={(e) => {
-                        e.stopPropagation();
+                        e.preventDefault(); e.stopPropagation();
                         const nextCat = allCategories[categoryIndex + 1];
                         if (nextCat) onMoveToCategory(template.id, nextCat.id);
                       }}
-                      className="absolute bottom-1 left-1/2 -translate-x-1/2 z-20 w-6 h-6 rounded-full bg-black/80 flex items-center justify-center hover:bg-emerald-500 transition-colors shadow-lg opacity-0 group-hover/card:opacity-100"
+                      className="pointer-events-auto absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-7 h-7 rounded-full bg-black/90 flex items-center justify-center hover:bg-emerald-500 transition-colors shadow-lg border border-white/20"
                       title={`Move to "${allCategories[categoryIndex + 1]?.name || 'next'}" category`}
                     >
                       <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -262,7 +262,7 @@ export default function CarouselSection({
                       </svg>
                     </button>
                   )}
-                </>
+                </div>
               )}
               <TemplateCard
                 template={template}
