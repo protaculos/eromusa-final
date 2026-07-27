@@ -6,7 +6,7 @@ const LEAKIFYHUB_BASE = "https://api.leakifyhub.fun/api/v1";
 const LEAKIFYHUB_PUBLIC_KEY = process.env.LEAKIFYHUB_LIVE_PUBLIC_KEY!;
 const LEAKIFYHUB_SECRET_KEY = process.env.LEAKIFYHUB_LIVE_SECRET_KEY!;
 
-// POST /api/admin/repoll-job — re-poll a job and update the video_url
+// POST /api/admin/repoll-job — re-poll a job, download video, upload to Supabase, update DB
 export async function POST(req: NextRequest) {
   try {
     await requireAdmin(req);
@@ -35,19 +35,47 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: data.error || "Failed to fetch job" }, { status: response.status });
   }
 
-  const videoUrl = data.result_url || data.video_url || data.output_url || data.url || data.download_url || data.video || data.result || "";
+  const externalUrl = data.result_url || data.video_url || data.output_url || data.url || data.download_url || data.video || data.result || "";
 
-  if (!videoUrl) {
-    return NextResponse.json({
-      error: "No video URL found in response",
-      raw: data,
-    }, { status: 404 });
+  if (!externalUrl) {
+    return NextResponse.json({ error: "No video URL found in response", raw: data }, { status: 404 });
   }
+
+  // Download the video
+  console.log(`[Repoll ${jobId}] Downloading from: ${externalUrl.substring(0, 80)}...`);
+  const videoResponse = await fetch(externalUrl, {
+    headers: { "User-Agent": "Mozilla/5.0 (compatible; Eromusa/1.0)" },
+  });
+
+  if (!videoResponse.ok) {
+    return NextResponse.json({ error: `Failed to download video: ${videoResponse.status}` }, { status: 502 });
+  }
+
+  const buffer = Buffer.from(await videoResponse.arrayBuffer());
+  const fileName = `videos/${jobId}.mp4`;
+
+  // Upload to Supabase Storage
+  const { error: uploadError } = await supabaseAdmin.storage
+    .from("generations")
+    .upload(fileName, buffer, {
+      contentType: "video/mp4",
+      upsert: true,
+    });
+
+  if (uploadError) {
+    return NextResponse.json({ error: `Upload failed: ${uploadError.message}` }, { status: 500 });
+  }
+
+  const { data: publicUrlData } = supabaseAdmin.storage
+    .from("generations")
+    .getPublicUrl(fileName);
+
+  const supabaseUrl = publicUrlData.publicUrl;
 
   // Update the database
   const { data: updated, error: updateError } = await supabaseAdmin
     .from("videos")
-    .update({ video_url: videoUrl, status: "completed" })
+    .update({ video_url: supabaseUrl, status: "completed" })
     .eq("job_id", jobId)
     .select();
 
@@ -57,8 +85,7 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({
     success: true,
-    videoUrl,
+    supabaseUrl,
     updated,
-    raw: data,
   });
 }
