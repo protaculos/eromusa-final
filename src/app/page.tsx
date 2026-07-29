@@ -198,7 +198,7 @@ export default function DiscoverPage() {
       <div className="pt-16 md:pt-14 pb-6">
         {/* Admin: New Scene button */}
         {isAdmin && (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 flex items-center gap-3">
             <button
               onClick={() => { setEditScene(null); setEditModalOpen(true); }}
               className="flex items-center gap-2 text-white/60 hover:text-white transition-colors text-sm"
@@ -208,6 +208,17 @@ export default function DiscoverPage() {
               </svg>
               New Scene
             </button>
+            {scenes.length > 0 && (
+              <button
+                onClick={() => setScenes([])}
+                className="flex items-center gap-2 text-red-400/60 hover:text-red-400 transition-colors text-sm"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Clear all
+              </button>
+            )}
           </div>
         )}
 
