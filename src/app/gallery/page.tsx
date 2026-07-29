@@ -361,11 +361,11 @@ function VideoPopup({
         onClick={onClose}
       >
         <div
-          className="relative bg-[#0A0B14] border border-[#1E2130] rounded-2xl w-full max-w-[300px] max-h-[90vh] overflow-y-auto shadow-2xl scrollbar-thin scrollbar-thumb-[#1E2130] scrollbar-track-transparent"
+          className="relative bg-[#0A0B14] border border-[#1E2130] rounded-2xl w-full max-w-[90vw] max-h-[90vh] shadow-2xl overflow-hidden"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="sticky top-0 bg-[#0A0B14] z-10 flex items-center justify-between p-4 border-b border-[#1E2130]">
+          <div className="flex items-center justify-between p-4 border-b border-[#1E2130]">
             <div className="min-w-0">
               <h2 className="font-bold text-white text-base truncate">{video.template_name || "Video"}</h2>
               <p className="text-white/40 text-[11px] mt-0.5">{video.template_duration}</p>
@@ -382,15 +382,15 @@ function VideoPopup({
 
           {/* Body */}
           <div className="p-4 space-y-3">
-            {/* Video player — portrait aspect, capped so modal fits without scroll */}
-            <div className="relative aspect-[9/16] max-h-[55vh] rounded-2xl overflow-hidden bg-black border border-[#1E2130]">
+            {/* Video player — adapts to video's natural dimensions */}
+            <div className="rounded-2xl overflow-hidden bg-black border border-[#1E2130] flex justify-center">
               <video
                 ref={videoRef}
                 src={video.video_url}
                 loop
                 muted
                 playsInline
-                className="w-full h-full object-cover"
+                className="max-w-full max-h-[60vh] w-auto h-auto object-contain"
                 onClick={togglePlay}
               />
 
