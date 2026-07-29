@@ -44,3 +44,15 @@ CREATE INDEX IF NOT EXISTS idx_scenes_name ON scenes(name);
 --    Storage → Create bucket → name: scene-videos → Public bucket)
 --    Depois adicionar política de leitura pública:
 --    CREATE POLICY "Public Read" ON storage.objects FOR SELECT USING (bucket_id = 'scene-videos');
+
+-- 7. Tabela de exemplos por cena
+CREATE TABLE IF NOT EXISTS scene_examples (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  scene_id UUID REFERENCES scenes(id) ON DELETE CASCADE,
+  video_url TEXT NOT NULL,
+  name TEXT DEFAULT '',
+  "order" INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_scene_examples_scene ON scene_examples(scene_id);

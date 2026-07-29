@@ -9,17 +9,12 @@ export interface VideoCreateModalProps {
   onClose: () => void;
   onOpenLogin: () => void;
   onOpenPayment?: () => void;
-  categoryTemplates?: {
+  sceneExamples?: {
     id: string;
-    title: string;
-    thumbnail: string;
-    videoUrl: string;
-    gradient: string;
-    duration: string;
-    credits: number;
-    instructions: string[];
-    tags: string[];
-    styleId: string;
+    scene_id: string;
+    video_url: string;
+    name: string;
+    order: number;
   }[];
   template: {
     id: string;
@@ -41,7 +36,7 @@ export default function VideoCreateModal({
   onClose,
   onOpenLogin,
   onOpenPayment,
-  categoryTemplates = [],
+  sceneExamples = [],
   template,
 }: VideoCreateModalProps) {
   const { user, session, credits } = useAuth();
@@ -380,36 +375,36 @@ export default function VideoCreateModal({
             </div>
           </div>
 
-          {/* Category scenes carousel — thumbnails only */}
-          {categoryTemplates.length > 1 && (
+          {/* Scene examples carousel — thumbnails only */}
+          {sceneExamples.length > 0 && (
             <div>
               <p className="text-xs text-white/40 font-semibold uppercase tracking-wider mb-2">More Examples</p>
               <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
-                {categoryTemplates.map((t) => (
+                {sceneExamples.map((ex) => (
                   <button
-                    key={t.id}
+                    key={ex.id}
                     onClick={() => {
                       setActiveTemplate({
-                        id: t.id,
-                        name: t.title,
-                        duration: t.duration,
-                        credits: t.credits,
-                        videoUrl: t.videoUrl,
-                        thumbnailUrl: t.thumbnail,
-                        instructions: t.instructions,
-                        tags: t.tags,
-                        gradient: t.gradient,
-                        styleId: t.styleId,
+                        id: ex.scene_id,
+                        name: ex.name || activeTemplate.name,
+                        duration: activeTemplate.duration,
+                        credits: activeTemplate.credits,
+                        videoUrl: ex.video_url,
+                        thumbnailUrl: ex.video_url,
+                        instructions: activeTemplate.instructions,
+                        tags: activeTemplate.tags,
+                        gradient: activeTemplate.gradient,
+                        styleId: activeTemplate.styleId,
                       });
                     }}
                     className={`shrink-0 w-16 h-24 rounded-lg overflow-hidden border-2 transition-all ${
-                      activeTemplate.id === t.id
+                      activeTemplate.videoUrl === ex.video_url
                         ? 'border-[#EE5F96] ring-1 ring-[#EE5F96]/50'
                         : 'border-[#1E2130] hover:border-white/30'
                     }`}
                   >
                     <video
-                      src={t.videoUrl}
+                      src={ex.video_url}
                       muted
                       playsInline
                       preload="metadata"

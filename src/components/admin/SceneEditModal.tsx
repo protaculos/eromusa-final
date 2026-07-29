@@ -37,6 +37,14 @@ export default function SceneEditModal({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Examples state
+  const [examples, setExamples] = useState<{ id: string; video_url: string; name: string }[]>([]);
+  const [exampleVideoFile, setExampleVideoFile] = useState<File | null>(null);
+  const [exampleName, setExampleName] = useState("");
+  const [exampleUploading, setExampleUploading] = useState(false);
+  const [addingExample, setAddingExample] = useState(false);
+  const exampleFileInputRef = useRef<HTMLInputElement>(null);
+
   const isEditing = !!scene;
 
   // Reset form when modal opens
@@ -47,18 +55,108 @@ export default function SceneEditModal({
         setCredits(scene.credits);
         setStyleId(scene.style_id);
         setVideoPreview(scene.loop_video_url);
+        // Fetch examples
+        fetchExamples(scene.id);
       } else {
         setName("");
         setCredits(10);
         setStyleId("");
         setVideoPreview(null);
+        setExamples([]);
       }
       setVideoFile(null);
       setError(null);
       setSaving(false);
       setDeleting(false);
+      setAddingExample(false);
+      setExampleVideoFile(null);
+      setExampleName("");
     }
   }, [isOpen, scene]);
+
+  const fetchExamples = async (sceneId: string) => {
+    try {
+      const res = await fetch(`/api/admin/scenes/${sceneId}/examples`);
+      if (res.ok) {
+        const data = await res.json();
+        setExamples(Array.isArray(data) ? data : []);
+      }
+    } catch {
+      setExamples([]);
+    }
+  };
+
+  const handleAddExample = async () => {
+    if (!scene || !session?.access_token) return;
+    if (!exampleVideoFile) return;
+
+    setExampleUploading(true);
+    setError(null);
+
+    try {
+      // Upload video
+      const formData = new FormData();
+      formData.append("file", exampleVideoFile);
+      formData.append("scene_id", scene.id);
+
+      const uploadRes = await fetch("/api/admin/upload", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        body: formData,
+      });
+
+      if (!uploadRes.ok) {
+        const uploadErr = await uploadRes.json();
+        throw new Error(uploadErr.error || "Failed to upload video");
+      }
+
+      const uploadData = await uploadRes.json();
+
+      // Create example
+      const res = await fetch(`/api/admin/scenes/${scene.id}/examples`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          video_url: uploadData.url,
+          name: exampleName.trim() || "",
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Failed to add example");
+      }
+
+      setExampleVideoFile(null);
+      setExampleName("");
+      setAddingExample(false);
+      fetchExamples(scene.id);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to add example");
+    } finally {
+      setExampleUploading(false);
+    }
+  };
+
+  const handleDeleteExample = async (exampleId: string) => {
+    if (!scene || !session?.access_token) return;
+
+    try {
+      const res = await fetch(`/api/admin/scenes/${scene.id}/examples?example_id=${exampleId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+
+      if (res.ok) {
+        fetchExamples(scene.id);
+      }
+    } catch (err) {
+      console.error("Failed to delete example:", err);
+    }
+  };
 
   // Cleanup object URLs
   useEffect(() => {
@@ -291,6 +389,92 @@ export default function SceneEditModal({
               />
             </div>
           </div>
+
+          {/* Examples section — only when editing */}
+          {isEditing && (
+            <div className="border-t border-[#1E2130] pt-4">
+              <div className="flex items-center justify-between mb-3">
+                <label className="text-sm text-white/60 font-semibold uppercase tracking-wider">Examples</label>
+                <button
+                  onClick={() => setAddingExample(!addingExample)}
+                  className="text-xs text-[#EE5F96] hover:text-pink-400 font-medium transition-colors"
+                >
+                  {addingExample ? "Cancel" : "+ Add Example"}
+                </button>
+              </div>
+
+              {/* Add example form */}
+              {addingExample && (
+                <div className="bg-[#161827] rounded-xl p-3 space-y-2 mb-3">
+                  <input
+                    type="text"
+                    value={exampleName}
+                    onChange={(e) => setExampleName(e.target.value)}
+                    placeholder="Example name (optional)"
+                    className="w-full bg-[#0A0B14] border border-[#1E2130] rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-[#EE5F96] transition-colors"
+                  />
+                  <input
+                    ref={exampleFileInputRef}
+                    type="file"
+                    accept=".webm,.mp4"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) setExampleVideoFile(file);
+                    }}
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => exampleFileInputRef.current?.click()}
+                      className="flex-1 px-3 py-2 rounded-lg border border-dashed border-[#1E2130] text-white/40 hover:text-white/60 text-xs transition-colors"
+                    >
+                      {exampleVideoFile ? exampleVideoFile.name : "Select video"}
+                    </button>
+                    <button
+                      onClick={handleAddExample}
+                      disabled={!exampleVideoFile || exampleUploading}
+                      className="px-4 py-2 rounded-lg bg-[#EE5F96] hover:bg-pink-600 disabled:opacity-50 text-white text-xs font-semibold transition-colors"
+                    >
+                      {exampleUploading ? "Uploading..." : "Add"}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Examples list */}
+              {examples.length === 0 ? (
+                <p className="text-white/30 text-xs">No examples yet</p>
+              ) : (
+                <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                  {examples.map((ex) => (
+                    <div key={ex.id} className="flex items-center gap-2 bg-[#161827] rounded-xl p-2">
+                      <div className="w-12 h-16 rounded-lg overflow-hidden bg-black shrink-0">
+                        <video
+                          src={ex.video_url}
+                          muted
+                          playsInline
+                          preload="metadata"
+                          className="w-full h-full object-cover"
+                          onLoadedMetadata={(e) => { (e.target as HTMLVideoElement).currentTime = 0; }}
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white text-xs truncate">{ex.name || "Untitled"}</p>
+                      </div>
+                      <button
+                        onClick={() => handleDeleteExample(ex.id)}
+                        className="w-6 h-6 rounded-full bg-red-500/20 flex items-center justify-center hover:bg-red-500/40 transition-colors shrink-0"
+                      >
+                        <svg className="w-3 h-3 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Error */}
           {error && (

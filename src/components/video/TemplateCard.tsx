@@ -64,12 +64,12 @@ export default function TemplateCard({ template, isAutoPlay = false, onClick, on
       onMouseLeave={handleMouseLeave}
       className="group relative rounded-2xl overflow-hidden bg-[#161827] border border-[#1E2130] hover:border-[#EE5F96]/50 transition-all duration-300 text-left w-full focus:outline-none focus:ring-2 focus:ring-[#EE5F96]/50"
     >
-      <div className="relative aspect-[4/5] overflow-hidden">
+      <div className="relative overflow-hidden">
         {/* Video serves as both thumbnail and hover preview */}
         <video
           ref={videoRef}
           src={template.videoUrl}
-          className={`w-full h-full object-cover transition-transform duration-500 ${isHovered ? 'scale-110' : 'scale-100'}`}
+          className={`w-full h-auto object-contain transition-transform duration-500 ${isHovered ? 'scale-110' : 'scale-100'}`}
           muted
           loop
           playsInline
