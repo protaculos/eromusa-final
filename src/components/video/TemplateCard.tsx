@@ -110,28 +110,28 @@ export default function TemplateCard({ template, isAutoPlay = false, onClick, on
           </div>
         )}
 
-        {/* Admin reorder arrows — left and right edges */}
+        {/* Admin reorder arrows — inside card, bottom area */}
         {isAdmin && (
-          <div className="absolute inset-0 z-10 pointer-events-none">
+          <div className="absolute bottom-10 left-0 right-0 z-10 flex justify-center gap-1 pointer-events-none">
             {onReorderUp && showReorderUp && (
               <button
                 onClick={(e) => { e.stopPropagation(); onReorderUp(); }}
-                className="pointer-events-auto absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-black/80 flex items-center justify-center hover:bg-[#EE5F96] transition-colors shadow-lg border border-white/20"
+                className="pointer-events-auto w-6 h-6 rounded-full bg-black/80 flex items-center justify-center hover:bg-[#EE5F96] transition-colors shadow-lg border border-white/20"
                 title="Move up"
               >
                 <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 15l7-7 7 7" />
                 </svg>
               </button>
             )}
             {onReorderDown && showReorderDown && (
               <button
                 onClick={(e) => { e.stopPropagation(); onReorderDown(); }}
-                className="pointer-events-auto absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-6 h-6 rounded-full bg-black/80 flex items-center justify-center hover:bg-[#EE5F96] transition-colors shadow-lg border border-white/20"
+                className="pointer-events-auto w-6 h-6 rounded-full bg-black/80 flex items-center justify-center hover:bg-[#EE5F96] transition-colors shadow-lg border border-white/20"
                 title="Move down"
               >
                 <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
             )}
