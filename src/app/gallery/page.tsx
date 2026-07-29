@@ -90,9 +90,6 @@ function ProcessingCard({ video }: { video: VideoData }) {
 
         {/* Bottom info */}
         <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
-          <span className="bg-black/60 text-white/80 text-[10px] px-2 py-0.5 rounded-md">
-            {video.template_duration}
-          </span>
           <a
             href="/support"
             className="bg-red-500/80 hover:bg-red-500 text-white text-[10px] font-semibold px-2 py-0.5 rounded-md transition-colors"
@@ -129,9 +126,6 @@ function ProcessingCard({ video }: { video: VideoData }) {
 
       {/* Bottom info */}
       <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
-        <span className="bg-black/60 text-white/80 text-[10px] px-2 py-0.5 rounded-md">
-          {video.template_duration}
-        </span>
         {/* Processing badge removed */}
       </div>
     </div>
@@ -201,9 +195,6 @@ function CompletedCard({
 
       {/* Bottom info */}
       <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
-        <span className="bg-black/60 text-white/80 text-[10px] px-2 py-0.5 rounded-md">
-          {video.template_duration}
-        </span>
         {/* Ready badge removed */}
       </div>
 
@@ -383,7 +374,7 @@ function VideoPopup({
           {/* Body */}
           <div className="p-4 space-y-3">
             {/* Video player — adapts to video's natural dimensions */}
-            <div className="rounded-2xl overflow-hidden bg-black border border-[#1E2130] flex justify-center">
+            <div className="relative rounded-2xl overflow-hidden bg-black border border-[#1E2130] flex justify-center">
               <video
                 ref={videoRef}
                 src={video.video_url}
@@ -408,15 +399,16 @@ function VideoPopup({
                 </div>
               )}
 
-              {/* Expires countdown — top area */}
-              {expiresDisplay && (
-                <div className="absolute top-2 left-2 right-2 flex justify-center">
-                  <div className="bg-black/70 text-white/80 text-[10px] px-2 py-0.5 rounded-md">
-                    Expira em {expiresDisplay}
-                  </div>
-                </div>
-              )}
             </div>
+
+            {/* Expires countdown — between video and actions */}
+            {expiresDisplay && (
+              <div className="flex justify-center">
+                <div className="bg-[#1E2130] text-white/70 text-xs px-3 py-1.5 rounded-lg">
+                  Expires in {expiresDisplay}
+                </div>
+              </div>
+            )}
 
             {/* Actions */}
             <div className="flex gap-2">
