@@ -17,6 +17,7 @@ interface SceneData {
   style_id: string;
   loop_video_url: string;
   gradient: string;
+  visible?: boolean;
 }
 
 interface SceneExample {
@@ -57,6 +58,8 @@ export default function DiscoverPage() {
   const [loading, setLoading] = useState(true);
   const [editScene, setEditScene] = useState<SceneData | null>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [showAddPopup, setShowAddPopup] = useState(false);
+  const [allScenes, setAllScenes] = useState<SceneData[]>([]);
 
   // Delete scene state (2-step flow)
   const [deleteSceneTarget, setDeleteSceneTarget] = useState<{ sceneId: string; sceneName: string } | null>(null);
@@ -217,6 +220,24 @@ export default function DiscoverPage() {
               </svg>
               New Scene
             </button>
+            <button
+              onClick={async () => {
+                try {
+                  const res = await fetch('/api/admin/scenes');
+                  if (res.ok) {
+                    const data = await res.json();
+                    setAllScenes(Array.isArray(data) ? data : []);
+                    setShowAddPopup(true);
+                  }
+                } catch {}
+              }}
+              className="flex items-center gap-2 text-white/60 hover:text-white transition-colors text-sm"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Add Scene
+            </button>
             {scenes.length > 0 && (
               <button
                 onClick={() => setConfirmClearAll(true)}
@@ -354,6 +375,77 @@ export default function DiscoverPage() {
         confirmLabel="Clear all"
         confirmColor="bg-red-500 hover:bg-red-600"
       />
+
+      {/* Add Scene popup */}
+      {showAddPopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowAddPopup(false)}>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <div
+            className="relative bg-[#0A0B14] border border-[#1E2130] rounded-2xl w-full max-w-md max-h-[70vh] overflow-y-auto shadow-2xl p-5"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-white">Add Scene</h2>
+              <button onClick={() => setShowAddPopup(false)} className="text-white/40 hover:text-white p-1">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            {allScenes.length === 0 ? (
+              <p className="text-white/30 text-sm">No scenes in the database.</p>
+            ) : (
+              <div className="space-y-2">
+                {allScenes.map((s) => {
+                  const isVisible = scenes.some((v) => v.id === s.id);
+                  return (
+                    <div key={s.id} className="flex items-center gap-3 bg-[#161827] rounded-xl p-3">
+                      <div className="w-10 h-14 rounded-lg overflow-hidden bg-black shrink-0">
+                        <video
+                          src={s.loop_video_url}
+                          muted
+                          playsInline
+                          preload="metadata"
+                          className="w-full h-full object-cover"
+                          onLoadedMetadata={(e) => { (e.target as HTMLVideoElement).currentTime = 0; }}
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white text-sm truncate">{s.name}</p>
+                        <p className="text-white/30 text-xs">{s.style_id}</p>
+                      </div>
+                      {isVisible ? (
+                        <span className="text-emerald-400 text-xs font-medium">Visible</span>
+                      ) : (
+                        <button
+                          onClick={async () => {
+                            if (!session?.access_token) return;
+                            try {
+                              await fetch(`/api/admin/scenes/${s.id}`, {
+                                method: 'PATCH',
+                                headers: {
+                                  'Content-Type': 'application/json',
+                                  Authorization: `Bearer ${session.access_token}`,
+                                },
+                                body: JSON.stringify({ visible: true }),
+                              });
+                              fetchScenes();
+                              setAllScenes((prev) => prev.map((x) => x.id === s.id ? { ...x, visible: true } : x));
+                            } catch {}
+                          }}
+                          className="px-3 py-1.5 rounded-lg bg-[#EE5F96] hover:bg-pink-600 text-white text-xs font-semibold transition-colors"
+                        >
+                          Add
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
