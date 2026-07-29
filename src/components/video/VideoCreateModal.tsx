@@ -258,7 +258,7 @@ export default function VideoCreateModal({
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
       {/* Container — portrait/mobile-like, fixed aspect, responsive */}
-      <div className="relative bg-[#0A0B14] border border-[#1E2130] rounded-2xl w-full max-w-[420px] max-h-[90vh] overflow-y-auto shadow-2xl scrollbar-thin scrollbar-thumb-[#1E2130] scrollbar-track-transparent">
+      <div className="relative bg-[#0A0B14] border border-[#1E2130] rounded-2xl w-full max-w-[420px] shadow-2xl">
         {/* Header with title + filters */}
         <div className="sticky top-0 bg-[#0A0B14] z-10 flex items-center justify-between p-5 border-b border-[#1E2130]">
           <div className="min-w-0">
@@ -298,7 +298,7 @@ export default function VideoCreateModal({
                 onDragLeave={onDragLeave}
                 onClick={() => fileInputRef.current?.click()}
                 className={`
-                  relative aspect-[9/16] rounded-2xl border-2 border-dashed cursor-pointer
+                  relative aspect-[2/3] rounded-2xl border-2 border-dashed cursor-pointer
                   transition-all duration-200 overflow-hidden
                   ${dragOver
                     ? 'border-[#EE5F96] bg-[#EE5F96]/10'
@@ -357,7 +357,7 @@ export default function VideoCreateModal({
             {/* Template preview card — aspect-[3/4] portrait */}
             <div className="flex-1 min-w-0">
               <p className="text-xs text-white/40 font-semibold uppercase tracking-wider mb-2">Output Video</p>
-              <div className="relative aspect-[9/16] rounded-2xl overflow-hidden bg-[#0A0B14] border border-[#1E2130] group">
+              <div className="relative aspect-[2/3] rounded-2xl overflow-hidden bg-[#0A0B14] border border-[#1E2130] group">
                 <video
                   src={activeTemplate.videoUrl}
                   autoPlay
