@@ -314,6 +314,12 @@ export default function DiscoverPage() {
     setDeleteSceneConfirm(null);
   };
 
+  const handleCloseStep1 = () => {
+    // Only close Step 1, don't clear deleteSceneConfirm
+    setDeleteSceneTarget(null);
+    setDeleteSceneMode(null);
+  };
+
   return (
     <div className="min-h-screen bg-[#0A0B14]">
       {/* Content */}
@@ -452,7 +458,7 @@ export default function DiscoverPage() {
       {/* Step 1: Choose mode */}
       <ConfirmModal
         open={!!deleteSceneTarget && !deleteSceneMode}
-        onClose={handleCloseDeleteScene}
+        onClose={handleCloseStep1}
         title="Delete Scene"
         message={`What do you want to do with "${deleteSceneTarget?.sceneName}"?`}
         actions={[
