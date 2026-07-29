@@ -34,6 +34,7 @@ export default function CarouselSection({
   onRenameCategory,
   onReorderScene,
   onMoveToCategory,
+  onDeleteScene,
   categoryId,
   categoryIndex = 0,
   totalCategories = 0,

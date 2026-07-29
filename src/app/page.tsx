@@ -475,8 +475,8 @@ export default function DiscoverPage() {
         title="Are you sure?"
         message={
           deleteSceneConfirm?.mode === 'site'
-            ? `"${deleteSceneConfirm.sceneName}" will be removed from this category but will remain in the database.`
-            : `"${deleteSceneConfirm.sceneName}" will be permanently deleted from the database and removed from all categories. This cannot be undone.`
+            ? `"${deleteSceneConfirm?.sceneName ?? ''}" will be removed from this category but will remain in the database.`
+            : `"${deleteSceneConfirm?.sceneName ?? ''}" will be permanently deleted from the database and removed from all categories. This cannot be undone.`
         }
         confirmLabel={
           deleteSceneConfirm?.mode === 'site' ? "Yes, remove from site" : "Yes, delete permanently"
