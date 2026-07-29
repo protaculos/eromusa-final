@@ -64,6 +64,11 @@ export default function DiscoverPage() {
   // Confirm delete state
   const [confirmDelete, setConfirmDelete] = useState<{ id: string; name: string } | null>(null);
 
+  // Delete scene from category state (2-step flow)
+  const [deleteSceneTarget, setDeleteSceneTarget] = useState<{ sceneId: string; categoryId: string; sceneName: string } | null>(null);
+  const [deleteSceneMode, setDeleteSceneMode] = useState<'site' | 'database' | null>(null);
+  const [deleteSceneConfirm, setDeleteSceneConfirm] = useState<{ sceneId: string; categoryId: string; sceneName: string; mode: 'site' | 'database' } | null>(null);
+
   // Fetch categories from Supabase
   const fetchCategories = async () => {
     try {
@@ -248,6 +253,67 @@ export default function DiscoverPage() {
     }
   };
 
+  // ── Delete scene handlers (2-step flow) ───────────
+
+  const handleDeleteScene = (sceneId: string) => {
+    // Step 1: Find the scene and open the mode picker
+    for (const cat of categories) {
+      const scene = cat.scenes.find((s) => s.id === sceneId);
+      if (scene) {
+        setDeleteSceneTarget({ sceneId, categoryId: cat.id, sceneName: scene.name });
+        setDeleteSceneMode(null);
+        return;
+      }
+    }
+  };
+
+  const handleChooseDeleteMode = (mode: 'site' | 'database') => {
+    if (!deleteSceneTarget) return;
+    setDeleteSceneMode(mode);
+    setDeleteSceneConfirm({
+      sceneId: deleteSceneTarget.sceneId,
+      categoryId: deleteSceneTarget.categoryId,
+      sceneName: deleteSceneTarget.sceneName,
+      mode,
+    });
+  };
+
+  const handleConfirmDeleteScene = async () => {
+    if (!session?.access_token || !deleteSceneConfirm) return;
+    const { sceneId, categoryId, mode } = deleteSceneConfirm;
+
+    try {
+      if (mode === 'site') {
+        // Remove from category only
+        const res = await fetch(`/api/admin/category-scenes?category_id=${categoryId}&scene_id=${sceneId}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        });
+        if (!res.ok) throw new Error('Failed to remove scene from category');
+      } else {
+        // Delete from database (cascade removes from category_scenes too)
+        const res = await fetch(`/api/admin/scenes/${sceneId}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        });
+        if (!res.ok) throw new Error('Failed to delete scene');
+      }
+
+      setDeleteSceneTarget(null);
+      setDeleteSceneMode(null);
+      setDeleteSceneConfirm(null);
+      fetchCategories();
+    } catch (err) {
+      console.error('Failed to delete scene:', err);
+    }
+  };
+
+  const handleCloseDeleteScene = () => {
+    setDeleteSceneTarget(null);
+    setDeleteSceneMode(null);
+    setDeleteSceneConfirm(null);
+  };
+
   return (
     <div className="min-h-screen bg-[#0A0B14]">
       {/* Content */}
@@ -319,6 +385,7 @@ export default function DiscoverPage() {
               onRenameCategory={isAdmin && section.categoryId ? (newName) => handleRenameCategory(section.categoryId!, newName) : undefined}
               onReorderScene={isAdmin && section.categoryId ? (sceneId, dir) => handleReorderScene(section.categoryId!, sceneId, dir) : undefined}
               onMoveToCategory={isAdmin ? handleMoveSceneToCategory : undefined}
+              onDeleteScene={isAdmin ? handleDeleteScene : undefined}
               categoryId={section.categoryId}
               categoryIndex={idx}
               totalCategories={carouselSections.length}
@@ -379,6 +446,47 @@ export default function DiscoverPage() {
         message={`Are you sure you want to delete "${confirmDelete?.name}"? Scenes will be unlinked but not deleted.`}
         confirmLabel="Delete"
         confirmColor="bg-red-500 hover:bg-red-600"
+      />
+
+      {/* Delete scene modals (2-step flow) */}
+      {/* Step 1: Choose mode */}
+      <ConfirmModal
+        open={!!deleteSceneTarget && !deleteSceneMode}
+        onClose={handleCloseDeleteScene}
+        title="Delete Scene"
+        message={`What do you want to do with "${deleteSceneTarget?.sceneName}"?`}
+        actions={[
+          {
+            label: "Delete from site",
+            color: "bg-amber-500 hover:bg-amber-600",
+            onClick: () => handleChooseDeleteMode('site'),
+          },
+          {
+            label: "Delete from database",
+            color: "bg-red-500 hover:bg-red-600",
+            onClick: () => handleChooseDeleteMode('database'),
+          },
+        ]}
+      />
+      {/* Step 2: Confirm */}
+      <ConfirmModal
+        open={!!deleteSceneConfirm}
+        onClose={handleCloseDeleteScene}
+        title="Are you sure?"
+        message={
+          deleteSceneConfirm?.mode === 'site'
+            ? `"${deleteSceneConfirm.sceneName}" will be removed from this category but will remain in the database.`
+            : `"${deleteSceneConfirm.sceneName}" will be permanently deleted from the database and removed from all categories. This cannot be undone.`
+        }
+        confirmLabel={
+          deleteSceneConfirm?.mode === 'site' ? "Yes, remove from site" : "Yes, delete permanently"
+        }
+        confirmColor={
+          deleteSceneConfirm?.mode === 'site'
+            ? "bg-amber-500 hover:bg-amber-600"
+            : "bg-red-500 hover:bg-red-600"
+        }
+        onConfirm={handleConfirmDeleteScene}
       />
     </div>
   );

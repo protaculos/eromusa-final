@@ -1,14 +1,22 @@
 "use client";
 import React from 'react';
 
+interface ActionButton {
+  label: string;
+  color: string;
+  onClick: () => void;
+}
+
 interface ConfirmModalProps {
   open: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm?: () => void;
   title: string;
   message: string;
   confirmLabel?: string;
   confirmColor?: string;
+  /** When provided, renders multiple action buttons instead of the single confirm button */
+  actions?: ActionButton[];
 }
 
 export default function ConfirmModal({
@@ -19,6 +27,7 @@ export default function ConfirmModal({
   message,
   confirmLabel = 'Confirm',
   confirmColor = 'bg-[#EE5F96] hover:bg-[#d94d7e]',
+  actions,
 }: ConfirmModalProps) {
   if (!open) return null;
 
@@ -51,12 +60,24 @@ export default function ConfirmModal({
           >
             Cancel
           </button>
-          <button
-            onClick={() => { onConfirm(); onClose(); }}
-            className={`flex-1 px-4 py-3 rounded-xl text-sm font-semibold text-white transition-colors ${confirmColor}`}
-          >
-            {confirmLabel}
-          </button>
+          {actions ? (
+            actions.map((action, i) => (
+              <button
+                key={i}
+                onClick={() => { action.onClick(); onClose(); }}
+                className={`flex-1 px-4 py-3 rounded-xl text-sm font-semibold text-white transition-colors ${action.color}`}
+              >
+                {action.label}
+              </button>
+            ))
+          ) : (
+            <button
+              onClick={() => { onConfirm?.(); onClose(); }}
+              className={`flex-1 px-4 py-3 rounded-xl text-sm font-semibold text-white transition-colors ${confirmColor}`}
+            >
+              {confirmLabel}
+            </button>
+          )}
         </div>
       </div>
     </div>
