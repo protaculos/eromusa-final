@@ -336,13 +336,21 @@ function VideoPopup({
     setConfirmDelete(false);
   }, [video.job_id, deleting, onDelete, onClose]);
 
-  const handleDownload = useCallback(() => {
-    const a = document.createElement("a");
-    a.href = video.video_url;
-    a.download = `${video.template_name || "video"}.mp4`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+  const handleDownload = useCallback(async () => {
+    try {
+      const res = await fetch(video.video_url);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${video.template_name || "video"}.mp4`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Download failed:", err);
+    }
     setConfirmDownload(false);
   }, [video.video_url, video.template_name]);
 
@@ -353,7 +361,7 @@ function VideoPopup({
         onClick={onClose}
       >
         <div
-          className="relative bg-[#0A0B14] border border-[#1E2130] rounded-2xl w-full max-w-[360px] max-h-[90vh] overflow-y-auto shadow-2xl scrollbar-thin scrollbar-thumb-[#1E2130] scrollbar-track-transparent"
+          className="relative bg-[#0A0B14] border border-[#1E2130] rounded-2xl w-full max-w-[300px] max-h-[90vh] overflow-y-auto shadow-2xl scrollbar-thin scrollbar-thumb-[#1E2130] scrollbar-track-transparent"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
@@ -605,7 +613,7 @@ export default function GalleryPage() {
           {/* Info banner */}
           <div className="bg-[#EE5F96]/10 border border-[#EE5F96]/20 rounded-2xl p-4 mb-8 text-center">
             <p className="text-white/70 text-sm">
-              Videos are automatically deleted <strong>72 hours</strong> after creation.
+              <strong>Download your videos!</strong> We don&apos;t store your media permanently — videos are automatically deleted <strong>72 hours</strong> after creation.
             </p>
           </div>
 
@@ -634,7 +642,7 @@ export default function GalleryPage() {
         {/* Info banner */}
         <div className="bg-[#EE5F96]/10 border border-[#EE5F96]/20 rounded-2xl p-4 mb-8 text-center">
           <p className="text-white/70 text-sm">
-            Videos are automatically deleted <strong>72 hours</strong> after creation.
+            <strong>Download your videos!</strong> We don&apos;t store your media permanently — videos are automatically deleted <strong>72 hours</strong> after creation.
           </p>
         </div>
 
