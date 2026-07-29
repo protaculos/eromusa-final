@@ -116,6 +116,20 @@ export default function DiscoverPage() {
     }
   };
 
+  // ── Reorder scene handlers ──────────────────────────
+
+  const handleReorderScene = (sceneId: string, direction: 'up' | 'down') => {
+    setScenes((prev) => {
+      const idx = prev.findIndex((s) => s.id === sceneId);
+      if (idx === -1) return prev;
+      const newIdx = direction === 'up' ? idx - 1 : idx + 1;
+      if (newIdx < 0 || newIdx >= prev.length) return prev;
+      const arr = [...prev];
+      [arr[idx], arr[newIdx]] = [arr[newIdx], arr[idx]];
+      return arr;
+    });
+  };
+
   // ── Delete scene handlers (2-step flow) ───────────
 
   const handleDeleteScene = (sceneId: string) => {
@@ -207,13 +221,18 @@ export default function DiscoverPage() {
         ) : (
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              {displayTemplates.map((template) => (
+              {displayTemplates.map((template, index) => (
                 <TemplateCard
                   key={template.id}
                   template={template}
                   isAutoPlay={true}
                   onClick={() => handleTemplateClick(template)}
                   onEdit={isAdmin ? () => handleEditTemplate(template) : undefined}
+                  onDelete={isAdmin ? () => handleDeleteScene(template.id) : undefined}
+                  onReorderUp={isAdmin ? () => handleReorderScene(template.id, 'up') : undefined}
+                  onReorderDown={isAdmin ? () => handleReorderScene(template.id, 'down') : undefined}
+                  showReorderUp={index > 0}
+                  showReorderDown={index < displayTemplates.length - 1}
                 />
               ))}
             </div>
