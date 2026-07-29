@@ -7,8 +7,7 @@ export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const authError = await requireAdmin(req);
-  if (authError) return authError;
+  try { await requireAdmin(req); } catch (e) { return e as NextResponse; }
 
   const { id } = await params;
 
@@ -31,8 +30,7 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const authError = await requireAdmin(req);
-  if (authError) return authError;
+  try { await requireAdmin(req); } catch (e) { return e as NextResponse; }
 
   const { id } = await params;
   const body = await req.json();
@@ -76,8 +74,7 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const authError = await requireAdmin(req);
-  if (authError) return authError;
+  try { await requireAdmin(req); } catch (e) { return e as NextResponse; }
 
   const { id } = await params;
   const url = new URL(req.url);
