@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
+import ConfirmModal from "@/components/ConfirmModal";
 
 interface SceneData {
   id: string;
@@ -33,6 +34,7 @@ export default function SceneEditModal({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isEditing = !!scene;
@@ -174,10 +176,6 @@ export default function SceneEditModal({
   const handleDelete = async () => {
     if (!scene || !session?.access_token) return;
 
-    if (!confirm(`Are you sure you want to delete "${scene.name}"? This cannot be undone.`)) {
-      return;
-    }
-
     setDeleting(true);
     setError(null);
 
@@ -305,7 +303,7 @@ export default function SceneEditModal({
           <div className="flex gap-3 pt-2">
             {isEditing && (
               <button
-                onClick={handleDelete}
+                onClick={() => setShowDeleteConfirm(true)}
                 disabled={deleting}
                 className="px-4 py-2.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 text-sm font-medium transition-colors disabled:opacity-50"
               >
@@ -329,6 +327,17 @@ export default function SceneEditModal({
           </div>
         </div>
       </div>
+
+      {/* Delete confirmation modal */}
+      <ConfirmModal
+        open={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={handleDelete}
+        title="Delete Scene"
+        message={`Are you sure you want to delete "${scene?.name}"? This will permanently remove it from the database and all categories. This cannot be undone.`}
+        confirmLabel="Delete"
+        confirmColor="bg-red-500 hover:bg-red-600"
+      />
     </div>
   );
 }
