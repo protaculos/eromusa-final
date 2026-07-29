@@ -64,7 +64,7 @@ export default function DiscoverPage() {
   const [deleteSceneConfirm, setDeleteSceneConfirm] = useState<{ sceneId: string; sceneName: string; mode: 'site' | 'database' } | null>(null);
   const [confirmClearAll, setConfirmClearAll] = useState(false);
 
-  // Fetch scenes from Supabase
+  // Fetch visible scenes from Supabase
   const fetchScenes = async () => {
     try {
       const res = await fetch('/api/scenes');
@@ -157,9 +157,17 @@ export default function DiscoverPage() {
 
     try {
       if (mode === 'site') {
-        // For now, "delete from site" with no categories = just remove from display
-        // (scenes are standalone, so this is equivalent to hiding)
-        setScenes((prev) => prev.filter((s) => s.id !== sceneId));
+        // Mark as not visible in database
+        const res = await fetch(`/api/admin/scenes/${sceneId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ visible: false }),
+        });
+        if (!res.ok) throw new Error('Failed to hide scene');
+        fetchScenes();
       } else {
         const res = await fetch(`/api/admin/scenes/${sceneId}`, {
           method: 'DELETE',
@@ -328,7 +336,19 @@ export default function DiscoverPage() {
       <ConfirmModal
         open={confirmClearAll}
         onClose={() => setConfirmClearAll(false)}
-        onConfirm={() => { setScenes([]); setConfirmClearAll(false); }}
+        onConfirm={async () => {
+          if (!session?.access_token) return;
+          try {
+            await fetch('/api/admin/scenes/clear', {
+              method: 'POST',
+              headers: { Authorization: `Bearer ${session.access_token}` },
+            });
+            fetchScenes();
+          } catch (err) {
+            console.error('Failed to clear scenes:', err);
+          }
+          setConfirmClearAll(false);
+        }}
         title="Clear all scenes"
         message="This will remove all scenes from the display. They will remain in the database so you can add them back later."
         confirmLabel="Clear all"

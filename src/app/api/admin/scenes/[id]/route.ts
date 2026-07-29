@@ -16,7 +16,7 @@ export async function PATCH(
   const { id } = await params;
   const body = await req.json();
 
-  const allowedFields = ["name", "credits", "style_id", "loop_video_url", "gradient"];
+  const allowedFields = ["name", "credits", "style_id", "loop_video_url", "gradient", "visible"];
   const updates: Record<string, any> = {};
   for (const field of allowedFields) {
     if (body[field] !== undefined) {
