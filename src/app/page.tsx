@@ -62,6 +62,7 @@ export default function DiscoverPage() {
   const [deleteSceneTarget, setDeleteSceneTarget] = useState<{ sceneId: string; sceneName: string } | null>(null);
   const [deleteSceneMode, setDeleteSceneMode] = useState<'site' | 'database' | null>(null);
   const [deleteSceneConfirm, setDeleteSceneConfirm] = useState<{ sceneId: string; sceneName: string; mode: 'site' | 'database' } | null>(null);
+  const [confirmClearAll, setConfirmClearAll] = useState(false);
 
   // Fetch scenes from Supabase
   const fetchScenes = async () => {
@@ -210,7 +211,7 @@ export default function DiscoverPage() {
             </button>
             {scenes.length > 0 && (
               <button
-                onClick={() => setScenes([])}
+                onClick={() => setConfirmClearAll(true)}
                 className="flex items-center gap-2 text-red-400/60 hover:text-red-400 transition-colors text-sm"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -321,6 +322,17 @@ export default function DiscoverPage() {
             : "bg-red-500 hover:bg-red-600"
         }
         onConfirm={handleConfirmDeleteScene}
+      />
+
+      {/* Clear all confirmation modal */}
+      <ConfirmModal
+        open={confirmClearAll}
+        onClose={() => setConfirmClearAll(false)}
+        onConfirm={() => { setScenes([]); setConfirmClearAll(false); }}
+        title="Clear all scenes"
+        message="This will remove all scenes from the display. They will remain in the database so you can add them back later."
+        confirmLabel="Clear all"
+        confirmColor="bg-red-500 hover:bg-red-600"
       />
     </div>
   );
