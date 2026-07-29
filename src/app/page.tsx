@@ -84,7 +84,7 @@ export default function DiscoverPage() {
     setSelectedTemplate(template);
     // Fetch examples for this scene
     try {
-      const res = await fetch(`/api/admin/scenes/${template.id}/examples`);
+      const res = await fetch(`/api/scenes/${template.id}/examples`);
       if (res.ok) {
         const data = await res.json();
         setSceneExamples(Array.isArray(data) ? data : []);
