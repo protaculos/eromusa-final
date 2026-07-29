@@ -9,6 +9,18 @@ export interface VideoCreateModalProps {
   onClose: () => void;
   onOpenLogin: () => void;
   onOpenPayment?: () => void;
+  categoryTemplates?: {
+    id: string;
+    title: string;
+    thumbnail: string;
+    videoUrl: string;
+    gradient: string;
+    duration: string;
+    credits: number;
+    instructions: string[];
+    tags: string[];
+    styleId: string;
+  }[];
   template: {
     id: string;
     name: string;
@@ -29,6 +41,7 @@ export default function VideoCreateModal({
   onClose,
   onOpenLogin,
   onOpenPayment,
+  categoryTemplates = [],
   template,
 }: VideoCreateModalProps) {
   const { user, session, credits } = useAuth();
@@ -42,6 +55,7 @@ export default function VideoCreateModal({
   const [error, setError] = useState<string | null>(null);
   const [jobId, setJobId] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
+  const [activeTemplate, setActiveTemplate] = useState(template);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -55,8 +69,16 @@ export default function VideoCreateModal({
       setError(null);
       setJobId(null);
       setDragOver(false);
+      setActiveTemplate(template);
     }
   }, [isOpen]);
+
+  // Sync activeTemplate when template prop changes (e.g. user clicks a different scene)
+  useEffect(() => {
+    if (isOpen) {
+      setActiveTemplate(template);
+    }
+  }, [template, isOpen]);
 
   // Cleanup object URLs
   useEffect(() => {
@@ -117,7 +139,7 @@ export default function VideoCreateModal({
       return;
     }
 
-    if ((credits ?? 0) < (template?.credits ?? 0)) {
+    if ((credits ?? 0) < (activeTemplate?.credits ?? 0)) {
       if (onOpenPayment) {
         onOpenPayment();
       } else {
@@ -136,7 +158,7 @@ export default function VideoCreateModal({
       return;
     }
 
-    if (!template?.styleId) {
+    if (!activeTemplate?.styleId) {
       setError("Invalid template: missing style ID");
       setIsCreating(false);
       return;
@@ -167,12 +189,12 @@ export default function VideoCreateModal({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           imageBase64,
-          styleId: template.styleId,
-          templateId: template.id,
-          templateName: template.name,
-          templateThumbnail: template.thumbnailUrl,
-          templateDuration: template.duration,
-          templateCredits: template.credits,
+          styleId: activeTemplate.styleId,
+          templateId: activeTemplate.id,
+          templateName: activeTemplate.name,
+          templateThumbnail: activeTemplate.thumbnailUrl,
+          templateDuration: activeTemplate.duration,
+          templateCredits: activeTemplate.credits,
         }),
       });
 
@@ -233,7 +255,7 @@ export default function VideoCreateModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Overlay */}
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
       {/* Container — portrait/mobile-like, fixed aspect, responsive */}
       <div className="relative bg-[#0A0B14] border border-[#1E2130] rounded-2xl w-full max-w-[420px] max-h-[90vh] overflow-y-auto shadow-2xl scrollbar-thin scrollbar-thumb-[#1E2130] scrollbar-track-transparent">
@@ -242,14 +264,14 @@ export default function VideoCreateModal({
           <div className="min-w-0">
             <h2
               className="font-bold text-white whitespace-nowrap"
-              style={{ fontSize: template.name.length > 30 ? '0.9rem' : template.name.length > 20 ? '1.05rem' : '1.125rem' }}
-            >{template.name}</h2>
-            {template.tags.length > 0 && (
+              style={{ fontSize: activeTemplate.name.length > 30 ? '0.9rem' : activeTemplate.name.length > 20 ? '1.05rem' : '1.125rem' }}
+            >{activeTemplate.name}</h2>
+            {activeTemplate.tags.length > 0 && (
               <p
                 className="text-white/40 mt-0.5 whitespace-nowrap"
-                style={{ fontSize: template.tags.join(', ').length > 50 ? '0.65rem' : '0.75rem' }}
+                style={{ fontSize: activeTemplate.tags.join(', ').length > 50 ? '0.65rem' : '0.75rem' }}
               >
-                Filters: <span className="text-[#EE5F96]">{template.tags.join(', ')}</span>
+                Filters: <span className="text-[#EE5F96]">{activeTemplate.tags.join(', ')}</span>
               </p>
             )}
           </div>
@@ -303,7 +325,7 @@ export default function VideoCreateModal({
                   <>
                     {/* Template thumbnail (first frame, paused) as dimmed background reference */}
                     <video
-                      src={template.videoUrl}
+                      src={activeTemplate.videoUrl}
                       muted
                       playsInline
                       preload="metadata"
@@ -337,7 +359,7 @@ export default function VideoCreateModal({
               <p className="text-xs text-white/40 font-semibold uppercase tracking-wider mb-2">Output Video</p>
               <div className="relative aspect-[9/16] rounded-2xl overflow-hidden bg-[#0A0B14] border border-[#1E2130] group">
                 <video
-                  src={template.videoUrl}
+                  src={activeTemplate.videoUrl}
                   autoPlay
                   loop
                   muted
@@ -349,14 +371,56 @@ export default function VideoCreateModal({
 
                 {/* Bottom badges */}
                 <div className="absolute bottom-2 left-2 right-2 flex items-end justify-between">
-                  <p className="text-white text-xs font-semibold truncate">{template.name}</p>
+                  <p className="text-white text-xs font-semibold truncate">{activeTemplate.name}</p>
                   <span className="bg-black/60 text-white/80 text-[10px] px-2 py-0.5 rounded-md shrink-0 ml-2">
-                    {template.duration}
+                    {activeTemplate.duration}
                   </span>
                 </div>
               </div>
             </div>
           </div>
+
+          {/* Category scenes carousel — thumbnails only */}
+          {categoryTemplates.length > 1 && (
+            <div>
+              <p className="text-xs text-white/40 font-semibold uppercase tracking-wider mb-2">More Examples</p>
+              <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+                {categoryTemplates.map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => {
+                      setActiveTemplate({
+                        id: t.id,
+                        name: t.title,
+                        duration: t.duration,
+                        credits: t.credits,
+                        videoUrl: t.videoUrl,
+                        thumbnailUrl: t.thumbnail,
+                        instructions: t.instructions,
+                        tags: t.tags,
+                        gradient: t.gradient,
+                        styleId: t.styleId,
+                      });
+                    }}
+                    className={`shrink-0 w-16 h-24 rounded-lg overflow-hidden border-2 transition-all ${
+                      activeTemplate.id === t.id
+                        ? 'border-[#EE5F96] ring-1 ring-[#EE5F96]/50'
+                        : 'border-[#1E2130] hover:border-white/30'
+                    }`}
+                  >
+                    <video
+                      src={t.videoUrl}
+                      muted
+                      playsInline
+                      preload="metadata"
+                      className="w-full h-full object-cover"
+                      onLoadedMetadata={(e) => { (e.target as HTMLVideoElement).currentTime = 0; }}
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Error */}
           {error && (
@@ -380,7 +444,7 @@ export default function VideoCreateModal({
             {user && (
               <div className="flex items-center gap-1.5">
                 <span className="text-white/40 text-sm font-medium">✦</span>
-                <span className="text-white font-bold text-base">{template.credits}</span>
+                <span className="text-white font-bold text-base">{activeTemplate.credits}</span>
                 <span className="text-white/40 text-sm">Credits</span>
               </div>
             )}

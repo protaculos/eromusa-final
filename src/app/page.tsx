@@ -48,6 +48,7 @@ function sceneToTemplate(scene: SceneData): Template {
 export default function DiscoverPage() {
   const { session, isAdmin } = useAuth();
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
+  const [categoryTemplates, setCategoryTemplates] = useState<Template[]>([]);
   const [loginOpen, setLoginOpen] = useState(false);
   const [paymentOpen, setPaymentOpen] = useState(false);
 
@@ -114,6 +115,15 @@ export default function DiscoverPage() {
 
   const handleTemplateClick = (template: Template) => {
     setSelectedTemplate(template);
+    // Find the category this template belongs to and pass all its templates
+    for (const cat of categories) {
+      const found = cat.scenes.find((s) => s.id === template.id);
+      if (found) {
+        setCategoryTemplates((cat.scenes || []).map(sceneToTemplate));
+        return;
+      }
+    }
+    setCategoryTemplates([]);
   };
 
   const handleOpenLogin = () => {
@@ -408,6 +418,7 @@ export default function DiscoverPage() {
           onClose={() => setSelectedTemplate(null)}
           onOpenLogin={handleOpenLogin}
           onOpenPayment={handleOpenPayment}
+          categoryTemplates={categoryTemplates}
           template={{
             id: selectedTemplate.id,
             name: selectedTemplate.title,
