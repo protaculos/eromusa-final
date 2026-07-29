@@ -7,6 +7,7 @@ export async function GET() {
   const { data, error } = await supabaseAdmin
     .from("scenes")
     .select("*")
+    .order("sort_order", { ascending: true })
     .order("name", { ascending: true });
 
   if (error) {
@@ -31,6 +32,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "name and style_id are required" }, { status: 400 });
   }
 
+  // Get next sort_order
+  const { data: maxOrder } = await supabaseAdmin
+    .from("scenes")
+    .select("sort_order")
+    .order("sort_order", { ascending: false })
+    .limit(1)
+    .single();
+
+  const nextOrder = (maxOrder?.sort_order ?? -1) + 1;
+
   const { data, error } = await supabaseAdmin
     .from("scenes")
     .insert({
@@ -39,6 +50,7 @@ export async function POST(req: NextRequest) {
       style_id,
       loop_video_url: loop_video_url || "",
       gradient: gradient || "from-orange-500 via-pink-500 to-purple-600",
+      sort_order: nextOrder,
     })
     .select()
     .single();

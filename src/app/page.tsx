@@ -122,7 +122,8 @@ export default function DiscoverPage() {
 
   // ── Reorder scene handlers ──────────────────────────
 
-  const handleReorderScene = (sceneId: string, direction: 'up' | 'down') => {
+  const handleReorderScene = async (sceneId: string, direction: 'up' | 'down') => {
+    // Update local state immediately for responsiveness
     setScenes((prev) => {
       const idx = prev.findIndex((s) => s.id === sceneId);
       if (idx === -1) return prev;
@@ -132,6 +133,23 @@ export default function DiscoverPage() {
       [arr[idx], arr[newIdx]] = [arr[newIdx], arr[idx]];
       return arr;
     });
+
+    // Persist to database
+    if (!session?.access_token) return;
+    try {
+      await fetch('/api/admin/scenes/reorder', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ scene_id: sceneId, direction }),
+      });
+    } catch (err) {
+      console.error('Failed to persist reorder:', err);
+      // Revert on error by refetching
+      fetchScenes();
+    }
   };
 
   // ── Delete scene handlers (2-step flow) ───────────

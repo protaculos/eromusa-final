@@ -7,6 +7,7 @@ export async function GET() {
     .from("scenes")
     .select("*")
     .eq("visible", true)
+    .order("sort_order", { ascending: true })
     .order("name", { ascending: true });
 
   if (error) {
