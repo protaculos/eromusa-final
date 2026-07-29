@@ -190,8 +190,8 @@ export default function DiscoverPage() {
   // Build templates from scenes
   const templates = scenes.map(sceneToTemplate);
 
-  // Fallback to local templates if no scenes in DB
-  const displayTemplates = templates.length > 0 ? templates : allTemplates;
+  // No fallback — user adds scenes manually
+  const displayTemplates = templates;
 
   return (
     <div className="min-h-screen bg-[#0A0B14]">
