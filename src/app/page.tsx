@@ -279,20 +279,21 @@ export default function DiscoverPage() {
           </div>
         ) : (
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
               {displayTemplates.map((template, index) => (
-                <TemplateCard
-                  key={template.id}
-                  template={template}
-                  isAutoPlay={true}
-                  onClick={() => handleTemplateClick(template)}
-                  onEdit={isAdmin ? () => handleEditTemplate(template) : undefined}
-                  onDelete={isAdmin ? () => handleDeleteScene(template.id) : undefined}
-                  onReorderUp={isAdmin ? () => handleReorderScene(template.id, 'up') : undefined}
-                  onReorderDown={isAdmin ? () => handleReorderScene(template.id, 'down') : undefined}
-                  showReorderUp={index > 0}
-                  showReorderDown={index < displayTemplates.length - 1}
-                />
+                <div key={template.id} className="w-full max-w-[280px] mx-auto">
+                  <TemplateCard
+                    template={template}
+                    isAutoPlay={true}
+                    onClick={() => handleTemplateClick(template)}
+                    onEdit={isAdmin ? () => handleEditTemplate(template) : undefined}
+                    onDelete={isAdmin ? () => handleDeleteScene(template.id) : undefined}
+                    onReorderUp={isAdmin ? () => handleReorderScene(template.id, 'up') : undefined}
+                    onReorderDown={isAdmin ? () => handleReorderScene(template.id, 'down') : undefined}
+                    showReorderUp={index > 0}
+                    showReorderDown={index < displayTemplates.length - 1}
+                  />
+                </div>
               ))}
             </div>
           </div>
