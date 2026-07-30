@@ -403,21 +403,14 @@ export default function VideoCreateModal({
                       : 'border-[#1E2130] hover:border-white/30'
                   }`}
                 >
-                  <div className="relative w-full h-full">
-                    <video
-                      src={template.videoUrl}
-                      muted
-                      playsInline
-                      preload="metadata"
-                      className="w-full h-full object-cover"
-                      onLoadedMetadata={(e) => { (e.target as HTMLVideoElement).currentTime = 0; }}
-                    />
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                      <span className="text-[8px] text-white font-bold uppercase tracking-wider bg-black/60 px-1.5 py-0.5 rounded">
-                        Original
-                      </span>
-                    </div>
-                  </div>
+                  <video
+                    src={template.videoUrl}
+                    muted
+                    playsInline
+                    preload="metadata"
+                    className="w-full h-full object-cover"
+                    onLoadedMetadata={(e) => { (e.target as HTMLVideoElement).currentTime = 0; }}
+                  />
                 </button>
 
                 {/* Database examples */}
