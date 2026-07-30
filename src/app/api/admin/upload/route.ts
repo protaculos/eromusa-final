@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 
+// Allow up to 100MB uploads
+export const maxBodySize = 104857600;
+
 // POST /api/admin/upload — upload a video loop to Supabase Storage
 export async function POST(req: NextRequest) {
   try {
