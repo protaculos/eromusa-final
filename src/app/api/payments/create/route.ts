@@ -95,33 +95,92 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ direct: true, credits: newCredits });
     }
 
-    // 5. Create Vexutopia payment session for paid plans
-    const vexutopiaResponse = await fetch(VEXUTOPIA_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-API-Key': VEXUTOPIA_API_KEY,
-      },
-      body: JSON.stringify({
-        amount: (amount / 100).toString(), // convert cents to dollars (e.g., "19.00")
-        currency: 'USD',
-        return_url: `${SITE_URL}/success`,
-        cancel_url: `${SITE_URL}/cancel`,
-        metadata: {
-          user_id: userId,
-          plan,
-          credits: credits.toString(),
+    // 5. Determine payment method and create Vexutopia session
+    const paymentMethod = body.payment_method || 'standard';
+    const amountStr = (amount / 100).toString(); // frontend sends cents (e.g. 1999), Vexutopia expects "19.99"
+
+    let vexutopiaResponse: Response;
+
+    if (paymentMethod === 'telegram') {
+      // Docs: https://vexutopia.com/docs/payments#telegram-stars
+      vexutopiaResponse = await fetch(`${VEXUTOPIA_API_URL}/telegram-stars`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': VEXUTOPIA_API_KEY,
         },
-        customer_email: userEmail,
-        customer_id: userId,
-      }),
-    });
+        body: JSON.stringify({
+          amount: amountStr,
+          currency: 'USD',
+          return_url: `${SITE_URL}/success`,
+          webhook_url: `${SITE_URL}/api/webhooks/vexutopia`,
+          metadata: {
+            user_id: userId,
+            plan,
+            credits: credits.toString(),
+          },
+          customer_email: userEmail,
+          customer_id: userId,
+        }),
+      });
+    } else if (paymentMethod === 'crypto') {
+      // Docs: https://vexutopia.com/docs/payments#crypto-direct
+      vexutopiaResponse = await fetch(VEXUTOPIA_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': VEXUTOPIA_API_KEY,
+        },
+        body: JSON.stringify({
+          amount: amountStr,
+          currency: 'USD',
+          crypto: true,
+          return_url: `${SITE_URL}/success`,
+          webhook_url: `${SITE_URL}/api/webhooks/vexutopia`,
+          metadata: {
+            user_id: userId,
+            plan,
+            credits: credits.toString(),
+          },
+          customer_email: userEmail,
+          customer_id: userId,
+        }),
+      });
+    } else {
+      // Standard fiat / card / PIX
+      // Docs: https://vexutopia.com/docs/payments#create
+      vexutopiaResponse = await fetch(VEXUTOPIA_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': VEXUTOPIA_API_KEY,
+        },
+        body: JSON.stringify({
+          amount: amountStr,
+          currency: 'USD',
+          return_url: `${SITE_URL}/success`,
+          webhook_url: `${SITE_URL}/api/webhooks/vexutopia`,
+          metadata: {
+            user_id: userId,
+            plan,
+            credits: credits.toString(),
+          },
+          customer_email: userEmail,
+          customer_id: userId,
+        }),
+      });
+    }
 
     if (!vexutopiaResponse.ok) {
-      const errorText = await vexutopiaResponse.text();
-      console.error('Vexutopia API error:', vexutopiaResponse.status, errorText);
+      let errorBody = '';
+      try {
+        errorBody = await vexutopiaResponse.text();
+      } catch {
+        errorBody = '(could not read body)';
+      }
+      console.error('Vexutopia API error:', vexutopiaResponse.status, errorBody);
       return NextResponse.json(
-        { error: 'Failed to create payment session' },
+        { error: 'Failed to create payment session', detail: errorBody },
         { status: 502 }
       );
     }
@@ -141,8 +200,6 @@ export async function POST(request: NextRequest) {
 
     if (insertError) {
       console.error('Failed to store payment record:', insertError);
-      // Payment was created on Vexutopia but we couldn't store it — still return checkout_url
-      // The webhook will handle reconciliation
     }
 
     // 7. Return checkout URL to frontend

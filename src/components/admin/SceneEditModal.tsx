@@ -132,7 +132,7 @@ export default function SceneEditModal({
 
       setExampleVideoFile(null);
       setExampleName("");
-      setAddingExample(false);
+      // Keep the form open so admin can add multiple examples in sequence
       fetchExamples(scene.id);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to add example");

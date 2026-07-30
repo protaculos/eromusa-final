@@ -375,11 +375,52 @@ export default function VideoCreateModal({
             </div>
           </div>
 
-          {/* Scene examples carousel — thumbnails only */}
+          {/* Scene examples carousel — original + examples */}
           {sceneExamples.length > 0 && (
             <div>
               <p className="text-xs text-white/40 font-semibold uppercase tracking-wider mb-2">More Examples</p>
               <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+                {/* Original scene video — always first */}
+                <button
+                  key="original"
+                  onClick={() => {
+                    setActiveTemplate({
+                      id: template.id,
+                      name: template.name,
+                      duration: template.duration,
+                      credits: template.credits,
+                      videoUrl: template.videoUrl,
+                      thumbnailUrl: template.thumbnailUrl,
+                      instructions: template.instructions,
+                      tags: template.tags,
+                      gradient: template.gradient,
+                      styleId: template.styleId,
+                    });
+                  }}
+                  className={`shrink-0 w-16 h-24 rounded-lg overflow-hidden border-2 transition-all ${
+                    activeTemplate.videoUrl === template.videoUrl
+                      ? 'border-[#EE5F96] ring-1 ring-[#EE5F96]/50'
+                      : 'border-[#1E2130] hover:border-white/30'
+                  }`}
+                >
+                  <div className="relative w-full h-full">
+                    <video
+                      src={template.videoUrl}
+                      muted
+                      playsInline
+                      preload="metadata"
+                      className="w-full h-full object-cover"
+                      onLoadedMetadata={(e) => { (e.target as HTMLVideoElement).currentTime = 0; }}
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                      <span className="text-[8px] text-white font-bold uppercase tracking-wider bg-black/60 px-1.5 py-0.5 rounded">
+                        Original
+                      </span>
+                    </div>
+                  </div>
+                </button>
+
+                {/* Database examples */}
                 {sceneExamples.map((ex) => (
                   <button
                     key={ex.id}

@@ -51,3 +51,5 @@ next-env.d.ts
 # deploy helper scripts
 deploy-fix*.bat
 deploy-fix*.sh
+
+.env*

@@ -25,14 +25,12 @@ const OPTIONS: { id: PaymentOption; label: string; desc: string; icon: string; c
     label: 'Cryptocurrency',
     desc: 'Pay with Bitcoin, Ethereum, USDT and more',
     icon: '₿',
-    comingSoon: true,
   },
   {
     id: 'telegram',
     label: 'Telegram Stars',
     desc: 'Pay using Telegram Stars',
     icon: '⭐',
-    comingSoon: true,
   },
 ];
 
@@ -50,12 +48,6 @@ export default function PaymentMethodModal({
   if (!isOpen) return null;
 
   const handleSelect = async (option: PaymentOption) => {
-    if (option === 'crypto' || option === 'telegram') {
-      // TODO: implement later
-      return;
-    }
-
-    // Option 1: Fiat → Vexutopia checkout
     setLoading(true);
     setError(null);
 
@@ -78,7 +70,7 @@ export default function PaymentMethodModal({
           plan: planName.toLowerCase(),
           credits: planCredits,
           amount: planAmount,
-          payment_method: 'standard',
+          payment_method: option,
         }),
       });
 
@@ -161,7 +153,7 @@ export default function PaymentMethodModal({
                 <p className="text-xs text-white/50 mt-0.5">{opt.desc}</p>
               </div>
 
-              {loading && opt.id === 'fiat' && (
+              {loading && (
                 <div className="w-5 h-5 border-2 border-[#EE5F96] border-t-transparent rounded-full animate-spin shrink-0" />
               )}
             </button>
