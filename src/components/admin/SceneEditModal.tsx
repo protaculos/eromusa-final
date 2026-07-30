@@ -172,8 +172,8 @@ export default function SceneEditModal({
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.name.endsWith(".webm") && !file.name.endsWith(".mp4")) {
-      setError("Only .webm and .mp4 files are allowed");
+    if (!file.type.startsWith("video/")) {
+      setError("Only video files are allowed");
       return;
     }
     setVideoFile(file);
@@ -387,7 +387,7 @@ export default function SceneEditModal({
               <input
                 ref={fileInputRef}
                 type="file"
-                accept=".webm,.mp4"
+                accept="video/*"
                 className="hidden"
                 onChange={handleFileSelect}
               />
@@ -420,7 +420,7 @@ export default function SceneEditModal({
                   <input
                     ref={exampleFileInputRef}
                     type="file"
-                    accept=".webm,.mp4"
+                    accept="video/*"
                     className="hidden"
                     onChange={(e) => {
                       const file = e.target.files?.[0];

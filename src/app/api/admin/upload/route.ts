@@ -34,15 +34,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "file and scene_id are required" }, { status: 400 });
     }
 
-    // Validate file type
-    if (!file.name.endsWith(".webm") && !file.name.endsWith(".mp4")) {
-      return NextResponse.json({ error: "Only .webm and .mp4 files are allowed" }, { status: 400 });
+    // Validate file type — accept any video format
+    if (!file.type.startsWith("video/")) {
+      return NextResponse.json({ error: "Only video files are allowed" }, { status: 400 });
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
     const timestamp = Date.now();
     const random = Math.random().toString(36).substring(2, 8);
-    const ext = file.name.endsWith(".mp4") ? ".mp4" : ".webm";
+    const originalName = file.name;
+    const ext = originalName.includes(".") ? originalName.substring(originalName.lastIndexOf(".")) : ".webm";
     const fileName = `${sceneId}/examples/${timestamp}-${random}${ext}`;
 
     // Upload to Supabase Storage
