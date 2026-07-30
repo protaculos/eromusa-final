@@ -40,7 +40,10 @@ export async function POST(req: NextRequest) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    const fileName = `${sceneId}/video.webm`;
+    const timestamp = Date.now();
+    const random = Math.random().toString(36).substring(2, 8);
+    const ext = file.name.endsWith(".mp4") ? ".mp4" : ".webm";
+    const fileName = `${sceneId}/examples/${timestamp}-${random}${ext}`;
 
     // Upload to Supabase Storage
     const { error: uploadError } = await supabaseAdmin.storage
