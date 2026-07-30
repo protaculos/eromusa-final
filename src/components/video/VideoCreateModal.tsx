@@ -92,6 +92,25 @@ export default function VideoCreateModal({
     return () => window.removeEventListener('keydown', handler);
   }, [isOpen, onClose]);
 
+  // Preload example videos when modal opens so they switch instantly
+  useEffect(() => {
+    if (!isOpen || sceneExamples.length === 0) return;
+    const links: HTMLLinkElement[] = [];
+    for (const ex of sceneExamples) {
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'video';
+      link.href = ex.video_url;
+      document.head.appendChild(link);
+      links.push(link);
+    }
+    return () => {
+      for (const link of links) {
+        document.head.removeChild(link);
+      }
+    };
+  }, [isOpen, sceneExamples]);
+
   // ── File handlers ──────────────────────────────
   const handleFile = useCallback((file: File) => {
     if (!file.type.startsWith('image/')) {
