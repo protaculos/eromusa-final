@@ -253,7 +253,7 @@ export default function VideoCreateModal({
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
       {/* Container — portrait/mobile-like, fixed aspect, responsive */}
-      <div className="relative bg-[#0A0B14] border border-[#1E2130] rounded-2xl w-full max-w-[420px] shadow-2xl">
+      <div className="relative bg-[#0A0B14] border border-[#1E2130] rounded-2xl w-full max-w-[420px] shadow-2xl overflow-hidden">
         {/* Header with title + filters */}
         <div className="sticky top-0 bg-[#0A0B14] z-10 flex items-center justify-between p-5 border-b border-[#1E2130]">
           <div className="min-w-0">
