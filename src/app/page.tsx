@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { allTemplates, type Template } from '@/data/templates';
 import VideoCreateModal from '@/components/video/VideoCreateModal';
@@ -66,6 +66,41 @@ export default function DiscoverPage() {
   const [deleteSceneMode, setDeleteSceneMode] = useState<'site' | 'database' | null>(null);
   const [deleteSceneConfirm, setDeleteSceneConfirm] = useState<{ sceneId: string; sceneName: string; mode: 'site' | 'database' } | null>(null);
   const [confirmClearAll, setConfirmClearAll] = useState(false);
+
+  // Autoplay state
+  const [autoplayEnabled] = useState(true);
+  const [visibleCardIds, setVisibleCardIds] = useState<Set<string>>(new Set());
+  const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+
+  // True when any modal is open — pauses discovery videos
+  const modalOpen = !!(selectedTemplate || loginOpen || paymentOpen || editModalOpen || showAddPopup || deleteSceneTarget || deleteSceneConfirm || confirmClearAll);
+
+  // IntersectionObserver to track which cards are at least 60% visible
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        setVisibleCardIds((prev) => {
+          const next = new Set(prev);
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              next.add(entry.target.id);
+            } else {
+              next.delete(entry.target.id);
+            }
+          }
+          return next;
+        });
+      },
+      { threshold: 0.6 }
+    );
+
+    const currentRefs = cardRefs.current;
+    currentRefs.forEach((el) => observer.observe(el));
+    return () => {
+      currentRefs.forEach((el) => observer.unobserve(el));
+      observer.disconnect();
+    };
+  }, [scenes]);
 
   // Fetch visible scenes from Supabase
   const fetchScenes = async () => {
@@ -280,21 +315,34 @@ export default function DiscoverPage() {
         ) : (
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
-              {displayTemplates.map((template, index) => (
-                <div key={template.id} className="w-full max-w-[280px] mx-auto">
-                  <TemplateCard
-                    template={template}
-                    isAutoPlay={true}
-                    onClick={() => handleTemplateClick(template)}
-                    onEdit={isAdmin ? () => handleEditTemplate(template) : undefined}
-                    onDelete={isAdmin ? () => handleDeleteScene(template.id) : undefined}
-                    onReorderUp={isAdmin ? () => handleReorderScene(template.id, 'up') : undefined}
-                    onReorderDown={isAdmin ? () => handleReorderScene(template.id, 'down') : undefined}
-                    showReorderUp={index > 0}
-                    showReorderDown={index < displayTemplates.length - 1}
-                  />
-                </div>
-              ))}
+              {displayTemplates.map((template, index) => {
+                const cardId = `scene-card-${template.id}`;
+                const isVisible = visibleCardIds.has(cardId);
+                const autoPlay = autoplayEnabled && !modalOpen && isVisible;
+                return (
+                  <div
+                    key={template.id}
+                    id={cardId}
+                    ref={(el) => {
+                      if (el) cardRefs.current.set(cardId, el);
+                      else cardRefs.current.delete(cardId);
+                    }}
+                    className="w-full max-w-[280px] mx-auto"
+                  >
+                    <TemplateCard
+                      template={template}
+                      isAutoPlay={autoPlay}
+                      onClick={() => handleTemplateClick(template)}
+                      onEdit={isAdmin ? () => handleEditTemplate(template) : undefined}
+                      onDelete={isAdmin ? () => handleDeleteScene(template.id) : undefined}
+                      onReorderUp={isAdmin ? () => handleReorderScene(template.id, 'up') : undefined}
+                      onReorderDown={isAdmin ? () => handleReorderScene(template.id, 'down') : undefined}
+                      showReorderUp={index > 0}
+                      showReorderDown={index < displayTemplates.length - 1}
+                    />
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

@@ -45,6 +45,17 @@ export default function TemplateCard({ template, isAutoPlay = false, onClick, on
     return () => el.removeEventListener('loadedmetadata', onMeta);
   }, []);
 
+  // Autoplay when visible on screen
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!el) return;
+    if (isAutoPlay) {
+      el.play().catch(() => {});
+    } else {
+      el.pause();
+    }
+  }, [isAutoPlay]);
+
   const handleMouseEnter = () => {
     setIsHovered(true);
     if (videoRef.current) {
