@@ -76,7 +76,11 @@ export default function SceneEditModal({
 
   const fetchExamples = async (sceneId: string) => {
     try {
-      const res = await fetch(`/api/admin/scenes/${sceneId}/examples`);
+      const headers: Record<string, string> = {};
+      if (session?.access_token) {
+        headers["Authorization"] = `Bearer ${session.access_token}`;
+      }
+      const res = await fetch(`/api/admin/scenes/${sceneId}/examples`, { headers });
       if (res.ok) {
         const data = await res.json();
         setExamples(Array.isArray(data) ? data : []);
