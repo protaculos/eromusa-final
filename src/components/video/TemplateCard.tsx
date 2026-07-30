@@ -68,6 +68,8 @@ export default function TemplateCard({ template, isAutoPlay = false, onClick, on
   const handleMouseLeave = () => {
     setIsHovered(false);
     if (videoRef.current) {
+      // Se autoplay estiver ligado, não pausa — o vídeo continua rodando sozinho
+      if (isAutoPlay) return;
       videoRef.current.pause();
       videoRef.current.currentTime = 0;
     }
@@ -92,6 +94,17 @@ export default function TemplateCard({ template, isAutoPlay = false, onClick, on
           preload="metadata"
           poster=""
         />
+
+        {/* Play icon overlay — visible when video is NOT playing (autoplay off + no hover) */}
+        {!isAutoPlay && !isHovered && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center">
+              <svg className="w-5 h-5 text-white/80 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            </div>
+          </div>
+        )}
 
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useSettings } from '@/context/SettingsContext';
 import { allTemplates, type Template } from '@/data/templates';
 import VideoCreateModal from '@/components/video/VideoCreateModal';
 import LoginModal from '@/components/LoginModal';
@@ -67,8 +68,8 @@ export default function DiscoverPage() {
   const [deleteSceneConfirm, setDeleteSceneConfirm] = useState<{ sceneId: string; sceneName: string; mode: 'site' | 'database' } | null>(null);
   const [confirmClearAll, setConfirmClearAll] = useState(false);
 
-  // Autoplay state
-  const [autoplayEnabled] = useState(true);
+  // Autoplay state — controlled by header toggle via SettingsContext
+  const { settings } = useSettings();
   const [visibleCardIds, setVisibleCardIds] = useState<Set<string>>(new Set());
   const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
@@ -318,7 +319,7 @@ export default function DiscoverPage() {
               {displayTemplates.map((template, index) => {
                 const cardId = `scene-card-${template.id}`;
                 const isVisible = visibleCardIds.has(cardId);
-                const autoPlay = autoplayEnabled && !modalOpen && isVisible;
+                const autoPlay = settings.autoPlayVideos && !modalOpen && isVisible;
                 return (
                   <div
                     key={template.id}

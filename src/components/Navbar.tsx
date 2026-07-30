@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useSettings } from '@/context/SettingsContext';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import PaymentModal from '@/components/PaymentModal';
@@ -26,6 +27,7 @@ const LANGUAGES = [
 
 export default function Navbar() {
   const { user, credits, loading } = useAuth();
+  const { settings, updateSettings } = useSettings();
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
@@ -240,7 +242,12 @@ export default function Navbar() {
                       Auto play
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" className="sr-only peer" defaultChecked />
+                      <input
+                        type="checkbox"
+                        className="sr-only peer"
+                        checked={settings.autoPlayVideos}
+                        onChange={() => updateSettings({ autoPlayVideos: !settings.autoPlayVideos })}
+                      />
                       <div className="w-9 h-5 bg-[#1E2130] rounded-full peer peer-checked:bg-[#EE5F96] transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-4" />
                     </label>
                   </div>
