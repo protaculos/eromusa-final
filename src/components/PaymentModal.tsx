@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from 'react';
+import { supabase } from '@/lib/supabase';
 import { useToast } from '@/components/Toast';
 
 interface Plan {
@@ -39,9 +40,20 @@ export default function PaymentModal({ isOpen, onClose }: { isOpen: boolean; onC
     setError(null);
 
     try {
+      // Get auth session token
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+
+      if (!token) {
+        throw new Error('You must be logged in to make a purchase');
+      }
+
       const res = await fetch('/api/payments/create', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
         body: JSON.stringify({
           plan: plan.id,
           credits: plan.credits,
