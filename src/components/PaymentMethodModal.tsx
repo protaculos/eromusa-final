@@ -76,7 +76,10 @@ export default function PaymentMethodModal({
 
       const data = await res.json();
 
-      if (!res.ok) throw new Error(data.error || 'Payment failed');
+      if (!res.ok) {
+        const detail = data.detail ? ` (${data.detail})` : '';
+        throw new Error(`${data.error || 'Payment failed'}${detail}`);
+      }
 
       if (data.direct) {
         toast(`Successfully added ${planCredits} credits!`, "success");

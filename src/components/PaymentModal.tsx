@@ -64,7 +64,10 @@ export default function PaymentModal({ isOpen, onClose }: { isOpen: boolean; onC
 
       const data = await res.json();
 
-      if (!res.ok) throw new Error(data.error || 'Payment failed');
+      if (!res.ok) {
+        const detail = data.detail ? ` (${data.detail})` : '';
+        throw new Error(`${data.error || 'Payment failed'}${detail}`);
+      }
 
       if (data.direct) {
         // Credits added instantly (test mode)
