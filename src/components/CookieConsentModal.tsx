@@ -1,63 +1,23 @@
 "use client";
 import React, { useState } from "react";
 import { useSettings } from "@/context/SettingsContext";
+import { useT } from "@/i18n/useT";
 
 const LANGUAGES = [
   { code: "en", label: "English" },
-  { code: "pt-BR", label: "Português (Brasil)" },
+  { code: "pt", label: "Português (Brasil)" },
   { code: "es", label: "Español" },
 ];
 
-const COPY: Record<
-  string,
-  {
-    title: string;
-    warnings: string[];
-    policy: string;
-    languageLabel: string;
-    continue: string;
-  }
-> = {
-  en: {
-    title: "Age & Cookie Notice",
-    warnings: [
-      "Adult content 18+",
-      "Your data is protected",
-      "Cookies & Terms apply",
-    ],
-    policy:
-      "By continuing, you confirm that you are 18 years of age or older and agree to our Terms of Use and Privacy Policy. This site uses cookies and similar technologies to provide, protect, and improve our services.",
-    languageLabel: "Language",
-    continue: "Continue",
-  },
-  "pt-BR": {
-    title: "Aviso de Idade e Cookies",
-    warnings: [
-      "Conteúdo adulto 18+",
-      "Seus dados estão protegidos",
-      "Cookies e Termos se aplicam",
-    ],
-    policy:
-      "Ao continuar, você confirma que tem 18 anos ou mais e concorda com nossos Termos de Uso e Política de Privacidade. Este site utiliza cookies e tecnologias semelhantes para fornecer, proteger e melhorar nossos serviços.",
-    languageLabel: "Idioma",
-    continue: "Continuar",
-  },
-  es: {
-    title: "Aviso de Edad y Cookies",
-    warnings: [
-      "Contenido adulto 18+",
-      "Tus datos están protegidos",
-      "Cookies y Términos aplican",
-    ],
-    policy:
-      "Al continuar, confirmas que tienes 18 años o más y aceptas nuestros Términos de Uso y Política de Privacidad. Este sitio utiliza cookies y tecnologías similares para proporcionar, proteger y mejorar nuestros servicios.",
-    languageLabel: "Idioma",
-    continue: "Continuar",
-  },
+const LANG_LABELS: Record<string, string> = {
+  en: "English",
+  pt: "Português (Brasil)",
+  es: "Español",
 };
 
 export default function CookieConsentModal() {
   const { settings, updateSettings } = useSettings();
+  const t = useT();
   const initialLang = LANGUAGES.find((l) => l.code === settings.language)
     ? settings.language
     : "en";
@@ -66,8 +26,7 @@ export default function CookieConsentModal() {
   const [lang, setLang] = useState(initialLang);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  const t = COPY[lang] || COPY.en;
-  const currentLangLabel = LANGUAGES.find((l) => l.code === lang)?.label ?? "English";
+  const currentLangLabel = LANG_LABELS[lang] ?? "English";
 
   const handleContinue = () => {
     updateSettings({ language: lang });
@@ -85,12 +44,12 @@ export default function CookieConsentModal() {
       <div className="relative w-full max-w-md bg-[#0A0B14] border border-[#1E2130] rounded-2xl shadow-2xl p-6">
         {/* Title */}
         <h2 className="text-lg font-bold text-white text-center mb-5">
-          {t.title}
+          {t('cookie.title')}
         </h2>
 
         {/* Warnings with outline emoji-style icons */}
         <div className="space-y-3 mb-5">
-          {t.warnings.map((text, idx) => (
+          {[t('cookie.warning1'), t('cookie.warning2'), t('cookie.warning3')].map((text, idx) => (
             <div
               key={idx}
               className="flex items-center gap-3 text-sm text-white/80"
@@ -142,7 +101,7 @@ export default function CookieConsentModal() {
 
         {/* Policy text */}
         <p className="text-xs text-white/50 leading-relaxed mb-5 text-center">
-          {t.policy}
+          {t('cookie.policy')}
         </p>
 
         {/* Divider */}
@@ -166,7 +125,7 @@ export default function CookieConsentModal() {
                 <path d="M2 12h20" />
                 <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
               </svg>
-              {t.languageLabel}: <span className="text-white font-medium">{currentLangLabel}</span>
+              {t('cookie.languageLabel')}: <span className="text-white font-medium">{currentLangLabel}</span>
             </span>
             <svg
               className={`w-4 h-4 text-white/40 transition-transform ${dropdownOpen ? "rotate-180" : ""}`}
@@ -209,7 +168,7 @@ export default function CookieConsentModal() {
           onClick={handleContinue}
           className="w-full py-3 rounded-xl font-semibold text-sm bg-[#EE5F96] hover:bg-[#d94d7e] text-white transition-colors"
         >
-          {t.continue}
+          {t('cookie.continue')}
         </button>
       </div>
     </div>

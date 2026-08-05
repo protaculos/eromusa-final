@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/components/Toast';
+import { useT } from '@/i18n/useT';
 
 interface PaymentMethodModalProps {
   isOpen: boolean;
@@ -41,6 +42,7 @@ export default function PaymentMethodModal({
   planAmount,
   onClose,
 }: PaymentMethodModalProps) {
+  const t = useT();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
@@ -103,7 +105,7 @@ export default function PaymentMethodModal({
         {/* Header */}
         <div className="p-6 border-b border-[#1E2130] flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-bold text-white">Choose Payment Method</h2>
+            <h2 className="text-xl font-bold text-white">{t('paymentMethod.chooseTitle')}</h2>
             <p className="text-sm text-white/50 mt-1">
               {planName} • <span className="text-[#EE5F96] font-semibold">+{planCredits} credits</span>
               {planAmount > 0 && (
@@ -149,7 +151,7 @@ export default function PaymentMethodModal({
                   <span className="text-white font-bold text-sm">{opt.label}</span>
                   {opt.comingSoon && (
                     <span className="text-[10px] uppercase tracking-wider text-white/30 bg-white/5 px-2 py-0.5 rounded-full font-semibold">
-                      Soon
+                      {t('paymentMethod.soon')}
                     </span>
                   )}
                 </div>
@@ -166,7 +168,7 @@ export default function PaymentMethodModal({
         {/* Footer */}
         <div className="p-4 bg-[#161827]/50 text-center">
           <p className="text-[10px] text-white/30 uppercase tracking-widest font-semibold">
-            Secure payments powered by Vexutopia
+            {t('paymentMethod.secureBy')}
           </p>
         </div>
       </div>

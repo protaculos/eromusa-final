@@ -2,6 +2,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useSettings } from '@/context/SettingsContext';
+import { useT } from '@/i18n/useT';
+import { localeLabels, type Locale } from '@/i18n/config';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import PaymentModal from '@/components/PaymentModal';
@@ -10,24 +12,21 @@ import DeleteAccountModal from '@/components/DeleteAccountModal';
 import ConfirmModal from '@/components/ConfirmModal';
 
 const NAV_ITEMS = [
-  { href: '/', label: 'Discovery' },
-  { href: '/gallery', label: 'Gallery' },
-  { href: '/pricing', label: 'Pricing' },
+  { href: '/', labelKey: 'nav.discovery' },
+  { href: '/gallery', labelKey: 'nav.gallery' },
+  { href: '/pricing', labelKey: 'nav.pricing' },
 ];
 
-const LANGUAGES = [
-  { code: 'pt-BR', label: 'Português (Brasil)' },
+const LANGUAGES: { code: Locale; label: string }[] = [
   { code: 'en', label: 'English' },
+  { code: 'pt', label: 'Português' },
   { code: 'es', label: 'Español' },
-  { code: 'fr', label: 'Français' },
-  { code: 'de', label: 'Deutsch' },
-  { code: 'ja', label: '日本語' },
-  { code: 'zh', label: '中文' },
 ];
 
 export default function Navbar() {
   const { user, credits, loading } = useAuth();
   const { settings, updateSettings } = useSettings();
+  const t = useT();
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
@@ -37,7 +36,6 @@ export default function Navbar() {
   const pathname = usePathname();
 
   const menuRef = useRef<HTMLDivElement>(null);
-  const langRef = useRef<HTMLDivElement>(null);
 
   // Fecha o menu principal ao clicar fora
   useEffect(() => {
@@ -77,7 +75,7 @@ export default function Navbar() {
   };
 
   const handleLanguageSelect = (code: string) => {
-    // TODO: implement language switching
+    updateSettings({ language: code });
     setLangOpen(false);
     setMenuOpen(false);
   };
@@ -115,7 +113,7 @@ export default function Navbar() {
                       : 'text-white/60 hover:text-white hover:bg-[#161827]'
                   }`}
                 >
-                  {item.label}
+                  {t(item.labelKey)}
                 </Link>
               );
             })}
@@ -142,7 +140,7 @@ export default function Navbar() {
                 onClick={() => setLoginOpen(true)}
                 className="bg-[#EE5F96] hover:bg-[#d94d7e] text-white text-sm font-semibold px-5 py-2 rounded-full transition-colors"
               >
-                Sign In
+                {t('nav.signIn')}
               </button>
             )}
 
@@ -183,7 +181,7 @@ export default function Navbar() {
                       <path d="M9.5 8.5a.5.5 0 01.5-.5h.5a.5.5 0 010 1H10a.5.5 0 01-.5-.5z" />
                       <path d="M9.5 11a.5.5 0 01.5-.5h.5a.5.5 0 010 1H10a.5.5 0 01-.5-.5z" />
                     </svg>
-                    {user ? 'Credits / Upgrade' : 'Credits / Upgrade'}
+                    {t('nav.buyCredits')}
                   </Link>
 
                   <div className="border-b border-[#1E2130]" />
@@ -198,7 +196,7 @@ export default function Navbar() {
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        Idioma
+                        {t('nav.language')}
                       </div>
                       <svg className={`w-4 h-4 transition-transform ${langOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -212,7 +210,11 @@ export default function Navbar() {
                           <button
                             key={lang.code}
                             onClick={() => handleLanguageSelect(lang.code)}
-                            className="w-full text-left px-4 py-2.5 pl-12 text-sm text-white/60 hover:text-white hover:bg-[#161827] transition-colors"
+                            className={`w-full text-left px-4 py-2.5 pl-12 text-sm transition-colors ${
+                              settings.language === lang.code
+                                ? 'text-[#EE5F96] font-semibold'
+                                : 'text-white/60 hover:text-white hover:bg-[#161827]'
+                            }`}
                           >
                             {lang.label}
                           </button>
@@ -230,7 +232,7 @@ export default function Navbar() {
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    Suporte
+                    {t('support.title')}
                   </Link>
 
                   {/* Auto play */}
@@ -239,7 +241,7 @@ export default function Navbar() {
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                       </svg>
-                      Auto play
+                      {t('nav.autoplay')}
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
@@ -264,7 +266,7 @@ export default function Navbar() {
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                         </svg>
-                        Sair da conta
+                        {t('nav.signOut')}
                       </button>
 
                       <div className="border-b border-[#1E2130]" />
@@ -277,7 +279,7 @@ export default function Navbar() {
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
-                        Excluir conta
+                        {t('nav.deleteAccount')}
                       </button>
                     </>
                   ) : (
@@ -290,7 +292,7 @@ export default function Navbar() {
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                         </svg>
-                        Entrar na conta
+                        {t('nav.signIn')}
                       </button>
                     </>
                   )}
@@ -314,7 +316,7 @@ export default function Navbar() {
                     : 'text-white/60 hover:text-white hover:bg-[#161827]'
                 }`}
               >
-                {item.label}
+                {t(item.labelKey)}
               </Link>
             );
           })}
@@ -328,9 +330,9 @@ export default function Navbar() {
         open={logoutOpen}
         onClose={() => setLogoutOpen(false)}
         onConfirm={handleLogout}
-        title="Sign Out"
-        message="Are you sure you want to sign out of your account?"
-        confirmLabel="Sign Out"
+        title={t('nav.signOut')}
+        message={t('nav.logoutConfirm')}
+        confirmLabel={t('nav.signOut')}
       />
     </div>
   );

@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from 'react';
+import { useT } from '@/i18n/useT';
 
 interface DeleteAccountModalProps {
   open: boolean;
@@ -8,6 +9,7 @@ interface DeleteAccountModalProps {
 }
 
 export default function DeleteAccountModal({ open, onClose, onConfirm }: DeleteAccountModalProps) {
+  const t = useT();
   const [typed, setTyped] = useState('');
   const [deleting, setDeleting] = useState(false);
 
@@ -46,15 +48,19 @@ export default function DeleteAccountModal({ open, onClose, onConfirm }: DeleteA
 
         {/* Título */}
         <h2 className="text-xl font-bold text-white text-center mb-2">
-          Delete Account
+          {t('deleteAccount.title')}
         </h2>
         <p className="text-sm text-white/50 text-center mb-6">
-          This action is <span className="text-red-400 font-semibold">irreversible</span>. All your data, videos, and credits will be permanently deleted.
+          {t('deleteAccount.warningStart')}
+          <span className="text-red-400 font-semibold">{t('deleteAccount.irreversible')}</span>
+          {t('deleteAccount.warningEnd')}
         </p>
 
         {/* Campo de confirmação */}
         <label className="block text-sm text-white/60 mb-2">
-          Type <span className="font-mono font-bold text-white">DELETE</span> to confirm
+          {t('deleteAccount.typeDeleteStart')}
+          <span className="font-mono font-bold text-white">DELETE</span>
+          {t('deleteAccount.typeDeleteEnd')}
         </label>
         <input
           type="text"
@@ -72,7 +78,7 @@ export default function DeleteAccountModal({ open, onClose, onConfirm }: DeleteA
             disabled={deleting}
             className="flex-1 px-4 py-3 rounded-xl text-sm font-semibold text-white/60 hover:text-white bg-[#161827] hover:bg-[#1E2130] border border-[#1E2130] transition-colors disabled:opacity-50"
           >
-            Cancel
+            {t('deleteAccount.cancel')}
           </button>
           <button
             onClick={handleConfirm}
@@ -85,10 +91,10 @@ export default function DeleteAccountModal({ open, onClose, onConfirm }: DeleteA
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                 </svg>
-                Deleting...
+                {t('deleteAccount.deleting')}
               </span>
             ) : (
-              'Delete Account'
+              t('deleteAccount.title')
             )}
           </button>
         </div>

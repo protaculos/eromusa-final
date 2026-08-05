@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useT } from '@/i18n/useT';
 
 interface LoginModalProps {
   open: boolean;
@@ -8,6 +9,7 @@ interface LoginModalProps {
 }
 
 export default function LoginModal({ open, onClose }: LoginModalProps) {
+  const t = useT();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -51,7 +53,7 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
         if (isInvalidCredentials) {
           setMessage({
             type: 'error',
-            text: 'An account already exists with this email. Please check your password.',
+            text: t('login.invalidCredentials'),
           });
           return;
         }
@@ -67,7 +69,7 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
 
         setMessage({
           type: 'success',
-          text: 'Check your email to confirm your account!',
+          text: t('login.checkEmail'),
         });
         setEmail('');
         setPassword('');
@@ -87,7 +89,7 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
       <div className="bg-[#0A0B14] border border-[#1E2130] rounded-2xl p-5 max-w-sm w-full mx-4 shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-white">Sign In</h2>
+          <h2 className="text-lg font-bold text-white">{t('login.title')}</h2>
           <button onClick={onClose} className="text-white/40 hover:text-white transition-colors">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -148,7 +150,7 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
         {/* Separator */}
         <div className="flex items-center gap-2 mb-4">
           <div className="flex-1 h-px bg-[#1E2130]" />
-          <span className="text-xs text-white/40">or continue with email</span>
+          <span className="text-xs text-white/40">{t('login.orContinue')}</span>
           <div className="flex-1 h-px bg-[#1E2130]" />
         </div>
 
@@ -156,7 +158,7 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
         <form onSubmit={handleEmailSubmit} className="space-y-3">
           <input
             type="email"
-            placeholder="Email"
+            placeholder={t('login.email')}
             value={email}
             onChange={e => setEmail(e.target.value)}
             required
@@ -164,7 +166,7 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
           />
           <input
             type="password"
-            placeholder="Password"
+            placeholder={t('login.password')}
             value={password}
             onChange={e => setPassword(e.target.value)}
             required
@@ -187,7 +189,7 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
             disabled={loading}
             className="w-full py-2.5 rounded-xl font-semibold text-sm bg-[#EE5F96] hover:bg-[#d94d7e] text-white disabled:opacity-50 transition-all"
           >
-            {loading ? 'Loading...' : 'Continue'}
+            {loading ? t('login.loading') : t('login.continue')}
           </button>
         </form>
       </div>

@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/components/Toast';
+import { useT } from '@/i18n/useT';
 
 interface Plan {
   id: string;
@@ -32,6 +33,7 @@ export default function PaymentModal({ isOpen, onClose }: { isOpen: boolean; onC
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  const t = useT();
 
   if (!isOpen) return null;
 
@@ -45,7 +47,7 @@ export default function PaymentModal({ isOpen, onClose }: { isOpen: boolean; onC
       const token = session?.access_token;
 
       if (!token) {
-        throw new Error('You must be logged in to make a purchase');
+        throw new Error(t('payment.loginRequired'));
       }
 
       const res = await fetch('/api/payments/create', {
@@ -71,7 +73,7 @@ export default function PaymentModal({ isOpen, onClose }: { isOpen: boolean; onC
 
       if (data.direct) {
         // Credits added instantly (test mode)
-        toast(`Successfully added ${plan.credits} credits!`, "success");
+        toast(t('payment.success').replace('{credits}', String(plan.credits)), "success");
         onClose();
       } else if (data.checkout_url) {
         // Open Vexutopia checkout in new tab
@@ -91,7 +93,7 @@ export default function PaymentModal({ isOpen, onClose }: { isOpen: boolean; onC
 
       <div className="relative bg-[#0A0B14] border border-[#1E2130] rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
         <div className="p-6 border-b border-[#1E2130] flex items-center justify-between">
-          <h2 className="text-xl font-bold text-white">Get More Credits</h2>
+          <h2 className="text-xl font-bold text-white">{t('payment.title')}</h2>
           <button onClick={onClose} className="text-white/40 hover:text-white transition-colors">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -127,10 +129,10 @@ export default function PaymentModal({ isOpen, onClose }: { isOpen: boolean; onC
                   <div className="flex items-center justify-between">
                     <span className="text-white font-bold">{plan.label}</span>
                     <span className="text-[#EE5F96] font-bold">
-                      {plan.amount === 0 ? 'FREE' : `$${(plan.amount / 100).toFixed(2)}`}
+                      {plan.amount === 0 ? t('payment.free') : `$${(plan.amount / 100).toFixed(2)}`}
                     </span>
                   </div>
-                  <p className="text-xs text-white/50">{plan.desc} • {plan.credits} credits</p>
+                  <p className="text-xs text-white/50">{plan.desc} • {plan.credits} {t('payment.credits')}</p>
                 </div>
 
                 {loadingPlan === plan.id && (
@@ -143,7 +145,7 @@ export default function PaymentModal({ isOpen, onClose }: { isOpen: boolean; onC
 
         <div className="p-4 bg-[#161827]/50 text-center">
           <p className="text-[10px] text-white/30 uppercase tracking-widest font-semibold">
-            Secure Payments powered by Vexutopia
+            {t('payment.securePayments')}
           </p>
         </div>
       </div>

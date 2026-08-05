@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useT } from '@/i18n/useT';
 import LoginModal from '@/components/LoginModal';
 import PaymentMethodModal from '@/components/PaymentMethodModal';
 
@@ -23,13 +24,15 @@ interface PlanData {
 const PricingCard = ({ data, onBuy }: {
   data: PlanData;
   onBuy: (plan: string, credits: number, amount: number) => void;
-}) => (
+}) => {
+  const t = useT();
+  return (
   <div className={`relative p-8 rounded-3xl border flex flex-col h-full transition-transform hover:scale-[1.02] ${
     data.isPopular ? 'border-[#EE5F96] bg-[#1a1a1e]' : 'border-white/10 bg-[#141417]'
   }`}>
     {data.isPopular && (
       <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#EE5F96] text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-        Most Popular
+        {t('pricing.mostPopular')}
       </div>
     )}
 
@@ -50,7 +53,7 @@ const PricingCard = ({ data, onBuy }: {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <span><strong className="text-white">{data.credits.toLocaleString()}</strong> credits per month</span>
+        <span><strong className="text-white">{data.credits.toLocaleString()}</strong> {t('pricing.creditsPerMonth')}</span>
       </li>
 
       {/* 2. Templates */}
@@ -60,7 +63,7 @@ const PricingCard = ({ data, onBuy }: {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <span><strong className="text-white">{data.templates}</strong> videos on Discovery</span>
+        <span><strong className="text-white">{data.templates}</strong> {t('pricing.videosOnDiscovery')}</span>
       </li>
 
       {/* 3. Vídeos que consegue fazer */}
@@ -70,7 +73,7 @@ const PricingCard = ({ data, onBuy }: {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <span>Up to <strong className="text-white">{data.totalVideos}</strong> videos per month</span>
+        <span>{t('pricing.upTo')} <strong className="text-white">{data.totalVideos}</strong> {t('pricing.videosPerMonth')}</span>
       </li>
 
       {/* 4. Custo por vídeo */}
@@ -80,7 +83,7 @@ const PricingCard = ({ data, onBuy }: {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <span>Just <strong className="text-white">${data.costPerVideo}/video</strong> with package discount</span>
+        <span>{t('pricing.just')} <strong className="text-white">${data.costPerVideo}</strong> {t('pricing.perVideo')}</span>
       </li>
 
       {/* 5. Vídeos simultâneos */}
@@ -90,7 +93,7 @@ const PricingCard = ({ data, onBuy }: {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <span><strong className="text-white">{data.simultaneous}</strong> simultaneous renders</span>
+        <span><strong className="text-white">{data.simultaneous}</strong> {t('pricing.simultaneousRenders')}</span>
       </li>
 
       {/* 6. Fila de prioridade */}
@@ -100,7 +103,7 @@ const PricingCard = ({ data, onBuy }: {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <span><strong className="text-white">{data.queue}</strong> priority queue</span>
+        <span><strong className="text-white">{data.queue}</strong> {t('pricing.priorityQueue')}</span>
       </li>
     </ul>
 
@@ -113,10 +116,11 @@ const PricingCard = ({ data, onBuy }: {
           : 'bg-white/10 text-white hover:bg-white/20'
       }`}
     >
-      Get Started
+      {t('pricing.getStarted')}
     </button>
   </div>
-);
+  );
+};
 
 // ============================================
 // FAQ Item
@@ -191,6 +195,7 @@ const PLANS: PlanData[] = [
 // ============================================
 export default function PricingPage() {
   const { user } = useAuth();
+  const t = useT();
   const [showLogin, setShowLogin] = useState(false);
   const [showPaymentMethod, setShowPaymentMethod] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<{ name: string; credits: number; amount: number } | null>(null);
@@ -225,23 +230,23 @@ export default function PricingPage() {
 
         {/* FAQ */}
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl font-bold text-white text-center mb-12">Frequently Asked Questions</h2>
+          <h2 className="text-3xl font-bold text-white text-center mb-12">{t('pricing.faq')}</h2>
           <div className="bg-[#141417] rounded-3xl p-8 border border-white/10">
             <FAQItem
-              question="Can I change my plan later?"
-              answer="Yes, you can upgrade or downgrade your plan at any time from your account settings. Changes will take effect immediately."
+              question={t('pricing.faq1q')}
+              answer={t('pricing.faq1a')}
             />
             <FAQItem
-              question="How do the generation credits work?"
-              answer="Each video generation costs 30 credits (standard) or 60 credits (premium). Your credits reset every month on your billing date."
+              question={t('pricing.faq2q')}
+              answer={t('pricing.faq2a')}
             />
             <FAQItem
-              question="What payment methods do you accept?"
-              answer="We accept credit cards, bank transfers, and PIX through our secure payment partner Vexutopia."
+              question={t('pricing.faq3q')}
+              answer={t('pricing.faq3a')}
             />
             <FAQItem
-              question="Is there a free trial for Plus and Prime?"
-              answer="We offer a 7-day free trial for our Plus plan for new users to explore all the premium features."
+              question={t('pricing.faq4q')}
+              answer={t('pricing.faq4a')}
             />
           </div>
         </div>

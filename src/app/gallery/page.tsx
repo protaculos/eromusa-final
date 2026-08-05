@@ -3,6 +3,7 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
 import LoginModal from "@/components/LoginModal";
+import { useT } from "@/i18n/useT";
 
 // ── Types ─────────────────────────────────────────────
 interface VideoData {
@@ -58,6 +59,7 @@ function useCountdown(expiresAt: string | undefined, createdAt?: string): string
 
 // ── Processing / Failed card ─────────────────────────
 function ProcessingCard({ video }: { video: VideoData }) {
+  const t = useT();
   const isFailed = video.status === "failed";
 
   if (isFailed) {
@@ -81,10 +83,10 @@ function ProcessingCard({ video }: { video: VideoData }) {
             </svg>
           </div>
           <p className="text-red-400 text-sm font-semibold text-center drop-shadow-lg">
-            Generation failed
+            {t('gallery.generationFailed')}
           </p>
           <p className="text-white/50 text-[10px] text-center drop-shadow">
-            Your credits have been refunded. Please contact support.
+            {t('gallery.refunded')}
           </p>
         </div>
 
@@ -94,7 +96,7 @@ function ProcessingCard({ video }: { video: VideoData }) {
             href="/support"
             className="bg-red-500/80 hover:bg-red-500 text-white text-[10px] font-semibold px-2 py-0.5 rounded-md transition-colors"
           >
-            Support
+            {t('gallery.support')}
           </a>
         </div>
       </div>
@@ -117,10 +119,10 @@ function ProcessingCard({ video }: { video: VideoData }) {
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-4">
         <div className="w-10 h-10 border-2 border-[#EE5F96] border-t-transparent rounded-full animate-spin" />
         <p className="text-white/90 text-sm font-semibold text-center drop-shadow-lg">
-          Your video is being created
+          {t('gallery.creatingTitle')}
         </p>
         <p className="text-white/50 text-xs text-center drop-shadow">
-          Please wait 2–5 minutes
+          {t('gallery.pleaseWait')}
         </p>
       </div>
 
@@ -151,6 +153,7 @@ function CompletedCard({
   onSelect: (v: VideoData) => void;
   onReprocess: (jobId: string) => void;
 }) {
+  const t = useT();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [hovering, setHovering] = useState(false);
   const [reprocessing, setReprocessing] = useState(false);
@@ -227,7 +230,7 @@ function CompletedCard({
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
           </svg>
           <p className="text-white/80 text-xs font-semibold text-center">
-            Video file unavailable
+            {t('gallery.videoUnavailable')}
           </p>
           <button
             onClick={handleReprocess}
@@ -237,7 +240,7 @@ function CompletedCard({
             {reprocessing ? (
               <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto" />
             ) : (
-              "Reprocessar"
+              t('gallery.reprocess')
             )}
           </button>
         </div>
@@ -247,7 +250,7 @@ function CompletedCard({
       {expiresDisplay && (
         <div className="absolute top-2 left-2 right-2 flex justify-center">
           <div className="bg-black/70 text-white/80 text-[10px] px-2 py-0.5 rounded-md">
-            Expira em {expiresDisplay}
+            {t('gallery.expiresIn')} {expiresDisplay}
           </div>
         </div>
       )}
@@ -275,6 +278,7 @@ function ConfirmModal({
   onConfirm: () => void;
   onCancel: () => void;
 }) {
+  const t = useT();
   if (!open) return null;
   return (
     <div
@@ -292,7 +296,7 @@ function ConfirmModal({
             onClick={onCancel}
             className="px-4 py-2 rounded-xl text-sm text-white/60 hover:text-white bg-white/5 hover:bg-white/10 transition-colors"
           >
-            Cancel
+            {t('gallery.cancel')}
           </button>
           <button
             onClick={onConfirm}
@@ -327,6 +331,7 @@ function VideoPopup({
   onDelete: (jobId: string) => void;
   accessToken: string;
 }) {
+  const t = useT();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(true);
   const [deleting, setDeleting] = useState(false);
@@ -403,7 +408,7 @@ function VideoPopup({
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-[#1E2130]">
             <div className="min-w-0">
-              <h2 className="font-bold text-white text-base truncate">{video.template_name || "Video"}</h2>
+              <h2 className="font-bold text-white text-base truncate">{video.template_name || t('gallery.videoFallback')}</h2>
               <p className="text-white/40 text-[11px] mt-0.5">{video.template_duration}</p>
             </div>
             <button

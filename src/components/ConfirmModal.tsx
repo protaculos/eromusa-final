@@ -1,5 +1,6 @@
 "use client";
 import React from 'react';
+import { useT } from '@/i18n/useT';
 
 interface ActionButton {
   label: string;
@@ -29,6 +30,7 @@ export default function ConfirmModal({
   confirmColor = 'bg-[#EE5F96] hover:bg-[#d94d7e]',
   actions,
 }: ConfirmModalProps) {
+  const t = useT();
   if (!open) return null;
 
   return (
@@ -58,7 +60,7 @@ export default function ConfirmModal({
             onClick={onClose}
             className="flex-1 px-4 py-3 rounded-xl text-sm font-semibold text-white/60 hover:text-white bg-[#161827] hover:bg-[#1E2130] border border-[#1E2130] transition-colors"
           >
-            Cancel
+            {t('confirm.cancel')}
           </button>
           {actions ? (
             actions.map((action, i) => (

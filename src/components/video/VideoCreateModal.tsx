@@ -2,6 +2,7 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { useT } from '@/i18n/useT';
 
 // ── Types ──────────────────────────────────────────
 export interface VideoCreateModalProps {
@@ -41,6 +42,7 @@ export default function VideoCreateModal({
 }: VideoCreateModalProps) {
   const { user, session, credits } = useAuth();
   const router = useRouter();
+  const t = useT();
 
   // State
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -114,7 +116,7 @@ export default function VideoCreateModal({
   // ── File handlers ──────────────────────────────
   const handleFile = useCallback((file: File) => {
     if (!file.type.startsWith('image/')) {
-      setError('Please select an image file (JPEG or PNG)');
+      setError(t('videoModal.selectImage'));
       return;
     }
     setError(null);
@@ -157,7 +159,7 @@ export default function VideoCreateModal({
       if (onOpenPayment) {
         onOpenPayment();
       } else {
-        alert("Insufficient credits. Please purchase more.");
+        alert(t('videoModal.insufficientCredits'));
       }
       return;
     }
@@ -167,13 +169,13 @@ export default function VideoCreateModal({
 
     // Validate before sending
     if (!imageBlob) {
-      setError("Please select an image first");
+      setError(t('videoModal.selectImageFirst'));
       setIsCreating(false);
       return;
     }
 
     if (!activeTemplate?.styleId) {
-      setError("Invalid template: missing style ID");
+      setError(t('videoModal.invalidTemplate'));
       setIsCreating(false);
       return;
     }
@@ -285,7 +287,7 @@ export default function VideoCreateModal({
                 className="text-white/40 mt-0.5 whitespace-nowrap"
                 style={{ fontSize: activeTemplate.tags.join(', ').length > 50 ? '0.65rem' : '0.75rem' }}
               >
-                Filters: <span className="text-[#EE5F96]">{activeTemplate.tags.join(', ')}</span>
+                {t('videoModal.filtersLabel').replace('{tags}', activeTemplate.tags.join(', '))}
               </p>
             )}
           </div>
@@ -305,7 +307,7 @@ export default function VideoCreateModal({
           <div className="flex gap-3">
             {/* Upload card — aspect-[3/4] portrait */}
             <div className="flex-1 min-w-0">
-              <p className="text-xs text-white/40 font-semibold uppercase tracking-wider mb-2">Your Image</p>
+              <p className="text-xs text-white/40 font-semibold uppercase tracking-wider mb-2">{t('videoModal.yourImage')}</p>
               <div
                 onDrop={onDrop}
                 onDragOver={onDragOver}
@@ -331,7 +333,7 @@ export default function VideoCreateModal({
                     />
                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                       <span className="bg-emerald-500 text-white text-xs font-semibold px-3 py-1.5 rounded-full">
-                        Image Selected
+                        {t('videoModal.imageSelected')}
                       </span>
                     </div>
                   </>
@@ -352,8 +354,8 @@ export default function VideoCreateModal({
                       <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
-                      <p className="text-xs">Upload your photo</p>
-                      <p className="text-[10px] text-white/20">JPEG or PNG</p>
+                      <p className="text-xs">{t('videoModal.uploadPhoto')}</p>
+                      <p className="text-[10px] text-white/20">{t('videoModal.jpegOrPng')}</p>
                     </div>
                   </>
                 )}
@@ -370,7 +372,7 @@ export default function VideoCreateModal({
 
             {/* Template preview card — aspect-[3/4] portrait */}
             <div className="flex-1 min-w-0">
-              <p className="text-xs text-white/40 font-semibold uppercase tracking-wider mb-2">Output Video</p>
+              <p className="text-xs text-white/40 font-semibold uppercase tracking-wider mb-2">{t('videoModal.outputVideo')}</p>
               <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-[#0A0B14] border border-[#1E2130] group">
                 <video
                   src={activeTemplate.videoUrl}
@@ -397,7 +399,7 @@ export default function VideoCreateModal({
           {/* Scene examples carousel — original + examples */}
           {sceneExamples.length > 0 && (
             <div>
-              <p className="text-xs text-white/40 font-semibold uppercase tracking-wider mb-2">More Examples</p>
+              <p className="text-xs text-white/40 font-semibold uppercase tracking-wider mb-2">{t('videoModal.moreExamples')}</p>
               <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
                 {/* Original scene video — always first */}
                 <button
@@ -483,17 +485,17 @@ export default function VideoCreateModal({
               <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              Video created! Job ID: {jobId}
+              {t('videoModal.videoCreated')} Job ID: {jobId}
             </div>
           )}
 
-          {/* Bottom bar: Credits + Create button centered */}
+          {/* Bottom bar: {t('videoModal.credits')} + Create button centered */}
           <div className="flex items-center justify-center gap-4 pt-1">
             {user && (
               <div className="flex items-center gap-1.5">
                 <span className="text-white/40 text-sm font-medium">✦</span>
                 <span className="text-white font-bold text-base">{activeTemplate.credits}</span>
-                <span className="text-white/40 text-sm">Credits</span>
+                <span className="text-white/40 text-sm">{t('videoModal.credits')}</span>
               </div>
             )}
 
@@ -509,12 +511,12 @@ export default function VideoCreateModal({
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                     </svg>
-                    Creating...
+                    {t('videoModal.creating')}
                   </>
                 ) : jobId ? (
-                  'Created ✓'
+                  t('videoModal.created')
                 ) : (
-                  'Create Video'
+                  t('videoModal.createVideo')
                 )}
               </button>
             ) : (
@@ -522,7 +524,7 @@ export default function VideoCreateModal({
                 onClick={onOpenLogin}
                 className="bg-[#EE5F96] hover:bg-pink-600 text-white font-semibold rounded-xl px-6 py-3 transition-colors text-sm"
               >
-                Create Video
+                {t('videoModal.createVideo')}
               </button>
             )}
           </div>

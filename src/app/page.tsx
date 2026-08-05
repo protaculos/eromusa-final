@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useSettings } from '@/context/SettingsContext';
+import { useT } from '@/i18n/useT';
 import { allTemplates, type Template } from '@/data/templates';
 import VideoCreateModal from '@/components/video/VideoCreateModal';
 import LoginModal from '@/components/LoginModal';
@@ -48,6 +49,7 @@ function sceneToTemplate(scene: SceneData): Template {
 }
 
 export default function DiscoverPage() {
+  const t = useT();
   const { session, isAdmin } = useAuth();
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [sceneExamples, setSceneExamples] = useState<SceneExample[]>([]);
@@ -272,7 +274,7 @@ export default function DiscoverPage() {
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              New Scene
+              {t('admin.newScene')}
             </button>
             <button
               onClick={async () => {
@@ -290,7 +292,7 @@ export default function DiscoverPage() {
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              Add Scene
+              {t('admin.addScene')}
             </button>
             {scenes.length > 0 && (
               <button
@@ -300,7 +302,7 @@ export default function DiscoverPage() {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
-                Clear all
+                {t('admin.clearAll')}
               </button>
             )}
           </div>
@@ -386,16 +388,16 @@ export default function DiscoverPage() {
       <ConfirmModal
         open={!!deleteSceneTarget && !deleteSceneMode}
         onClose={handleCloseStep1}
-        title="Delete Scene"
-        message={`What do you want to do with "${deleteSceneTarget?.sceneName}"?`}
+        title={t('admin.deleteScene')}
+        message={t('admin.deleteSceneMessage').replace('{name}', deleteSceneTarget?.sceneName ?? '')}
         actions={[
           {
-            label: "Delete from site",
+            label: t('admin.deleteFromSite'),
             color: "bg-amber-500 hover:bg-amber-600",
             onClick: () => handleChooseDeleteMode('site'),
           },
           {
-            label: "Delete from database",
+            label: t('admin.deleteFromDb'),
             color: "bg-red-500 hover:bg-red-600",
             onClick: () => handleChooseDeleteMode('database'),
           },
@@ -404,14 +406,14 @@ export default function DiscoverPage() {
       <ConfirmModal
         open={!!deleteSceneConfirm}
         onClose={handleCloseDeleteScene}
-        title="Are you sure?"
+        title={t('admin.areYouSure')}
         message={
           deleteSceneConfirm?.mode === 'site'
-            ? `"${deleteSceneConfirm?.sceneName ?? ''}" will be removed from the site.`
-            : `"${deleteSceneConfirm?.sceneName ?? ''}" will be permanently deleted from the database. This cannot be undone.`
+            ? `"${deleteSceneConfirm?.sceneName ?? ''}" ${t('admin.removeFromSite')}.`
+            : `"${deleteSceneConfirm?.sceneName ?? ''}" ${t('admin.deletePermanently')}.`
         }
         confirmLabel={
-          deleteSceneConfirm?.mode === 'site' ? "Yes, remove from site" : "Yes, delete permanently"
+          deleteSceneConfirm?.mode === 'site' ? t('admin.removeFromSite') : t('admin.deletePermanently')
         }
         confirmColor={
           deleteSceneConfirm?.mode === 'site'
@@ -438,9 +440,9 @@ export default function DiscoverPage() {
           }
           setConfirmClearAll(false);
         }}
-        title="Clear all scenes"
-        message="This will remove all scenes from the display. They will remain in the database so you can add them back later."
-        confirmLabel="Clear all"
+        title={t('admin.clearAllTitle')}
+        message={t('admin.clearAllMessage')}
+        confirmLabel={t('admin.clearAllConfirm')}
         confirmColor="bg-red-500 hover:bg-red-600"
       />
 
@@ -453,7 +455,7 @@ export default function DiscoverPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-white">Add Scene</h2>
+              <h2 className="text-lg font-bold text-white">{t('admin.addSceneTitle')}</h2>
               <button onClick={() => setShowAddPopup(false)} className="text-white/40 hover:text-white p-1">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -461,7 +463,7 @@ export default function DiscoverPage() {
               </button>
             </div>
             {allScenes.length === 0 ? (
-              <p className="text-white/30 text-sm">No scenes in the database.</p>
+              <p className="text-white/30 text-sm">{t('admin.noScenes')}</p>
             ) : (
               <div className="space-y-2">
                 {allScenes.map((s) => {
@@ -483,7 +485,7 @@ export default function DiscoverPage() {
                         <p className="text-white/30 text-xs">{s.style_id}</p>
                       </div>
                       {isVisible ? (
-                        <span className="text-emerald-400 text-xs font-medium">Visible</span>
+                        <span className="text-emerald-400 text-xs font-medium">{t('admin.visible')}</span>
                       ) : (
                         <button
                           onClick={async () => {
@@ -503,7 +505,7 @@ export default function DiscoverPage() {
                           }}
                           className="px-3 py-1.5 rounded-lg bg-[#EE5F96] hover:bg-pink-600 text-white text-xs font-semibold transition-colors"
                         >
-                          Add
+                          {t('admin.add')}
                         </button>
                       )}
                     </div>

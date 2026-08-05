@@ -1,0 +1,1872 @@
+Vexutopia API Documentation
+Vexutopia is a payment orchestration platform that lets you integrate multiple payment providers through a single, unified API. Process payments, manage customers, and handle webhooks with consistent interfaces across all providers.
+
+Get Started
+Get API Keys
+On this page
+
+Base URL
+Authentication
+Quick start
+Browse documentation
+Base URL
+All API requests should be made to:
+
+https://vexutopia.com/api/v1
+Authentication
+The Vexutopia API uses API keys to authenticate requests. Include your API key in theX-API-Keyheader on every request.
+
+Keep your API keys secure. Never expose them in client-side code or commit them to version control.
+Learn more in the Authentication guide.
+
+Quick Start
+Get up and running with Vexutopia in three simple steps:
+
+1
+Get your API key
+Sign in to your dashboard and create a new API key. Use test keys for development and live keys for production.
+
+2
+Create your first payment
+Make an authenticated POST to /v1/payments — this both verifies your key works and gives you a real session ID to play with:
+
+cURL
+Copy
+curl -X POST https://vexutopia.com/api/v1/payments \
+  -H "X-API-Key: vex_test_your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": "20",
+    "currency": "USD",
+    "return_url": "https://yoursite.com/success"
+  }'
+The response body includes id (e.g. tx_…) and checkout_url. The customer goes to checkout_url to pay.
+
+3
+Retrieve a payment
+Use the id returned in step 2 to look up the payment's current status:
+
+cURL
+Copy
+# Replace tx_REPLACE_WITH_YOUR_ID with the id you got back in step 2.
+curl https://vexutopia.com/api/v1/payments/tx_REPLACE_WITH_YOUR_ID \
+  -H "X-API-Key: vex_test_your_api_key"
+Browse documentation
+Open a topic below for full request shapes, fields, and examples.
+
+Getting started
+Authentication
+Learn how to authenticate with the Vexutopia API using API keys.
+
+API reference
+Payments
+Create, retrieve, and manage payments
+
+Direct Integration
+Render PIX, C2C, and SBP payments directly on your own site without our hosted checkout page.
+
+Providers
+All payment providers and rails available through Vexutopia's smart routing.
+
+Webhooks
+Receive real-time event notifications. HMAC signature verification + retry policy.
+
+Telegram Stars
+Accept Telegram Stars (XTR) inside Telegram bots and mini-apps. Settles in TON.
+
+Embedded checkout
+Embedded checkout
+Embed Vexutopia card checkout directly on your site. Customers complete payment without leaving your domain.
+
+Resources
+Error Codes
+Error codes and troubleshooting
+
+Authentication
+The Vexutopia API uses API keys to authenticate requests. Include your key in the X-API-Key header on every request.
+
+Base URL
+cURL
+Copy
+https://vexutopia.com/api/v1
+API Key Types
+Vexutopia provides two types of API keys for different environments:
+
+TEST
+Test Keys
+Use test keys during development. Real transactions are still processed — use small amounts only.
+
+vex_test_...
+LIVE
+Live Keys
+Use live keys in production. Real transactions are processed.
+
+vex_live_...
+Getting Your API Keys
+1
+Sign in to your Vexutopia dashboard
+2
+Navigate to API Keys in the sidebar
+3
+Click "Create API Key" and choose the key type (Test or Live)
+4
+Copy your key immediately — it won't be shown again
+Using Your API Key
+Pass your API key in the X-API-Key header with every request:
+
+cURL
+Copy
+curl https://vexutopia.com/api/v1/payments \
+  -H "X-API-Key: vex_test_your_api_key" \
+  -H "Content-Type: application/json"
+JavaScript
+Copy
+const response = await fetch('https://vexutopia.com/api/v1/payments', {
+  headers: {
+    'X-API-Key': 'vex_test_your_api_key',
+    'Content-Type': 'application/json'
+  }
+});
+
+const data = await response.json();
+Required Headers
+Parameter	Type	Description
+X-API-Keyrequired	string	Your API key. Format: vex_test_xxx (test) or vex_live_xxx (live)
+Content-Typerequired	string	Must be application/json for requests with a body
+User-Agent	string	Strongly recommended for server-to-server integrations. Send a descriptive value identifying your app (e.g. "YourCompany-Integration/1.0"). See the note below.
+Server-to-server: set a descriptive User-Agent
+Our edge bot-protection can challenge or block requests whose User-Agent looks automated — many HTTP libraries send a generic default (or none), which may be flagged. If you see Cloudflare challenges or an Error 1010 on your API calls, it is caused by the User-Agent, not your IP address. Set an explicit, app-specific User-Agent header and the issue clears:
+
+User-Agent: YourCompany-Integration/1.0
+Authentication Errors
+If authentication fails, you'll receive one of these errors:
+
+401
+Missing API Key
+JSON
+Copy
+{
+  "error": "Missing X-API-Key header",
+  "code": "MISSING_API_KEY"
+}
+401
+Invalid API Key
+JSON
+Copy
+{
+  "error": "Invalid API key",
+  "code": "INVALID_API_KEY"
+}
+401
+Revoked API Key
+JSON
+Copy
+{
+  "error": "API key has been revoked",
+  "code": "REVOKED_API_KEY"
+}
+Security Best Practices
+Keep keys secret
+Never expose API keys in client-side code, public repositories, or share them in plain text.
+
+Use environment variables
+Store API keys in environment variables, not in your codebase.
+
+cURL
+Copy
+# .env
+VEXUTOPIA_API_KEY=vex_live_your_api_key
+Rotate keys regularly
+Create new keys periodically and revoke old ones to maintain security.
+
+Payments API
+The Payments API allows you to create payment sessions and retrieve their status. Each payment generates a hosted checkout URL that you redirect your customer to.
+
+Telegram Stars uses a separate endpoint — it is not part of Vexutopia's standard hosted checkout flow for fiat and on-ramp payments. See Payment Providers for context.
+
+On this page
+
+Endpoints
+Payment object
+Create a payment
+card vs card_payment
+US IP requirement
+Crypto (direct)
+Telegram Stars
+Retrieve
+Resend webhook
+Statuses
+Idempotency
+Regional correlation
+Error handling
+Endpoints
+POST
+/v1/payments
+Create a new payment session (fiat, card, and on-ramp options on the hosted checkout)
+
+POST
+/v1/payments/telegram-stars
+Create a Telegram Stars payment (XTR) — optional; same /pay checkout, then Telegram app
+
+GET
+/v1/payments/:id
+Retrieve a payment by ID
+
+POST
+/v1/payments/:id/resend-webhook
+Re-fire the payment.completed webhook for a completed transaction
+
+The Payment Object
+JSON
+Copy
+{
+  "id": "tx_b84050910b493a1e",
+  "status": "pending",
+  "amount": "20",
+  "currency": "USD",
+  "checkout_url": "https://checkout.vexutopia.com/pay?session=tx_b84050910b493a1e",
+  "return_url": "https://yoursite.com/order/success",
+  "provider": "moonpay",
+  "customer_email": "customer@example.com",
+  "customer_name": "Jane Smith",
+  "failure_reason": null,
+  "metadata": {
+    "order_id": "1234"
+  },
+  "created_at": "2026-04-06T19:47:36.807Z",
+  "updated_at": "2026-04-06T19:47:39.020Z",
+  "expires_at": "2026-04-07T19:47:38.000Z",
+  "completed_at": null
+}
+Attributes
+Parameter	Type	Description
+id	string	Unique identifier for the payment (tx_ prefix)
+status	string	Payment status: pending, completed, failed, cancelled, expired, refunded, or partially_refunded. See the Payment Statuses table below for the meaning of each.
+amount	string	Decimal amount as a string (e.g., "20" or "19.99")
+currency	string	Three-letter ISO currency code. Supported: USD, EUR, GBP, CAD, AUD, JPY, BRL, MXN, ARS, RUB, CNY
+checkout_url	string	Hosted checkout URL — redirect your customer here to complete payment
+return_url	string	URL the customer is returned to after payment
+provider	string	Deprecated alias of processor — kept for backward compatibility. Use processor in new integrations.
+processor	string	Brand-neutral rail code for the underlying processor: card_acquirer, crypto_onramp, crypto_direct, regional, china_pay, or stars. Populated after the customer completes checkout — not a request field.
+payment_method	string	Method the customer paid with. Possible values: card (crypto on-ramp — customer pays with a card, you settle in USDT), card_payment (direct card processing — customer pays with a card, you settle in fiat), pix, c2c, sbp, open_banking, telegram_stars, crypto, alipay, or wxpay. See the rails section below for which countries each supports.
+customer_email	string	Customer email if provided
+customer_name	string	Customer name if provided
+failure_reason	string	Reason for failure if status is failed
+metadata	object	Custom key-value pairs you passed at creation
+created_at	string	ISO 8601 timestamp of creation
+updated_at	string	ISO 8601 timestamp of the most recent status change
+expires_at	string	ISO 8601 timestamp when the checkout link expires (1 hour)
+completed_at	string	ISO 8601 timestamp when payment was completed, or null
+Create a Payment
+POST
+/v1/payments
+Create a new payment session and get a hosted checkout URL
+
+Request Body
+Parameter	Type	Description
+amountrequired	string	Decimal amount as a string — e.g., "20" or "19.99". Not cents.
+currencyrequired	string	Three-letter ISO currency code. Supported: USD, EUR, GBP, CAD, AUD, JPY, BRL, MXN, ARS, RUB, CNY. Amounts are automatically converted to USDC at the current rate.
+return_urlrequired	string	URL to redirect the customer after payment completes
+customer_email	string	Customer email address
+customer_name	string	Customer full name
+customer_id	string	Your internal customer ID for reference
+webhook_url	string	URL to receive payment status notifications
+metadata	object	Custom key-value pairs (string values only)
+country	string	Two-letter ISO 3166-1 alpha-2 country code of the customer. Used to filter region-restricted providers and to pre-select the customer's region on the hosted checkout page. Optional — if omitted, we fall back to IP-based geolocation; the customer can still change the region themselves.
+locale	string	Optional UI language for the hosted checkout (BCP-47) — e.g. "fr", "de", "ja", "pt-BR", "ar". The whole checkout (amounts, payment options, card form, help, and the success screen) renders in this language, with right-to-left layout for Arabic and Hebrew. Forgiving about format: "FR", "fr-FR", "pt" (→pt-BR), and "zh-Hant" (→Traditional Chinese) all resolve. If omitted or unrecognized, the checkout follows the customer's region (e.g. Portuguese in Brazil) and otherwise falls back to English. You can also override per-link by appending ?locale= to the returned checkout_url. Supported: en, pt-BR, es, ru, zh-CN, zh-TW, fr, de, it, nl, pl, tr, ja, ko, hi, id, vi, th, uk, ro, cs, sv, el, ar, he.
+direct	boolean	Skip our hosted checkout and return the upstream PSP payment link directly in the response (you redirect your customer there yourself). v1 supports BRL (PIX), ARS (C2C), and RUB (SBP). Your site must be approved for regional payments. See "Direct mode" below.
+crypto	boolean	Route this payment to the direct-crypto checkout (customer pays in BTC, ETH, stablecoins, or other supported assets). Returns checkout_url on vexutopia.com/pay/crypto/… — not the multi-method /pay page. Minimum invoice USD 3 equivalent. See "Crypto (direct)" below.
+payment_method	string	Required for CNY transactions to choose between Alipay and WeChat Pay. Accepts "ALIPAY" or "WXPAY". CNY without this defaults to Alipay. Per-order range: 1 – 1,000 CNY (~$0.15 – $138 USD) — orders outside this window are rejected with HTTP 422. Other rails ignore this field and pick a method automatically. Your site must be approved for China Pay.
+card_payment	boolean	Force the card-payment rail (settlement in fiat) instead of letting routing pick. Use this when you want card processing for the customer rather than the crypto on-ramp fallback. Your site must be approved for card payments. Ignored if currency is CNY.
+Example Request
+cURL
+Copy
+curl -X POST https://vexutopia.com/api/v1/payments \
+  -H "X-API-Key: vex_test_your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": "20",
+    "currency": "USD",
+    "locale": "fr",
+    "return_url": "https://yoursite.com/order/success",
+    "customer_email": "customer@example.com",
+    "metadata": {
+      "order_id": "1234"
+    }
+  }'
+JavaScript
+Copy
+const response = await fetch('https://vexutopia.com/api/v1/payments', {
+  method: 'POST',
+  headers: {
+    'X-API-Key': 'vex_test_your_api_key',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    amount: '20',
+    currency: 'USD',
+    return_url: 'https://yoursite.com/order/success',
+    customer_email: 'customer@example.com',
+    metadata: { order_id: '1234' }
+  })
+});
+
+const payment = await response.json();
+
+// Redirect the customer to complete payment
+window.location.href = payment.checkout_url;
+Response
+JSON
+Copy
+{
+  "id": "tx_b84050910b493a1e",
+  "status": "pending",
+  "checkout_url": "https://checkout.vexutopia.com/pay?session=tx_b84050910b493a1e",
+  "expires_at": "2026-04-07T20:16:49.470Z",
+  "amount": "20",
+  "currency": "USD",
+  "created_at": "2026-04-06T20:16:47.932Z"
+}
+How it works
+After creating a payment, redirect your customer to checkout_url. They will choose their preferred payment provider (MoonPay, Transak, etc.) and complete payment there. Once paid, Vexutopia fires a webhook to your webhook_url and your payout is sent instantly to your configured wallet. The checkout link expires after 1 hour.
+
+United States card payments: Customers with US billing addresses pay on the same inline card page as everyone else (URL stays on vexutopia.com); the embedded iframe handles US too. The one US-specific requirement is that the customer must be on a US IP address — see the US card billing docs.
+
+Wallet requirement: Payouts are delivered as USDC, PYUSD, or other ERC-20 stablecoins depending on the payment method used. Use a self-custody EVM wallet (MetaMask, Rabby, Phantom, etc.) — exchange deposit addresses (Binance, Coinbase, etc.) may assign different addresses per token, and funds sent to an unsupported token could be unrecoverable.
+
+card vs card_payment — what's the difference?
+Both let your customer pay with a card, but they settle the merchant in different assets and route through different rails. Use whichever fits your business model.
+
+payment_method	What it is	You settle in	How to request
+card	Crypto on-ramp. Customer pays with a card; an on-ramp partner converts the fiat to crypto.	USDT / USDC (ERC-20 stablecoin)	Default. No flag needed — just POST /v1/payments with no card_payment / crypto flags.
+card_payment	Direct card processing through our card acquirer. Customer pays with a card; you receive fiat.	USD fiat (paid out to your bank)	Send card_payment: true. Requires per-site approval and a customer in a supported country (US, GB, EU, etc.).
+If card_payment: true is sent for a country we don't cover with direct cards yet, you'll get 422 NO_PROVIDER_AVAILABLE — we don't silently fall back to the on-ramp.
+
+Card payments — copy-paste example
+To take card payments, send card_payment: true and redirect the customer to the returned checkout_url. Vexutopia's hosted card form collects the customer's card and billing details — do not send firstName, lastName, billing, or card details on this call.
+
+cURL
+Copy
+curl -X POST https://vexutopia.com/api/v1/payments \
+  -H "X-API-Key: vex_live_…" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": "19.99",
+    "currency": "USD",
+    "customer_email": "buyer@example.com",
+    "customer_name": "Jane Doe",
+    "country": "US",
+    "card_payment": true,
+    "return_url": "https://yoursite.com/payment-status?order={order_id}",
+    "webhook_url": "https://yoursite.com/api/vexutopia-webhook",
+    "metadata": {
+      "order_no": "your-internal-order-id",
+      "user_id": "abc-123"
+    }
+  }'
+Response (redirect the customer to checkout_url):
+
+JSON
+Copy
+{
+  "id": "tx_abc1234567890def",
+  "status": "pending",
+  "amount": "19.99",
+  "currency": "USD",
+  "checkout_url": "https://vexutopia.com/pay/card?session=tx_abc1234567890def",
+  "expires_at": "2026-05-13T13:00:00.000Z"
+}
+Common mistake: sending firstName, lastName, or a billingobject on this call returns 400 CARD_PAYMENT_INTEGRATION — we collect those from the customer on the hosted form. US billing: handled automatically; the customer is silently routed to the secure US hosted card page. Embedded iframe: see Embedded Card Checkout for the on-site flow.
+
+US card payments require a US IP address
+For fraud prevention, US-billed card payments are restricted to customers connecting from a US IP address. Our US card acquirer treats geo-mismatched sessions (US billing from non-US IP) as high-risk: most are declined upstream, the small fraction that settle are disproportionately chargebacks, and you get billed for both. We hard-block these at the checkout layer so they never reach the card form.
+
+What this means for your integration:
+
+Sending country: "US" + card_payment: true on POST /v1/payments still succeeds — we don't IP-gate at create time (your server's IP isn't the customer's).
+The gate fires when the customer actually visits the hosted card page from their browser. If they're not on a US IP, they see a clear message and a "back to checkout" button so they can pick a different method.
+The /pay hosted checkout hides the Card Payments tile entirely when the customer's region resolves to US but their IP isn't US — they pick another rail (crypto on-ramp, regional, etc.) instead.
+Test mode is exempt. API keys starting with vex_test_ bypass the gate so you can integration-test from any region.
+API error code: US_IP_REQUIRED (HTTP 403). The response body includes detected_country for telemetry. The customer-facing message in the hosted UI is softer — "Card payments require a US connection."
+
+Provider selection is automatic
+Do not include a provider field in your request — it will cause an error. The payment provider is chosen by your customer on the checkout page. The provider field only appears in the response and webhooks after checkout to tell you which provider was used. Exception: when you set crypto: true, routing is fixed to the direct-crypto flow — customers do not pick a card/bank on-ramp provider for that session.
+
+Multi-currency
+Supported currencies: USD, EUR, GBP, CAD, AUD, JPY, BRL, MXN, ARS, RUB, CNY. For most rails, the amount is automatically converted to USDC at the live rate before the customer sees the checkout, and your payout is delivered in USDC. CNY routes through China Pay (Alipay/WeChat) and settles to your Vexutopia merchant balance instead of being converted on the fly. Unsupported currency codes return a 422 validation error.
+
+Crypto (direct)
+Pass crypto: true on POST /v1/payments to start a cryptocurrency checkout. The response checkout_url is on vexutopia.com/pay/crypto/<id> (embedded hosted flow; your customer completes payment there). This rail is not available as a choice on the standard multi-method /pay page — your backend must opt in per payment.
+
+Fees — crypto processor percentage (in our configuration) plus 2% Vexutopia margin, shown as one combined rate on the invoice (see Payment Providers)
+Minimum — USD 3 equivalent in your requested currency
+Underpayment tolerance — sends within 5% of the quoted amount still settle as completed
+return_url — may include {payment_id}, {order_id}, {transaction_id}, and {status}; these are replaced when the customer is sent back to your site
+Webhooks — same events as other rails; payment_method is crypto
+Example request
+cURL
+Copy
+curl -X POST https://vexutopia.com/api/v1/payments \
+  -H "X-API-Key: vex_live_your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": "10.00",
+    "currency": "USD",
+    "crypto": true,
+    "return_url": "https://yoursite.com/pay/return?id={payment_id}&status={status}",
+    "webhook_url": "https://yoursite.com/api/webhooks/vexutopia"
+  }'
+Store the returned id in your own database before redirecting — your return page should look up that id server-side (do not rely on the URL alone for fulfillment).
+
+Telegram Stars (optional)
+Telegram Stars can be offered in two ways. Both require a LIVE API key and Telegram Stars enabled under Dashboard → Settings (off by default).
+
+Mode	How	Best for
+Mixed checkout	Use POST /v1/payments as normal — Telegram Stars appears automatically at the top of the provider list if enabled	Most merchants — one API call covers all payment methods
+Standalone	Use POST /v1/payments/telegram-stars to create a Stars-only checkout	Telegram bots or flows where Stars is the only payment option
+In both modes, Vexutopia converts your USD amount to the equivalent number of stars automatically. The customer sees Stars at the top of the checkout — no KYC, no minimum, works worldwide. If they don't have enough Stars, Telegram prompts them to buy more inside the app.
+
+POST
+/v1/payments/telegram-stars
+Create a Telegram Stars invoice; returns checkout_url (same /pay page) and telegram_invoice_url
+
+Request Body
+Parameter	Type	Description
+amountrequired	string	USD amount as a string (e.g. "10.00") — automatically converted to stars
+currencyrequired	string	Must be "USD"
+return_urlrequired	string	URL to send the customer after successful payment
+customer_email	string	Optional customer email
+customer_name	string	Optional customer name
+customer_id	string	Optional your internal customer ID
+webhook_url	string	Optional URL for payment status webhooks
+metadata	object	Optional custom key-value pairs (string values only)
+Example Request
+cURL
+Copy
+curl -X POST https://vexutopia.com/api/v1/payments/telegram-stars \
+  -H "X-API-Key: vex_live_your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": "10.00",
+    "currency": "USD",
+    "return_url": "https://yoursite.com/order/success"
+  }'
+Response
+JSON
+Copy
+{
+  "id": "tx_…",
+  "status": "pending",
+  "checkout_url": "https://vexutopia.com/pay?session=tx_…",
+  "telegram_invoice_url": "https://t.me/$…",
+  "expires_at": "2026-04-09T19:32:10.977Z",
+  "amount": "10.00",
+  "currency": "USD",
+  "stars": 500,
+  "created_at": "2026-04-09T18:32:10.710Z"
+}
+Webhook events
+When the customer completes payment in Telegram, your webhook_url receives a payment.completed event:
+
+JSON
+Copy
+{
+  "event": "payment.completed",
+  "id": "tx_…",
+  "status": "completed",
+  "amount": "100",
+  "currency": "XTR",
+  "timestamp": "2026-04-09T20:13:36.280Z"
+}
+amount is the number of stars charged. Cross-reference with stars from the create response.
+
+If the customer requests a Telegram chargeback (refund), you will also receive a payment.refunded event:
+
+JSON
+Copy
+{
+  "event": "payment.refunded",
+  "id": "tx_…",
+  "status": "refunded",
+  "amount": "100",
+  "currency": "XTR",
+  "timestamp": "2026-04-09T20:45:11.000Z"
+}
+Telegram initiates refunds unilaterally — you cannot prevent them. Revoke access to any digital goods when you receive this event. The payment status will also update to refunded if you poll GET /v1/payments/:id.
+
+Chargeback fee — $40 per refund
+Each Telegram Stars chargeback incurs a $40 platform fee. The fee is automatically deducted from your pending Stars payout balance at the time the chargeback is received — not at your next payout cycle. Your balance in Dashboard → Settings always reflects what you will actually receive. A running total of fees is shown for transparency. High chargeback rates may result in Telegram Stars being disabled for your account.
+
+How it works
+Redirect the customer to checkout_url. They open the Telegram invoice from the Vexutopia checkout page and complete payment in Telegram. If they don't have enough Stars, Telegram prompts them to buy more automatically. Webhooks fire on completion just like other payment methods.
+
+🔗
+Want to skip our hosted page and render your own “Pay with PIX” button on your site? See Direct Integration.
+
+Retrieve a Payment
+GET
+/v1/payments/:id
+Retrieve a payment by its unique identifier
+
+Path Parameters
+Parameter	Type	Description
+idrequired	string	The payment ID (e.g., tx_b84050910b493a1e)
+Example Request
+cURL
+Copy
+curl https://vexutopia.com/api/v1/payments/tx_b84050910b493a1e \
+  -H "X-API-Key: vex_test_your_api_key"
+Response
+JSON
+Copy
+{
+  "id": "tx_b84050910b493a1e",
+  "status": "completed",
+  "amount": "20",
+  "currency": "USD",
+  "checkout_url": "https://checkout.vexutopia.com/pay?session=tx_b84050910b493a1e",
+  "return_url": "https://yoursite.com/order/success",
+  "provider": "moonpay",
+  "customer_email": "customer@example.com",
+  "customer_name": null,
+  "failure_reason": null,
+  "metadata": { "order_id": "1234" },
+  "created_at": "2026-04-06T20:16:47.932Z",
+  "updated_at": "2026-04-06T20:17:05.000Z",
+  "expires_at": "2026-04-07T20:16:49.470Z",
+  "completed_at": "2026-04-06T20:17:05.000Z"
+}
+Resend Webhook
+POST
+/v1/payments/:id/resend-webhook
+Re-fire the payment.completed webhook for a completed transaction
+
+Use this to recover from missed or failed webhook deliveries. The endpoint re-sends the payment.completed event to all your registered webhook endpoints and the webhook_url set at payment creation. Your handler should be idempotent — duplicate deliveries for an already-fulfilled payment should be a no-op on your side.
+
+Example Request
+cURL
+Copy
+curl -X POST https://vexutopia.com/api/v1/payments/tx_b84050910b493a1e/resend-webhook \
+  -H "X-API-Key: vex_live_your_api_key"
+JSON
+Copy
+{
+  "ok": true,
+  "transaction_id": "tx_b84050910b493a1e",
+  "event": "payment.completed"
+}
+Only works on completed transactions. Returns 400 NOT_COMPLETED if the transaction is still pending, processing, or failed.
+
+Rate limited to 60 requests per minute per API key (sliding window).
+
+Requires a LIVE API key.
+
+Payment Statuses
+Status	Description
+pending	Session created. Awaiting customer payment, or the customer has paid and we are awaiting upstream confirmation. Both pre-payment and post-payment in-flight transactions surface as "pending" — listen on the webhook (or poll) for the terminal state.
+completed	Payment confirmed and payout sent.
+failed	Payment failed or underpayment detected.
+cancelled	Session was superseded by a different rail (e.g. customer abandoned card and paid via WeChat — see Regional payments correlation), or explicitly cancelled. The original session ID still appears as payment_id on the child's webhook so you can reconcile.
+expired	Checkout link expired without payment (default 1 hour TTL).
+refunded	Payment was refunded in full.
+partially_refunded	Payment was refunded for less than the full amount.
+Idempotency
+Send an Idempotency-Key header on POST /v1/payments to make retries safe. If your service double-fires the same request (network retry, double-click, two tabs), reusing the same key returns the original response instead of creating a second payment session.
+
+Generate a unique key per logical payment intent (a UUID is fine). Format: A-Z a-z 0-9 _ -, 1–255 chars.
+Keys are scoped per API key and remembered for 24 hours.
+Same key + identical body within 24h → original response replayed, with header Idempotent-Replayed: true.
+Same key + different body → 409 IDEMPOTENCY_KEY_REUSED. Use a fresh key for new requests.
+Server errors (5xx) are not cached, so a retry with the same key will be processed normally.
+The header is optional — requests without it behave exactly as before.
+Example
+cURL
+Copy
+curl -X POST https://vexutopia.com/api/v1/payments \
+  -H "X-API-Key: vex_test_your_api_key" \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: 8b1f2c4e-9d3a-4f7b-8c1d-2e3f4a5b6c7d" \
+  -d '{
+    "amount": "20.00",
+    "currency": "USD",
+    "return_url": "https://yoursite.com/order/success"
+  }'
+Regional payments: correlating the webhook to your original payment
+When a customer pays via a regional rail (PIX in Brazil, C2C in Argentina, SBP in Russia), we settle the payment on a child transaction with its own ID. The original transaction we returned from POST /v1/payments is moved to CANCELLED with the reason “Superseded by [rail] regional payment”, and the payment.completed webhook is fired against the child.
+
+To credit the customer in your system, correlate by payment_id (the original ID we returned to you) or by metadata.<your_field> if you passed one through.
+
+Webhook payload (excerpt)
+JSON
+Copy
+{
+  "event": "payment.completed",
+  "id": "tx_9fbd2dd90d27c04b",          // child tx (the regional settlement)
+  "payment_id": "tx_68ede60fcaf92e24",   // original tx returned by POST /v1/payments
+  "status": "completed",
+  "amount": "98.47",
+  "currency": "BRL",
+  "processor": "regional",
+  "payment_method": "pix",
+  "settled_via": { "rail": "PIX", "amount": "98.47", "currency": "BRL" },
+  "metadata": { "order_id": "1234" },
+  "timestamp": "2026-05-08T01:33:43.656Z"
+}
+The same pattern applies if you also call GET /v1/payments/:id against the original ID — once the child has settled, the parent reflects status CANCELLED (superseded). Always trust the webhook's payment_id field as the authoritative back-reference.
+
+Error Handling
+All errors follow a consistent format:
+
+JSON
+Copy
+{
+  "error": "Human-readable error message",
+  "code": "MACHINE_READABLE_CODE"
+}
+422
+Validation Error
+JSON
+Copy
+{
+  "error": "Validation failed",
+  "code": "VALIDATION_ERROR",
+  "details": {
+    "fieldErrors": {
+      "amount": ["Invalid input: expected string, received number"]
+    }
+  }
+}
+400
+Wallet Not Configured
+JSON
+Copy
+{
+  "error": "USDC wallet not configured. Set your payout wallet in Settings.",
+  "code": "WALLET_NOT_CONFIGURED"
+}
+See the Errors reference for a complete list.
+
+Direct Integration
+Skip checkout.vexutopia.com entirely. With direct: true, the response from POST /v1/payments is a Vexutopia-hosted payment page on the apex domain — you redirect your customer there from your own site (or open it in a popup, or anywhere else you choose).
+
+Direct integration is a redirect-target change only. Webhooks, status polling, fees, rolling reserve and partner attribution behave identically to the hosted flow.
+
+When to use Direct vs. Hosted
+Use the hosted page
+You want customers to choose between several methods
+You want our trust badges, brand polish, and method discovery
+You don't want to manage redirects yourself
+Use direct integration
+You already have your own checkout UI
+The customer has already chosen a method (e.g. a “Pay with PIX” button on your page)
+You want to keep the customer on your domain until the redirect
+Eligibility
+Direct integration is gated by the same per-Site approval as the hosted flow. To use it you need:
+
+An active Vexutopia merchant account with at least one approved Site.
+Regional payments approval for the Site you're creating the transaction under. Request it from the Settings page in your dashboard. Without approval, requests with direct: true return 422 NO_PROVIDER_AVAILABLE.
+A LIVE API key (test keys can be used for integration but no real funds move).
+Supported methods (v1)
+Parameter	Type	Description
+PIX (BRL)	regional	Brazil — local instant transfer. Customer scans a QR or pastes a copy-and-paste code on the upstream page.
+C2C (ARS)	regional	Argentina — card-to-card.
+SBP (RUB)	regional	Russia — Sistema Bystrykh Platezhei (Faster Payments System).
+Open Banking (EUR), Card Payments, Crypto on-ramp, and Telegram Stars are not yet supported in direct mode. They are on the roadmap for v1.1.
+
+Request
+The endpoint and authentication are identical to the hosted flow — only the direct: true field is new. See POST /v1/payments for the full parameter list.
+
+Body parameters used by direct mode
+Parameter	Type	Description
+amountrequired	string	Decimal amount as a string — e.g. "100.00". Not cents.
+currencyrequired	string	Three-letter ISO. Direct mode (v1) accepts only BRL, ARS, RUB.
+return_urlrequired	string	Where the customer is sent back after payment (success or fail).
+customer_email	string	Strongly recommended — passed to the upstream PSP for receipts and reconciliation.
+webhook_url	string	Where we POST status updates. Same shape as the hosted flow.
+metadata	object	Custom key-value pairs (string values). Round-trips back on the webhook.
+directrequired	boolean	Set to true to receive the upstream payment URL in the response.
+Example — Direct PIX
+cURL
+Copy
+curl -X POST https://vexutopia.com/api/v1/payments \
+  -H "X-API-Key: vex_live_your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": "100.00",
+    "currency": "BRL",
+    "customer_email": "buyer@example.com",
+    "return_url": "https://yoursite.com/order/123/return",
+    "webhook_url": "https://yoursite.com/api/webhooks/vexutopia",
+    "metadata": { "order_id": "1234" },
+    "direct": true
+  }'
+Response
+The shape is identical to the hosted flow. The key difference: checkout_url is a Vexutopia-hosted page on the apex domain (e.g. /pay/regional/...) that renders the local rail (PIX QR, C2C details, SBP redirect, etc.) — not checkout.vexutopia.com.
+
+JSON
+Copy
+{
+  "id": "tx_b84050910b493a1e",
+  "status": "pending",
+  "amount": "100.00",
+  "currency": "BRL",
+  "checkout_url": "https://vexutopia.com/pay/regional/tx_b84050910b493a1e",
+  "expires_at": "2026-05-01T13:30:00Z"
+}
+Redirect your customer to checkout_url. They complete the payment on a page hosted by Vexutopia and are returned to your return_url with ?status=success or ?status=fail.
+
+Webhooks
+Webhook delivery is identical to the hosted flow. We send you a payment.completed / payment.failed / payment.cancelled event at your webhook_url when the upstream PSP confirms the outcome. The HMAC signature, retry policy, and payload shape are the same — see Webhooks.
+
+Errors specific to direct mode
+Parameter	Type	Description
+DIRECT_MODE_UNSUPPORTED_CURRENCY	422	You passed direct: true with a currency outside the v1 allowlist (BRL/ARS/RUB).
+NO_PROVIDER_AVAILABLE	422	Your Site is not approved for regional payments. Request approval from the dashboard before retrying.
+WALLET_NOT_CONFIGURED	400	Your organization has no payout wallet configured. Set it in Settings.
+VALIDATION_ERROR	422	Body failed schema validation. Inspect details.fieldErrors for field-level messages.
+Standard errors (auth, rate-limit, idempotency) behave identically to the hosted flow — see Error Codes.
+
+Telegram Stars
+Accept payments in Telegram Stars (XTR) — Telegram's native digital currency — directly inside Telegram. Use this when your customers already live in Telegram (bots, mini-apps, channels) and you want them to pay without leaving the app.
+
+This rail uses a separate endpoint from the main Payments API and returns a real t.me/$invoice/... link you can attach to a message, inline keyboard, or mini-app button. The customer never sees a Vexutopia checkout page.
+
+When Telegram Stars makes sense
+Good fit
+Telegram bot or mini-app selling digital goods
+You want zero card friction (no 3DS, no chargebacks)
+Your customers already hold Stars or top up easily
+Small-amount sales (subscriptions, tips, role unlocks)
+Poor fit
+Customer is on a website, not Telegram — use card or regional rails
+You need refunds (Stars refunds are limited and at Telegram's discretion)
+Large-ticket items — Star top-up cost adds friction past ~$50
+Prerequisites
+A LIVE API key. Test keys are rejected with 400 TELEGRAM_STARS_LIVE_ONLY. Stars are real money even at small amounts, so there is no sandbox mode.
+Telegram Stars approved for your site. Stars is gated by a per-site approval like every other rail. Once approved, proceeds settle to your balance and are withdrawn like any other coin/network — you choose the destination wallet (TON included) when you request a withdrawal. No payout wallet needs to be configured up front.
+Endpoint
+cURL
+Copy
+POST https://vexutopia.com/api/v1/payments/telegram-stars
+Authentication is the same as the rest of the API — pass your LIVE key in the X-API-Key header. See Authentication.
+
+Request body
+Parameter	Type	Description
+amountrequired	string	USD amount as a decimal string — e.g. "1.00". Converted to stars automatically using the current USD-per-star estimate.
+currencyrequired	string	Must be the literal "USD". Stars are denominated in XTR but priced in USD on this endpoint.
+return_urlrequired	string	Where the customer is sent after the invoice closes. Telegram opens this in an in-app browser.
+customer_email	string	Optional, used for receipts and reconciliation.
+customer_name	string	Optional display name. Telegram does not show this on the invoice — used for your records only.
+customer_id	string	Optional merchant-side identifier round-tripped on the webhook.
+webhook_url	string	Where we POST status updates. Same shape and signature as every other rail.
+metadata	object	String key/value pairs round-tripped on the webhook payload.
+country	string	Optional ISO 3166-1 alpha-2 country code for analytics.
+Example
+cURL
+Copy
+curl -X POST https://vexutopia.com/api/v1/payments/telegram-stars \
+  -H "X-API-Key: vex_live_your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": "1.00",
+    "currency": "USD",
+    "customer_email": "buyer@example.com",
+    "return_url": "https://t.me/your_bot?start=order_1234",
+    "webhook_url": "https://yoursite.com/api/webhooks/vexutopia",
+    "metadata": { "order_id": "1234" }
+  }'
+Response
+JSON
+Copy
+{
+  "id": "tx_a1b2c3d4e5f60718",
+  "status": "pending",
+  "amount": "1.00",
+  "currency": "USD",
+  "stars": 50,
+  "checkout_url": "https://vexutopia.com/pay?session=tx_a1b2c3d4e5f60718",
+  "telegram_invoice_url": "https://t.me/$AbCdEf...",
+  "expires_at": "2026-05-09T23:30:00Z",
+  "created_at": "2026-05-09T22:30:00Z"
+}
+Parameter	Type	Description
+id	string	Vexutopia transaction id. This is what the webhook references and what you pass to GET /v1/payments/{id}.
+telegram_invoice_url	string	The actual t.me/$invoice link to hand to the customer — attach to a button, send as a message, open from a mini-app. This is what you use.
+checkout_url	string	Vexutopia-hosted fallback page that wraps the same invoice. Useful if you also serve non-Telegram traffic; ignore otherwise.
+stars	integer	How many stars the customer is being charged, computed from amount at request time.
+status	string	Always "pending" on creation. Watch the webhook for the terminal status (completed / failed / cancelled / expired).
+Inside a Telegram bot: attach the telegram_invoice_url to an inline keyboard button using the url field — Telegram opens the invoice natively. Do not redirect through an in-app browser; the native invoice UI is what makes Stars work.
+
+Webhooks
+Webhook delivery is identical to every other rail. We POST to your webhook_url with a payment.completed or payment.failed event. The top-level id, payment_id, and order_id fields are all aliases for the same Vexutopia transaction id you received in the create response.
+
+Signature header, retry policy, and payload shape are documented in Webhooks.
+
+Fees and settlement
+Telegram takes its cut at withdrawal time, not per transaction — no per-payment PSP fee appears on your transaction.
+Vexutopia's platform fee on Stars is volume-tiered: 5% under $100K lifetime, 4% at $100K – $200K, 3% at $200K – $500K, and 2% above $500K. The same tier ladder applies to the Crypto On-Ramp rail; see Providers → Volume tiers for the full table.
+Stars proceeds settle to your Vexutopia balance and are withdrawn like any other coin or network — you choose the destination wallet (TON included, alongside every other supported network) when you request a withdrawal. No payout wallet needs to be configured up front. The USD-per-star conversion you see in the create response is locked at invoice creation for accounting purposes — the amount you receive in your chosen coin depends on its rate at withdrawal.
+Maturity: T+21. Each completed Stars sale becomes withdrawable 21 days after the customer paid, matching Telegram's customer-refund window. Until then the sale sits in the "Maturing" sub-line of your Stars balance card. Your dashboard's "Available to withdraw" figure is genuinely what's safe to pay out — it does not include Stars still subject to a customer refund.
+$40 fee per Telegram-issued refund. Customers can ask Telegram Support to refund a Stars payment. When that happens we record the refund on the transaction, decrement your pending Stars balance by the refunded amount plus the $30 equivalent, and surface it on the Refunds & Chargebacks page so you can keep track of it alongside disputes on other rails.
+Errors specific to this endpoint
+Parameter	Type	Description
+TELEGRAM_STARS_LIVE_ONLY	400	You authenticated with a TEST key. Switch to a LIVE key — there is no sandbox for Stars.
+TELEGRAM_STARS_NOT_ALLOWED	403	Your account is not on the Stars allowlist (used during phased rollout). Contact support if you believe this is wrong.
+TELEGRAM_NOT_CONFIGURED	503	The platform-side Telegram bot is temporarily unavailable. Safe to retry — this is on our side, not yours.
+TELEGRAM_STARS_NOT_APPROVED	403	Telegram Stars is not approved for this site yet. Request approval from the dashboard.
+INVALID_AMOUNT	422	amount is zero, negative, or rounds to outside the 1–100,000 stars range.
+PROVIDER_ERROR	422	Telegram rejected the invoice creation. The error message is included in the response — usually a transient Telegram API issue.
+Standard errors (auth, rate-limit, validation) behave the same as elsewhere — see Error Codes.
+
+Payment Providers
+Vexutopia offers four core payment rails. Your customers see only the options available for their region and amount at checkout — no extra configuration required on your side (except where a rail is API-only, noted below).
+
+1. Crypto on-ramp — global and regional providers that convert the customer's card/bank payment into crypto delivered to your payout wallet.
+2. Regional payment methods — local rails (Brazilian PIX, Argentine card-to-card, Russian SBP, EU Open Banking, Chinese Alipay & WeChat Pay) that settle to your Vexutopia merchant balance.
+3. Card payments — direct Visa/Mastercard acquiring. In onboarding — available only after KYB approval and a dedicated compliance review.
+4. Crypto (direct) — the customer pays in cryptocurrency through a hosted flow you start from the API with crypto: true. Not listed on the standard multi-method checkout page; see Payments API — Crypto (direct).
+Telegram Stars is a separate optional flow — see the Telegram Stars section below or the Payments API for the POST /v1/payments/telegram-stars endpoint.
+
+On this page
+
+How routing works
+Fee summary
+Crypto On-Ramp
+Regional methods
+Card Payments
+US hosted card
+Crypto (direct)
+Telegram Stars
+How routing works
+When a customer opens a Vexutopia hosted checkout link, we detect their country and present all eligible options ranked by quality. The customer chooses their preferred method. Options are filtered by:
+
+Minimum & maximum purchase amount — providers whose limits exclude the order amount are hidden (e.g. Alipay/WeChat enforce a 1 – 1,000 CNY per-order range)
+Region availability — regional providers only appear for customers in their supported area
+Provider status — providers that are offline or degraded are automatically excluded
+Fee summary
+All-in rates per rail (Vexutopia's platform fee combined with the underlying processor's fee). Crypto On-Ramp and Telegram Stars step down with lifetime processed volume. Crypto (direct) is processor percentage + 2% (not tiered); all other flat rows are fixed totals.
+
+Rail	All-in rate	Per-tx fixed	Tiered?
+Crypto On-Ramp	6% → 5% → 4% → 3%	—	Yes
+Card Payments
++ 1.5% settlement fee at payout
+12.5%	$0.50	No
+PIX (Brazil)	6.5%	BRL 1	No
+C2C (Argentina)	12%	—	No
+SBP (Russia)	15%	—	No
+Open Banking (EU)	11%	EUR 1	No
+Alipay (China)
+1 – 1,000 CNY per order
+12%	—	No
+WeChat Pay (China)
+1 – 1,000 CNY per order
+13%	—	No
+Telegram Stars	5% → 4% → 3% → 2%	—	Yes
+Crypto (direct)	
+upstream % + 2%
+Example: 1% upstream → 3% total. At 0.5% upstream, all-in is 2.5%.
+—	No
+Volume tiers (Crypto On-Ramp & Telegram Stars only)
+Lifetime volume	Platform fee
+$0 – $100K	5%
+$100K – $200K	4%
+$200K – $500K	3%
+$500K+	2%
+Tier breakpoints are based on cumulative completed volume in USD, all rails combined. Only Crypto On-Ramp and Telegram Stars use this ladder. Card Payments, regional methods, and Crypto (direct) are flat.
+
+1
+Crypto On-Ramp
+Crypto on-ramps accept the customer's fiat payment (card, bank, or local method) and deliver crypto straight to your payout wallet. These providers appear automatically at checkout based on the customer's country and the payment amount.
+
+Provider	Minimum	Region	Fee
+Bitnovo	$10	Global	See fee summary
+Topper	$10	Global	See fee summary
+Klever	$12	Global	See fee summary
+Transak	$15	Global	See fee summary
+Binance Connect	$15	Global	See fee summary
+Alchemy Pay	$15	Global	See fee summary
+MoonPay	$20	Global	See fee summary
+Banxa	$20	Global	See fee summary
+Ramp Network	Varies	Global	See fee summary
+Particle Network	$30	Global	See fee summary
+Sardine	$30	Global	See fee summary
+UTORG	$50	Global	See fee summary
+Stripe	$2	United States	See fee summary
+PayPal	$5	United States	See fee summary
+Robinhood	$5	United States	See fee summary
+Revolut	€6	EU / EEA / UK	See fee summary
+iDEAL	€46	Netherlands	See fee summary
+UPI / IMPS	₹1,600	India	See fee summary
+Interac	CA$100	Canada	See fee summary
+Fees vary by provider, payment method, and currency. The exact fee is set by the provider and shown to the customer at checkout before they confirm.
+
+Minimum amount guidance
+If your payment amount is below a provider's minimum, that provider will not be shown. To maximise the number of available on-ramp options:
+
+Amount	Providers unlocked
+$2+	Stripe (US)
+$5+	PayPal, Robinhood (US)
+$10+	Bitnovo, Topper (Global)
+$12+	Klever (Global)
+$15+	Transak, Binance Connect, Alchemy Pay (Global)
+$20+	MoonPay, Banxa (Global)
+$30+	Particle Network, Sardine (Global)
+$50+	UTORG (Global)
+2
+Regional Payment Methods
+Local rails for customers in select countries. These appear as extra options at checkout alongside the on-ramps above whenever the customer's region matches.
+
+Regional payments settle to your Vexutopia merchant account first. Track available balance and request withdrawals from Dashboard → Balances.
+
+Brazil
+Live
+PIX · BRL
+
+All-in rate
+6.5% + BRL 1
+Chargeback
+$40 · MED dispute mechanism
+Cycle
+T+0
+Minimum
+BRL 1
+Maximum
+BRL 10,000
+Refund
+No additional cost
+Settlement
+0% — no IOF
+Exchange rate
+Brazilbitcoin + 2.5% (USDT)
+Settlement exchange
+T+1 / T+0
+Argentina
+Live
+Card-to-card (transferencia entre tarjetas) · ARS
+
+All-in rate
+12%
+Traffic type
+FTD / STD
+Minimum
+ARS 1,000
+Maximum
+ARS 300,000
+Settlement
+0%
+Exchange rate
+Binance P2P avg. top 10 (USDT)
+Cycle
+T+0
+Chargeback
+$40
+Russia
+Live
+SBP QR (Faster Payments System) · RUB
+
+All-in rate
+15%
+Traffic type
+High risk
+Minimum
+RUB 10
+Maximum
+RUB 150,000
+Settlement
+0.5% (USDT)
+Min. settlement
+1,000 USDT
+Exchange rate
+Rapira Red avg. 5–10 lines
+Cycle
+T+1
+Refund
+Free
+Chargeback
+$150
+Europe
+Live
+Open Banking (direct bank transfer) · EUR
+
+All-in rate
+11% + EUR 1
+Traffic type
+FTD / STD
+Minimum
+EUR 10
+Maximum
+EUR 5,000
+Settlement
+0%
+Exchange rate
+Local (USDT)
+Cycle
+T+7 (Wednesdays)
+Refund
+EUR 3 (≈ $3.25)
+Chargeback
+EUR 100 (≈ $108)
+Rolling reserve
+10% held for 180 days
+China
+Live
+Alipay & WeChat Pay (closed-loop wallets) · CNY
+
+All-in rate
+Alipay 12% · WeChat 13%
+Channel selection
+Pass payment_method: "ALIPAY" or "WXPAY" on POST /v1/payments
+Per-order range
+CNY 1 – 1,000 (≈ $0.15 – $138 USD)
+Orders outside this window automatically fall back to other methods on the hosted checkout. The rate is enforced by the upstream wallet — split a larger order across multiple transactions if you need to take more than CNY 1,000 from a single customer.
+Settlement
+USDT to your Vexutopia balance
+Cycle
+T+1
+Payout cadence
+Daily — request one payout per day per channel
+Minimum payout
+$100 USD equivalent per request
+Dispute fee
+$40 per disputed transaction
+Alipay/WeChat customers can request a refund through their wallet app; the resulting reversal is recorded against the original transaction with a flat $30 operational fee.
+Refund
+Manual via Vexutopia support
+3
+Card Payments
+Direct Visa/Mastercard acquiring for global card acceptance. This rail is not enabled on any merchant account by default — access is granted individually after KYB approval and a compliance review.
+
+Global card gateway
+Live · KYB required
+Minimum order
+$10 USD (US billing) / $7 USD (all other countries)
+MDR fee
+12.5% per transaction
+Transaction fee
+$0.50 per transaction
+Settlement fee
+1.5% of payout amount (deducted at payout)
+Refund fee
+€15 / $15 per refund
+Chargeback fee
+€60 / $60 per chargeback
+Rolling reserve
+10% held for 180 days, capped at €350,000 / $350,000
+Settlement frequency
+Once per week
+Settlement delay
+T+7 (7 days after transaction)
+Minimum payout
+$5,000 — payouts below this threshold are skipped that week and roll into the next
+How to request access
+
+Complete full KYB and submit verification documents from your organization settings
+Contact Vexutopia support to initiate the compliance review
+Once approved, turn on Card Payments in your dashboard (Settings → Payment methods, and hosted checkout activation) so the card tile can appear for customers
+United States — card billing
+
+US billing addresses are accepted on the standard inline card flow — the customer enters their card on the Vexutopia-hosted card page (URL stays on vexutopia.com), the same as every other supported country. US billing has three extra requirements: the customer must be connecting from a US IP address (fraud control — see below), a billing state is required (the US acquirer MID rejects sessions without it), and the per-charge floor is higher — $10 USD minimum for US billing (the EU/global terminal stays at $7). All other terms (12.5% MDR, $5,000 payout floor) are identical.
+
+Standard hosted checkout (most merchants): No merchant action is required — send the customer to the checkout_url returned by POST /v1/payments and our card page handles US billing inline (collecting the billing state and applying the US-IP check). Nothing US-specific to wire up on your side.
+
+Embedded / direct-API integrators: US billing now works on the standard inline card endpoint (POST /api/v1/checkout/{sessionId}/card) and in the embedded iframe, the same as other countries — subject to the US-IP gate below. The dedicated US hosted-session endpoint remains available as an optional alternative if you'd rather mint the session server-side:
+
+POST /api/v1/checkout/{sessionId}/card-hosted
+X-API-Key: <your-live-or-test-api-key>
+Content-Type: application/json
+
+{
+  "email": "buyer@example.com",
+  "firstName": "Jane",
+  "lastName": "Doe",
+  "billing": {
+    "line1": "1 Market St",
+    "city": "San Francisco",
+    "postalCode": "94105",
+    "country": "US"
+  }
+}
+Only email is strictly required — the hosted page collects and corrects the rest. The response is { payment_link, session_id } where payment_link is a vexutopia.com/pay/card/processing/... URL that wraps the acquirer page in our iframe. Redirect the customer to it.
+
+The session is reusable for ~3.5 minutes — after that we mint a fresh upstream JWT on retry.
+Webhook delivery, return URL substitution, and reconciliation behave exactly like the inline flow — the only difference is where the card is entered.
+Below $10 USD the call returns 400 AMOUNT_BELOW_MINIMUM with the US-specific floor in the message.
+Customer must be on a US IP. The call returns 403 US_IP_REQUIRED when the customer's connection is not from the US (or anonymized via Tor / VPN that strips the country code). Test-mode keys (vex_test_*) bypass the gate. See the IP-requirement notice for the full rationale.
+Blocked billing countries (card)
+
+Customers cannot complete card checkout when the billing country is one of the ISO 3166-1 alpha-2 codes below (enforced in checkout and at session creation). The list follows our card processor's policy and may also reference FATF jurisdictions — if they publish an explicit ISO addendum, we merge it into this same list in code.
+
+AF, AO, BF, BG, BO, CD, CI, CM, CN, DZ, HT, IR, JP, KE, KP, LA, LB, MC, MM, MZ, NA, NG, NP, RU, SS, SY, TR, UA, VE, VG, VN, YE
+
+4
+Crypto (direct)
+For merchants who want customers to pay in cryptocurrency rather than with card or bank on-ramp: create a normal payment with crypto: true on POST /v1/payments. The response checkout_url points to a dedicated page on vexutopia.com where the customer selects a coin and sends funds. This rail is not offered as a tile on the standard multi-method hosted checkout — you opt in per payment from your server.
+
+Pricing — total fee on the invoice is the configured crypto processor percentage plus 2% Vexutopia margin (e.g. 1% upstream → 3% total). See the fee summary table above.
+Minimum — USD 3 equivalent in your quoted currency (smaller amounts return a validation error)
+Underpayments — if the customer sends within 5% of the quoted amount, the payment still completes
+Webhooks — same events as other rails; payment_method is crypto
+Return URL — use placeholders {payment_id}, {order_id}, {transaction_id}, and {status} as documented on the Payments page
+Full API reference: Payments API — Crypto (direct).
+
+Telegram Stars (optional)
+Customers pay in Telegram Stars inside the Telegram app. You create these payments with POST /v1/payments/telegram-stars (LIVE API keys only). The response includes the same hosted checkout_url pattern as other payments (/pay?session=…); the customer continues to Telegram to complete the invoice.
+
+Currency — XTR (whole stars only; amount is an integer string)
+Checkout — shared Vexutopia checkout UI, then "Open invoice in Telegram"
+Organization — optional: turn on Telegram Stars in Dashboard → Settings when you want to use this flow (off by default)
+Not automatic routing — does not appear in the standard hosted-checkout provider list; you opt in per payment via the dedicated endpoint
+Refund fee — $30 per Telegram-issued refund. Customers can ask Telegram Support to refund a Stars payment; the refund is recorded against the transaction, the refunded stars plus the $30 equivalent are deducted from your pending Stars balance, and the refund shows up on the Refunds & Chargebacks page.
+Maturity — T+21. Each Stars sale becomes withdrawable 21 days after the customer paid, matching Telegram's customer-refund window. The "Available to withdraw" figure on your balance card excludes Stars still inside this window.
+Method	Minimum	Region
+Telegram Stars	$0.01 USD	Where Telegram is available
+
+Webhooks
+Vexutopia notifies your server in real time when a payment completes or fails. Pass a webhook_url when creating a payment and we will send a POST request to it once the payment status changes.
+
+On this page
+
+How it works
+Payload
+Verifying signatures
+Receiving webhooks
+Setting webhook URL
+Managing endpoints
+Best practices
+How it works
+1
+Pass webhook_url when creating a payment
+2
+Customer completes (or fails) payment through the checkout page
+3
+Vexutopia sends a POST request to your webhook_url with the payment result
+4
+Your server returns HTTP 200 to acknowledge receipt
+Webhook Payload
+A POST request is sent to your webhook_url with a JSON body:
+
+!
+Look up orders by id, payment_id, or order_id — all three are the same value.
+
+When customers switch payment methods on the hosted checkout (e.g. abandon card → pay with WeChat), we create internal child transactions to track each rail. All three identifier fields on the webhook payload — id, payment_id, and order_id — are identical and always point at the root session ID, the value originally returned by POST /v1/payments. Use any of them for order lookups; they will never differ.
+
+Historical note: Before 2026-05-09, the top-level id on mixed-checkout payloads was set to the internal child rail ID (a value the merchant had never seen), which silently broke fulfilment for handlers that looked up orders by payload.id. That was fixed; all three fields are now the same. Either of the snippets below will work for every rail going forward.
+
+✓ Either field works
+
+const order = await db.orders.findOne({
+  payment_id: payload.id  // === payment_id === order_id
+});
+order.markPaid(payload.amount);
+✓ Defensive (compatible with old payloads)
+
+const order = await db.orders.findOne({
+  payment_id: payload.order_id
+    ?? payload.payment_id
+});
+order.markPaid(payload.amount);
+payment.completed (simple — single rail)
+Copy
+{
+  "event": "payment.completed",
+  "id": "tx_b84050910b493a1e",
+  "payment_id": "tx_b84050910b493a1e",
+  "order_id": "tx_b84050910b493a1e",
+  "status": "completed",
+  "amount": "20",
+  "currency": "USD",
+  "payment_method": "card_payment",
+  "processor": "card_acquirer",
+  "timestamp": "2026-04-06T20:17:05.000Z",
+  "livemode": true,
+  "metadata": { "order_id": "1234" }
+}
+payment.completed (mixed checkout — customer switched rails)
+Copy
+{
+  "event": "payment.completed",
+  "id":         "tx_75f4cfc818d73ff2",    // your root session
+  "payment_id": "tx_75f4cfc818d73ff2",    // identical
+  "order_id":   "tx_75f4cfc818d73ff2",    // identical
+  "status": "completed",
+  "amount": "5",
+  "currency": "USD",
+  "payment_method": "wxpay",
+  "processor": "china_pay",
+  "timestamp": "2026-05-08T06:22:45.358Z",
+  "livemode": true,
+  "settled_via": {
+    "rail": "WXPAY",
+    "amount": "34.08",
+    "currency": "CNY"
+  },
+  "metadata": { "credits": "30" }
+}
+payment.failed
+Copy
+{
+  "event": "payment.failed",
+  "id": "tx_b84050910b493a1e",
+  "payment_id": "tx_b84050910b493a1e",
+  "order_id": "tx_b84050910b493a1e",
+  "status": "failed",
+  "amount": "20",
+  "currency": "USD",
+  "payment_method": "card_payment",
+  "processor": "card_acquirer",
+  "timestamp": "2026-04-06T20:17:05.000Z",
+  "failure_code": "card_declined",
+  "failure_reason": "Your card was declined by the issuing bank.",
+  "metadata": { "order_id": "1234" }
+}
+payment.failed (mixed checkout — failed leg of a switched rail)
+Copy
+{
+  "event": "payment.failed",
+  "id": "tx_cbc0a40768eca4ce",            // your root session — same on every event
+  "payment_id": "tx_cbc0a40768eca4ce",    // identical aliases
+  "order_id":   "tx_cbc0a40768eca4ce",
+  "status": "failed",
+  "amount": "24.99",
+  "currency": "USD",
+  "payment_method": "card_payment",
+  "processor": "card_acquirer",
+  "timestamp": "2026-05-08T17:32:14.122Z",
+  "livemode": true,
+  "failure_code": "provider_unavailable",
+  "failure_reason": "Decline reason message: system malfunction",
+  "settled_via": {
+    "rail": "CARD_PAYMENT",
+    "amount": "24.99",
+    "currency": "USD"
+  },
+  "metadata": { "purchase_id": "01aa43ab-393a-4ef5-9b7e-845fc78d7f78", "user_id": "..." }
+}
+The mixed-checkout correlation applies to both payment.completed and payment.failed. Whether the customer's payment succeeds or fails on a switched rail, the webhook payload always carries your root session ID (in payment_id and order_id) and your original metadata. You write your handler once and it works for every status and every rail.
+
+Fields
+Parameter	Type	Description
+event	string	Event type: payment.completed, payment.failed, or payment.refunded. payment.refunded fires on ALL rails (card, crypto, regional, Alipay/WeChat, Telegram Stars) whenever a completed payment is reversed — both cardholder chargebacks/disputes and voluntary refunds. Use the type field to tell them apart.
+type	string	Only on payment.refunded: "chargeback" (an involuntary reversal — cardholder dispute, Alipay/WeChat refund, or Telegram Stars refund) or "refund" (a voluntary refund, e.g. crypto). Branch on this to decide whether to reverse the customer's credit and flag the dispute.
+id	string	Your root session ID — identical to payment_id and order_id. Use any of the three for order lookups.
+payment_id	string	Your root session ID (the value returned by POST /v1/payments). Identical alias of id and order_id.
+order_id	string	Your root session ID. Identical alias of id and payment_id.
+status	string	Final status: completed, failed, or refunded
+amount	string	The payment amount in the original (root-session) currency
+currency	string	The original currency code (the one you passed to POST /v1/payments)
+payment_method	string	Method the customer ultimately paid with. Common values: card (crypto on-ramp — you settle in USDT), card_payment (direct card processing — you settle in fiat USD), pix, c2c, sbp, open_banking, telegram_stars, crypto, alipay, wxpay. See /docs/payments for the full table.
+processor	string	Brand-neutral rail code (card_acquirer, crypto_onramp, china_pay, regional, etc.)
+settled_via	object	Present only on mixed-checkout payments. Contains the actual rail / amount / currency the customer settled in (may differ from the top-level amount/currency for FX-converted rails like WXPAY in CNY).
+livemode	boolean	true if the payment was made with a live API key, false for test-mode payments. Use this to distinguish sandbox traffic on a shared endpoint.
+timestamp	string	ISO 8601 timestamp the event was emitted
+failure_code	string	Stable enum (only on payment.failed). Switch on this for programmatic handling — see the table below.
+failure_reason	string	Raw upstream failure message (only on payment.failed). Use for human display; not a stable interface.
+metadata	object	Your original metadata from POST /v1/payments
+Failure codes
+failure_code is the documented programmatic interface for failed payments — switch on it in your fraud rules and dashboards instead of the raw failure_reason string. Unknown raw strings default to provider_error; new codes may be added in the future, so handle that case in your switch.
+
+Codes
+Parameter	Type	Description
+card_declined	code	Issuing bank refused the card (do-not-honour, blacklist, generic decline).
+insufficient_funds	code	Bank or wallet explicitly reported insufficient balance.
+card_unsupported	code	Card BIN blocked, country block, or card type unsupported by the acquirer.
+authentication_failed	code	3D Secure challenge failed or was abandoned.
+invoice_expired	code	Checkout session aged out without payment.
+underpayment	code	Customer paid less than expected (or zero) on a crypto on-ramp.
+currency_unsupported	code	Rail-specific currency mismatch (e.g. iDEAL only accepts EUR).
+cancelled_by_customer	code	Customer hit cancel or navigated away during checkout.
+provider_unavailable	code	Upstream gateway temporarily unavailable (5xx, system malfunction).
+provider_error	code	Catch-all when the raw failure string did not match a known code.
+Verifying signatures
+Every webhook we send is signed with HMAC-SHA256 so you can verify it came from Vexutopia and hasn't been tampered with. The signature is sent in the X-Vexutopia-Signature header.
+
+Header format
+The header value contains a timestamp and a hex-encoded signature, comma-separated:
+
+text
+Copy
+X-Vexutopia-Signature: t=1715164620,v1=4a1b9c8d…
+t — Unix timestamp (seconds) when the signature was generated.
+v1 — Hex-encoded HMAC-SHA256 of `{timestamp}.{rawRequestBody}`.
+Where the signing secret comes from
+Register a webhook endpoint via POST /v1/webhooks. The response returns a secret once, at creation time — store it in your secret manager. We never expose it again. That secret is used to sign every delivery to that endpoint.
+
+cURL
+Copy
+curl -X POST https://vexutopia.com/api/v1/webhooks \
+  -H "X-API-Key: vex_live_your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://yoursite.com/webhooks/vexutopia",
+    "events": ["payment.completed", "payment.failed"],
+    "mode": "live"
+  }'
+
+# Response (only time you'll see "secret"):
+# {
+#   "id": "we_…",
+#   "url": "https://yoursite.com/webhooks/vexutopia",
+#   "secret": "whsec_…",
+#   "events": ["payment.completed", "payment.failed"],
+#   "mode": "live",
+#   "is_enabled": true,
+#   "created_at": "2026-05-08T11:00:00.000Z"
+# }
+Endpoint mode (test / live / both)
+Endpoints carry a mode that controls which traffic they receive. Defaults to "live".
+
+• "live" — receives only payments made with live API keys.
+• "test" — receives only payments made with test API keys (e.g. vex_test_…).
+• "both" — receives both. Use the payload's livemode field to distinguish them in your handler.
+How to verify
+Read the X-Vexutopia-Signature header and split on the comma to get t and v1.
+Compute HMAC_SHA256(secret, `{t}.{rawRequestBody}`) and hex-encode it.
+Compare against v1 using a constant-time equality check.
+Reject the request if |now - t| > 5 minutes to mitigate replay attacks.
+Use the raw request body
+The signature is computed over the exact bytes we sent. If your framework parses the JSON and re-serializes it before you hash, you'll get a mismatch. In Express, mount express.raw({ type: 'application/json' }) on the webhook route.
+
+Node.js / Express — verification middleware
+Copy
+import express from 'express';
+import crypto from 'crypto';
+
+const app = express();
+
+// Stripe-style: capture the RAW body for signature verification.
+app.post(
+  '/webhooks/vexutopia',
+  express.raw({ type: 'application/json' }),
+  (req, res) => {
+    const header = req.header('X-Vexutopia-Signature') || '';
+    const parts = Object.fromEntries(
+      header.split(',').map((kv) => kv.trim().split('='))
+    );
+    const t  = parts.t;
+    const v1 = parts.v1;
+    if (!t || !v1) return res.status(400).send('missing signature');
+
+    // Replay window: reject anything older than 5 minutes.
+    const ageSec = Math.abs(Math.floor(Date.now() / 1000) - Number(t));
+    if (!Number.isFinite(ageSec) || ageSec > 300) {
+      return res.status(400).send('stale signature');
+    }
+
+    // The raw body is a Buffer when express.raw() is used.
+    const rawBody = req.body.toString('utf8');
+    const expected = crypto
+      .createHmac('sha256', process.env.VEX_WEBHOOK_SECRET)
+      .update(`${t}.${rawBody}`)
+      .digest('hex');
+
+    const ok =
+      expected.length === v1.length &&
+      crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(v1));
+    if (!ok) return res.status(401).send('bad signature');
+
+    // Verified — now it's safe to JSON.parse and process.
+    const payload = JSON.parse(rawBody);
+    res.status(200).send('OK');
+    // ...handle payload.event...
+  }
+);
+
+app.listen(3000);
+Python — verification helper
+Copy
+import hmac, hashlib, time
+
+def verify_vex_signature(secret: str, header: str, raw_body: bytes) -> bool:
+    parts = dict(p.split("=", 1) for p in header.split(","))
+    t, v1 = parts.get("t"), parts.get("v1")
+    if not t or not v1:
+        return False
+    if abs(int(time.time()) - int(t)) > 300:
+        return False
+    signing_string = f"{t}.{raw_body.decode('utf-8')}".encode()
+    expected = hmac.new(secret.encode(), signing_string, hashlib.sha256).hexdigest()
+    return hmac.compare_digest(expected, v1)
+Receiving Webhooks
+Node.js / Express
+Copy
+import express from 'express';
+
+const app = express();
+app.use(express.json());
+
+app.post('/webhooks/vexutopia', (req, res) => {
+  // Respond immediately before processing
+  res.status(200).send('OK');
+
+  const { event, id, metadata, failure_code } = req.body;
+
+  if (event === 'payment.completed') {
+    console.log('Payment completed:', id);
+    const orderId = metadata?.order_id;
+    // Fulfill the order, send confirmation email, etc.
+  }
+
+  if (event === 'payment.failed') {
+    console.log('Payment failed:', id, failure_code);
+    // Switch on the stable code, not the raw failure_reason string.
+    switch (failure_code) {
+      case 'card_declined':
+      case 'insufficient_funds':
+        // Prompt the customer to try a different card
+        break;
+      case 'invoice_expired':
+        // Email the customer a fresh checkout link
+        break;
+      default:
+        // provider_error / unknown — log and notify the customer
+    }
+  }
+});
+
+app.listen(3000);
+Setting your webhook URL
+Pass webhook_url at payment creation time:
+
+cURL
+Copy
+curl -X POST https://vexutopia.com/api/v1/payments \
+  -H "X-API-Key: vex_test_your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": "20",
+    "currency": "USD",
+    "return_url": "https://yoursite.com/success",
+    "webhook_url": "https://yoursite.com/webhooks/vexutopia",
+    "metadata": { "order_id": "1234" }
+  }'
+Managing endpoints
+Registered endpoints are stable URLs that receive every event matching their events filter, for the lifetime of the endpoint. Use the routes below to create, list, and delete them.
+
+Endpoints
+Parameter	Type	Description
+POST /v1/webhooks	create	Register a new endpoint. The signing secret is returned ONCE in the response. Requires the webhooks:write scope.
+GET /v1/webhooks	list	List all endpoints registered for your organization.
+GET /v1/webhooks/{id}	retrieve	Retrieve a single endpoint by id. Returns 404 if the id does not belong to your organization.
+DELETE /v1/webhooks/{id}	delete	Delete an endpoint. Returns HTTP 204 with an empty body on success. After deletion, no further events are sent to that URL.
+Create an endpoint
+See Verifying signatures for the full create flow — the response includes the secret field, returned only on creation.
+
+List endpoints
+cURL
+Copy
+curl https://vexutopia.com/api/v1/webhooks \
+  -H "X-API-Key: vex_live_your_api_key"
+
+# 200 OK
+# {
+#   "data": [
+#     {
+#       "id": "we_…",
+#       "url": "https://yoursite.com/webhooks/vexutopia",
+#       "events": ["payment.completed", "payment.failed"],
+#       "is_enabled": true,
+#       "description": null,
+#       "created_at": "2026-05-08T11:00:00.000Z"
+#     }
+#   ]
+# }
+Retrieve an endpoint
+cURL
+Copy
+curl https://vexutopia.com/api/v1/webhooks/we_abc123 \
+  -H "X-API-Key: vex_live_your_api_key"
+
+# 200 OK
+# {
+#   "id": "we_abc123",
+#   "url": "https://yoursite.com/webhooks/vexutopia",
+#   "events": ["payment.completed", "payment.failed"],
+#   "is_enabled": true,
+#   "description": null,
+#   "created_at": "2026-05-08T11:00:00.000Z"
+# }
+#
+# 404 Not Found
+# { "error": "Webhook endpoint not found" }
+Delete an endpoint
+cURL
+Copy
+curl -X DELETE https://vexutopia.com/api/v1/webhooks/we_abc123 \
+  -H "X-API-Key: vex_live_your_api_key"
+
+# 204 No Content   (success — empty body)
+# 404 Not Found    (endpoint does not exist or belongs to another org)
+Deletion is immediate and irreversible — any in-flight retries for that endpoint stop and the signing secret is destroyed. To rotate a secret, delete the endpoint and create a new one.
+
+Best Practices
+Return 200 immediately
+Respond with 200 before doing any processing. Long-running handlers may cause timeouts.
+
+Handle duplicates
+Use the payment id to deduplicate — the same event may be delivered more than once.
+
+Use HTTPS
+Your webhook endpoint must be a publicly accessible HTTPS URL.
+
+Testing locally
+Use a tool like ngrok to expose your local server for testing, or poll GET /v1/payments/:id to check status instead.
+
+Embedded Card Checkout
+Embed Vexutopia's card checkout directly on your site. Customers complete payment without leaving your domain. Card data never touches your server — it's captured inside our iframe and processed under our PCI scope.
+
+Prerequisites
+Your site must be approved by us (KYC complete for that specific domain).
+We'll add your domain to the allow-list — embedding will not work from any other origin.
+United States billing
+
+The embedded iframe accepts cards for every country, including the United States — the iframe collects the required US billing state and submits like any other country. US billing has one extra requirement: the customer must be connecting from a US IP address (fraud control). If they aren't, the iframe shows a refusal screen instead of the card form. No special handling is required on your side. If you'd rather not render the card form in your embed for US customers, two optional alternatives:
+
+Easiest — redirect to checkout_url: If you detect the customer's billing country is US on your form, skip mounting the embed and instead window.location = checkout_url using the value POST /v1/payments already returned. Our card page renders the form for US billing inline (with the billing-state field and the US-IP check applied).
+Programmatic — mint a hosted session yourself: POST /api/v1/checkout/{sessionId}/card-hosted with the customer's email and billing details; the response payment_link is a vexutopia.com/pay/card/processing/... URL — redirect the customer there. See Card payments — US hosted session.
+The hosted card page iframes the upstream acquirer under the Vexutopia domain — your customer's URL bar never leaves vexutopia.com.
+
+US-IP requirement: US-billed card payments only succeed when the customer is connecting from a US IP address. Both options above (redirect to checkout_url AND minting a hosted session via /card-hosted) enforce this gate. If the customer is on a non-US IP, they see a refusal screen with a “back to checkout” link instead of the card form, and the API call returns 403 US_IP_REQUIRED. Test-mode API keys (vex_test_*) bypass the gate so you can integration-test from any region. Full rationale at Payments → US IP requirement.
+
+1. Create a session (server-side)
+POST https://vexutopia.com/api/v1/payments
+X-API-Key: <your-live-or-test-api-key>
+Content-Type: application/json
+
+{
+  "amount": "29.99",
+  "currency": "USD",
+  "customer_email": "buyer@example.com",
+  "return_url": "https://yoursite.com/thanks?order={payment_id}"
+}
+The response includes id (e.g. tx_AbC123) — this is your session ID.
+
+2. Drop the snippet on your page
+<div id="vex-checkout"></div>
+<script src="https://checkout.vexutopia.com/embed.js"></script>
+<script>
+  Vexutopia.checkout({
+    sessionId: 'tx_AbC123',
+    container: '#vex-checkout',
+    onSuccess: function (e) { window.location = '/thanks'; },
+    onFail:    function (e) { alert('Payment failed: ' + (e.status || 'unknown')); },
+    onCancel:  function (e) { /* user closed/cleared */ },
+  });
+</script>
+Events
+All five events accept the same callback signature. The snippet above wires up the three you almost always need (onSuccess, onFail, onCancel); add the other two if you want UI affordances for them.
+
+onSuccess — payment captured. Always reconcile via webhook; the event is a best-effort UI signal.
+onFail — payment declined or processing error.
+onCancel — customer abandoned the form.
+onReady — iframe loaded and ready for input. Useful for hiding a loading spinner.
+onExpired — session aged out before completion. The customer needs a fresh session to retry.
+Security
+The iframe sets Content-Security-Policy: frame-ancestors per session — only your approved origin can embed it.
+postMessage events are scoped to https://checkout.vexutopia.com; verify event.origin if you handle messages directly rather than via our snippet.
+Do not trust client-side success events for fulfilment. Use the webhook.
+
+Error Codes
+When an error occurs, the Vexutopia API returns a consistent error response format with details to help you understand and handle the issue.
+
+On this page
+
+Response format
+HTTP status codes
+Error code reference
+Handling errors
+Rate limiting
+Error Response Format
+All errors follow this structure:
+
+JSON
+Copy
+{
+  "error": "Validation failed: amount: Required",
+  "code": "VALIDATION_ERROR",
+  "details": {
+    "fieldErrors": { "amount": ["Required"] },
+    "formErrors": []
+  }
+}
+Error Response Fields
+Parameter	Type	Description
+error	string	A human-readable description of the error
+code	string	A machine-readable error code (UPPERCASE_SNAKE_CASE)
+details	object	Optional. Present on VALIDATION_ERROR — contains zod fieldErrors and formErrors.
+HTTP Status Codes
+The API uses standard HTTP status codes to indicate success or failure:
+
+200
+OK
+Request succeeded
+
+201
+Created
+Resource created successfully
+
+400
+Bad Request
+Invalid request parameters or body
+
+401
+Unauthorized
+Missing or invalid API key
+
+403
+Forbidden
+API key lacks required permissions
+
+404
+Not Found
+Requested resource does not exist
+
+422
+Unprocessable Entity
+Request was well-formed but failed validation or business rules (e.g. unsupported currency, no provider available, amount below minimum).
+
+429
+Too Many Requests
+Rate limit exceeded. Slow down requests.
+
+500
+Internal Server Error
+Something went wrong on our end
+
+Error Codes
+Common error codes you may encounter:
+
+Code	Description
+MISSING_API_KEY	No X-API-Key header was provided. 401.
+INVALID_API_KEY	API key does not exist. 401.
+REVOKED_API_KEY	API key has been revoked from the dashboard. 401.
+EXPIRED_API_KEY	API key expiry date has passed. 401.
+ACCOUNT_SUSPENDED	Owning account is suspended. 403.
+INSUFFICIENT_SCOPE	API key lacks the scope required for this endpoint. 403.
+INVALID_BODY	Request body could not be parsed as JSON. 400.
+VALIDATION_ERROR	Body parsed but failed schema validation. The details field contains per-field errors. 422.
+RATE_LIMITED	Per-API-key rate limit exceeded. Honour the Retry-After header. 429.
+NO_PROVIDER_AVAILABLE	No payment provider can serve the requested currency / country / payment_method combination. 422.
+PROVIDER_ERROR	A downstream provider returned an unrecoverable error while creating the payment. 502.
+PROVIDER_UPSTREAM_UNAVAILABLE	The selected provider timed out or is currently unreachable. Safe to retry. 503.
+WALLET_NOT_CONFIGURED	Crypto payment requested but the merchant has no payout wallet configured for the requested currency. 422.
+DIRECT_MODE_UNSUPPORTED_CURRENCY	direct: true was passed with a currency outside the supported set (BRL, ARS, RUB). 422.
+CHINA_PAY_REQUIRES_CNY	payment_method=ALIPAY or WXPAY was passed without currency=CNY.
+CHINA_PAY_AMOUNT_TOO_LOW	Order amount is below the 1 CNY per-order minimum enforced by the Alipay/WeChat upstream.
+CHINA_PAY_AMOUNT_TOO_HIGH	Order amount exceeds the 1,000 CNY (~$138 USD) per-order maximum enforced by the Alipay/WeChat upstream. Split the order or use a different rail.
+AMOUNT_BELOW_MINIMUM	Card payment routed but amount is below the acquirer's per-charge floor: $10 USD for US billing addresses, $7 USD for all other countries. Use a different rail (crypto, regional, Telegram Stars) for sub-floor orders.
+CARD_PAYMENT_INTEGRATION	POST /v1/payments with card_payment:true was sent with billing fields (firstName, lastName, billing.*, card details). Those fields are collected from the customer on the hosted card form — remove them from the request and redirect the customer to the returned checkout_url instead. See copy-paste example. 400.
+US_IP_REQUIRED	A US-billed card session was attempted from a customer connection that isn't on a US IP (or whose IP-country was anonymized via Tor / VPN). For fraud prevention, US card payments are restricted to customers connecting from the US. Test-mode keys (vex_test_*) bypass the gate. See the IP-requirement notice. 403.
+INVALID_IDEMPOTENCY_KEY	Idempotency-Key header was provided but does not match the allowed format (1–255 chars from A-Z a-z 0-9 _ -).
+IDEMPOTENCY_KEY_REUSED	An Idempotency-Key was reused within 24h with a different request body. Use a fresh key for new requests.
+INTERNAL_ERROR	An unexpected error occurred. 500.
+Handling Errors
+Here's how to properly handle errors in your integration:
+
+JavaScript
+Copy
+async function createPayment(amount, currency) {
+  const response = await fetch('https://vexutopia.com/api/v1/payments', {
+    method: 'POST',
+    headers: {
+      'X-API-Key': 'vex_test_your_api_key',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ amount, currency })
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    // Handle the error based on the code
+    switch (data.code) {
+      case 'INVALID_API_KEY':
+      case 'MISSING_API_KEY':
+      case 'REVOKED_API_KEY':
+      case 'EXPIRED_API_KEY':
+        throw new Error('Check your API key configuration');
+      case 'VALIDATION_ERROR':
+        throw new Error(`Invalid request: ${data.error}`);
+      case 'NO_PROVIDER_AVAILABLE':
+        throw new Error('No provider available for this currency/country/method');
+      case 'RATE_LIMITED': {
+        // Honour Retry-After (in seconds) and retry once
+        const retryAfter = Number(response.headers.get('Retry-After') ?? '1');
+        await new Promise(r => setTimeout(r, retryAfter * 1000));
+        return createPayment(amount, currency);
+      }
+      case 'PROVIDER_UPSTREAM_UNAVAILABLE':
+        // Safe to retry with backoff
+        throw new Error('Provider temporarily unavailable, retry shortly');
+      default:
+        throw new Error(data.error);
+    }
+  }
+
+  return data;
+}
+Rate Limiting
+The API enforces rate limits to ensure fair usage. When you exceed the limit, you'll receive a 429 response.
+
+Default Limits
+• 300 requests per minute, per API key (sliding window).
+• Applies identically to test-mode and live-mode keys.
+Retry-After Header
+On a 429 response, the API returns a Retry-After header containing the number of seconds to wait before retrying. Honour this value rather than retrying immediately.
+
+Need Help?
+If you encounter persistent errors or need assistance, contact our support team at support@vexutopia.com with the timestamp of the failing request and the returned code value.
+
+How whitelabel works
+As a whitelabel reseller you run your own merchants under your brand. You bring the merchants and set their pricing; we handle the payment processing, settlement and compliance behind the scenes.
+
+The merchants you sign up are called sub-merchants. You decide what to charge each one. Each payment comes at an agreed cost to you; you set your own price on top and keep your fee on every payment they take. You never touch a customer's card or wait on a processor — that's our side.
+
+The loop
+1
+Onboard a merchant
+
+Add the merchant and set your fee — the markup you add on top of your cost. They start as pending.
+2
+We approve them
+
+We review the merchant. Once approved they go active.
+3
+Connect their checkout
+
+Add their website and generate an API key, then hand it to them (or their developer) to plug into their checkout.
+4
+They take payments — you earn
+
+As they process payments, your balance fills up. You withdraw it, pay each merchant their share, and keep your margin.
+Everything for a reseller lives in your Reseller dashboard (the “Reseller” item in your sidebar). The normal merchant pages — Customers, Transactions, Balances — stay empty, because you don't take payments directly. Your sub-merchants do.
+Two numbers to know
+Pricing comes down to two numbers, both on the pricing screen for every payment type:
+
+Your cost — your all-in cost to run that payment, shown for you. It's a single bundled number: everything needed to take the payment is already included, so you never add anything to it. We agree it with you up front.
+Your fee — the markup you add on top of your cost. This is your profit; your merchant pays your cost plus this.
+
+1. Onboard a merchant
+Adding a merchant takes about a minute. They go live once we approve them.
+
+1
+Open Sub-merchants
+
+In your reseller dashboard, click Sub-merchants at the top.
+2
+Fill in “Onboard a sub-merchant”
+
+Enter the merchant's business name, their website, and the rates you want to charge them per payment type (see Pricing). Then click Submit for approval.
+3
+Wait for approval
+
+The merchant shows a PENDING badge while we review them. This is usually quick.
+4
+They go ACTIVE
+
+Once approved, the badge flips to ACTIVE and you can connect their checkout.
+You can add a merchant and create a test key before approval, so you can integrate and try things out. A live key — the one that takes real payments — only unlocks after the merchant is approved.
+Why approval?
+Every merchant that processes through us has to be reviewed, the same way your own account was. It protects you and us: it keeps the payment networks happy and keeps bad actors off the platform. You're still the one who signs them up and sets their price — we just sign off before they go live.
+
+Editing a merchant later
+On each merchant's card you'll see Edit rates (change what you charge them) and Sites & keys (add their website and generate API keys). You can change rates any time.
+
+Next: pricing & your margin →
+
+2. Pricing & your margin
+You set your fee per payment type. Your merchant pays your cost plus your fee.
+
+The number you enter is your fee — the markup you add on top of your cost. Your merchant pays your cost plus your fee. So your profit is simply the fee you set.
+What each box shows
+When you onboard or edit a merchant, every payment type has a fee box. Around it we show two things so there's nothing to work out:
+
+cost X% — your all-in cost for that payment type. This is one bundled number; you don't need to think about what makes it up.
+merchant pays Z% — what your merchant is actually charged: your cost plus the fee you enter. Updates live as you type.
+Example
+Say your cost on cards is 12.5%, and you set your fee to 5%:
+
+Your cost (shown for you)	12.5%
+Your fee (what you enter)	5%
+Merchant pays	17.5%
+You enter 5 — just your fee, not the total. Your merchant is charged 17.5% (your 12.5% cost plus your 5% fee), and the 5% is yours. Set your fee to whatever you like; there's no cap.
+
+Your cost is a single all-in number — everything needed to run that payment type is already included. You never have to add anything to it yourself; just choose your fee, and the “merchant pays” figure shows the merchant's real rate.
+Different fees per merchant
+You can charge each merchant a different fee, and a different fee per payment type (cards vs crypto, etc.). Change it any time from Edit rates on their card. You can only price the methods we've enabled for you — if one you want is missing, ask us to add it.
+
+Next: connect their checkout →
+
+3. Connect their checkout
+Once a merchant is approved, you give them a key that lets their website take payments through us — under your brand.
+
+1
+Open Sites & keys
+
+On the merchant's card (under Sub-merchants), click Sites & keys.
+2
+Add their website
+
+Under Sites, paste the merchant's website and click Add site. This is where their checkout will run.
+3
+Generate an API key
+
+Under API keys, give it a name and click Generate. Start with a Test key; the Live key unlocks once the merchant is approved.
+4
+Copy it now
+
+The key is shown only once. Copy it the moment it appears. If you lose it, just generate a new one.
+5
+Hand it over
+
+Send the key to the merchant or their developer to plug into their checkout. From their customers' point of view, the whole payment experience is yours — they never see us.
+Treat the Live key like a password. Anyone with it can create real charges on that merchant's account. Share it over a secure channel, and generate a fresh one if it ever leaks.
+What the developer does with it
+The key plugs into our standard payments API — the same one any merchant uses. Your merchant's developer can follow the API documentation to create payments, set up webhooks and so on. Nothing about the integration is reseller-specific; the key simply belongs to that sub-merchant.
+
+Each payment type still needs to be switched on for the merchant's site (for example, cards or crypto). We enable these during review, the same as for any merchant. If a method isn't showing, let us know and we'll turn it on.
+
+4. Getting paid
+We settle the full amount for all your merchants to you. You then pay each merchant their share and keep your markup.
+
+Your balance
+The Overview page in your reseller dashboard shows your balance across every sub-merchant, combined. It updates automatically as your merchants take payments. Funds become withdrawable once they clear the processing settlement window (this varies by payment type — cards take a few days, some methods are instant).
+
+To actually withdraw, use the Balances page in your dashboard and request a payout there — it draws on the same combined balance.
+
+Your statement
+The Statement page breaks your balance down merchant by merchant. For each one it shows:
+
+Owed to sub — what you owe that merchant.
+Your markup — what you keep on their volume.
+Settled to you — the two added together, which is what we paid you for that merchant.
+You pay your merchants yourself, on your own schedule, however you normally would. We don't pay your sub-merchants directly — we pay you the whole amount, and the Statement tells you exactly what each one is owed.
+If a payment is reversed
+If one of your merchant's customers charges back or refunds a payment, the fee for that comes off your balance — since you're the one we settle with. Keep that in mind when you decide how much to pay each merchant.
+
+FAQ
+Quick answers to the questions resellers ask most.
+
+When I set a rate, do I enter the total or just my markup?
+
+Just your fee — the markup you add on top of your cost. So if your cost is 12.5% and you want to make 5%, enter 5. Your merchant is charged your cost plus your fee, which the screen shows live as “merchant pays”. See Pricing.
+Why are my Customers, Transactions and Balances pages empty?
+
+Because you don't take payments directly — your sub-merchants do. Everything for you lives in the Reseller section of your sidebar, not the normal merchant pages.
+How long does merchant approval take?
+
+It's a quick manual review on our side. You can add the merchant and create a test key right away; the live key unlocks once they're approved.
+Can I charge different merchants different rates?
+
+Yes — and a different rate per payment type. Set whatever fits each merchant, and change it any time from Edit rates on their card.
+Do my merchants’ customers see Vexutopia?
+
+No. The checkout shows your brand, not ours. Your customers never see who's processing behind the scenes.
+How do I get paid, and how do my merchants get paid?
+
+We settle the full amount to you. You withdraw from your Balances page, then pay each merchant their share yourself — the Statement shows exactly what each one is owed and what you keep.
+I lost an API key — what now?
+
+Generate a new one from the merchant's Sites & keys. Keys are shown once for security, so there's no way to see an old one again. You can keep more than one key per merchant.
+Something isn’t working or a payment method is missing.
+
+Send us the details and we'll sort it. A missing payment method usually just needs to be switched on for that merchant during review.

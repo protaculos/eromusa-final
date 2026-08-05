@@ -1,0 +1,9 @@
+Preciso que crie um claude.md onde vai informar todas a estratégia e informação desse nosso projeto, pra você não precisar ter que ficar toda hora lendo e tentando adivinhar.
+
+Isso é um projeto de criação de videos. 
+
+Discovey: é onde ficam os vídeos pro cliente ver de exemplo e criar o dele
+Galley é onde a galeria dos videos dos clientes
+pricing é  a página de pagamento pro cliente comprar os créditos.
+
+Preciso que de uma olhada no projeto pra poder criar esse claude.md de uma forma que voce não precise ficar adivinhando sempre o que e como funciona
