@@ -215,7 +215,7 @@ export default function PricingPage() {
         onClose={() => { setShowPaymentMethod(false); setSelectedPlan(null); }}
       />
 
-      <main className="max-w-7xl mx-auto px-6 py-20">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-0 md:pt-8 pb-12">
         {/* Pricing Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-32">
           {PLANS.map((plan) => (
