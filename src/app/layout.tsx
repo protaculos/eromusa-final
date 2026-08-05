@@ -4,6 +4,7 @@ import "./globals.css";
 import { Providers } from "@/components/Providers";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import CookieConsentModal from "@/components/CookieConsentModal";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,6 +33,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-[#0A0B14] text-white font-sans">
         <Providers>
+          <CookieConsentModal />
           <Navbar />
           <main className="flex-1 pt-24 md:pt-16">{children}</main>
           <Footer />
