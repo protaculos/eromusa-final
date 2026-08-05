@@ -43,7 +43,20 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
       });
 
       if (signInError) {
-        // Se falhou, tenta criar conta
+        // Se o e-mail existe mas a senha está errada, informa o usuário corretamente
+        const isInvalidCredentials =
+          signInError.message?.toLowerCase().includes('invalid login credentials') ||
+          signInError.code === 'invalid_credentials';
+
+        if (isInvalidCredentials) {
+          setMessage({
+            type: 'error',
+            text: 'An account already exists with this email. Please check your password.',
+          });
+          return;
+        }
+
+        // Se falhou por outro motivo, tenta criar conta
         const { error: signUpError } = await supabase.auth.signUp({
           email,
           password,
