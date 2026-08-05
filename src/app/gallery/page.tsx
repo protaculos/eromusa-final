@@ -519,6 +519,10 @@ export default function GalleryPage() {
             const genRes = await fetch(`/api/generate/${video.job_id}`);
             const genData = await genRes.json();
             if (genData.status === "completed" || genData.status === "failed") {
+              // Only mark as completed if we actually got a video URL
+              const effectiveStatus = (genData.status === "completed" && !genData.videoUrl)
+                ? "processing"
+                : genData.status;
               // Update via API — PATCH /api/videos/[jobId]
               const patchRes = await fetch(`/api/videos/${video.job_id}`, {
                 method: "PATCH",
@@ -527,12 +531,12 @@ export default function GalleryPage() {
                   Authorization: `Bearer ${session.access_token}`,
                 },
                 body: JSON.stringify({
-                  status: genData.status,
-                  videoUrl: genData.videoUrl || "",
+                  status: effectiveStatus,
+                  videoUrl: effectiveStatus === "completed" ? genData.videoUrl : "",
                 }),
               });
               // Refresh credits if video failed (refund was processed server-side)
-              if (genData.status === "failed" && patchRes.ok) {
+              if (effectiveStatus === "failed" && patchRes.ok) {
                 refreshCredits();
               }
             }

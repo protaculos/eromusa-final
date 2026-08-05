@@ -94,7 +94,7 @@ export async function GET(
 
     if (!videoResponse.ok) {
       console.error(`[Poll ${jobId}] Failed to download video: ${videoResponse.status}`);
-      return NextResponse.json({ status, videoUrl: externalUrl, error: null });
+      return NextResponse.json({ status: "processing", videoUrl: "", error: "Download failed" });
     }
 
     const encryptedBuffer = Buffer.from(await videoResponse.arrayBuffer());
@@ -109,7 +109,7 @@ export async function GET(
 
       if (uploadError) {
         console.error(`[Poll ${jobId}] Upload error:`, uploadError);
-        return NextResponse.json({ status, videoUrl: externalUrl, error: null });
+        return NextResponse.json({ status: "processing", videoUrl: "", error: "Upload failed" });
       }
 
       const { data: publicUrlData } = supabaseAdmin.storage.from("generations").getPublicUrl(fileName);
@@ -132,7 +132,7 @@ export async function GET(
 
       if (uploadError) {
         console.error(`[Poll ${jobId}] Upload error:`, uploadError);
-        return NextResponse.json({ status, videoUrl: externalUrl, error: null });
+        return NextResponse.json({ status: "processing", videoUrl: "", error: "Upload failed" });
       }
 
       const { data: publicUrlData } = supabaseAdmin.storage.from("generations").getPublicUrl(fileName);
@@ -142,7 +142,7 @@ export async function GET(
       return NextResponse.json({ status, videoUrl: supabaseUrl, error: null });
     } catch (decryptErr) {
       console.error(`[Poll ${jobId}] Decryption failed:`, decryptErr);
-      return NextResponse.json({ status, videoUrl: externalUrl, error: null });
+      return NextResponse.json({ status: "processing", videoUrl: "", error: "Decryption failed" });
     }
   } catch (err) {
     console.error("Poll job error:", err);
