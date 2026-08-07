@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { languageOptions, type Locale } from "@/i18n/config";
 import { useSettings } from "@/context/SettingsContext";
@@ -34,6 +34,15 @@ export default function CookieConsentModal() {
   const [isOpen, setIsOpen] = useState(true);
   const [lang, setLang] = useState(initialLang);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [ready, setReady] = useState(false);
+
+  // Ao montar, garante que o idioma global corresponda ao idioma detectado/exibido,
+  // para que useT() traduza o modal no mesmo idioma do seletor.
+  useEffect(() => {
+    updateSettings({ language: lang as Locale });
+    setReady(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const currentLangLabel =
     languageOptions.find((l) => l.code === lang)?.label ?? "English";
@@ -68,22 +77,23 @@ export default function CookieConsentModal() {
               <div className="flex-shrink-0 w-8 h-8 rounded-full border border-white/20 flex items-center justify-center text-white/60">
                 {idx === 0 && (
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10" />
-                    <path d="M7 17h10M9.5 7v6M14.5 7v6" />
-                    <path d="M8 7h8" />
+                    <rect x="2" y="5" width="20" height="14" rx="2" />
+                    <text x="12" y="15" fontSize="8" fontWeight="bold" textAnchor="middle" fill="currentColor">18+</text>
                   </svg>
                 )}
                 {idx === 1 && (
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                    <path d="M9 12l2 2 4-4" />
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                   </svg>
                 )}
                 {idx === 2 && (
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-                    <path d="M14 2v6h6" />
-                    <path d="M9 13h6M9 17h3" />
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    <path d="M12 8v4" />
+                    <path d="M12 16h.01" />
                   </svg>
                 )}
               </div>
