@@ -25,6 +25,10 @@
   "login.loading": "Carregando...",
   "login.checkEmail": "Verifique seu email para confirmar sua conta!",
   "login.invalidCredentials": "Já existe uma conta com este email. Verifique sua senha.",
+  "login.signInWithGoogle": "Entrar com Google",
+  "login.signInWithApple": "Entrar com Apple",
+  "login.signInWithGithub": "Entrar com GitHub",
+  "login.signInWithDiscord": "Entrar com Discord",
 
   "pricing.title": "Preços",
   "pricing.mostPopular": "Mais Popular",

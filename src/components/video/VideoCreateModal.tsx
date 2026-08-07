@@ -55,6 +55,7 @@ export default function VideoCreateModal({
   const [jobId, setJobId] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [activeTemplate, setActiveTemplate] = useState(template);
+  const [examplesReady, setExamplesReady] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -76,8 +77,16 @@ export default function VideoCreateModal({
   useEffect(() => {
     if (isOpen) {
       setActiveTemplate(template);
+      setExamplesReady(false);
     }
   }, [template, isOpen]);
+
+  // Mark examples as ready when they're available
+  useEffect(() => {
+    if (sceneExamples.length > 0) {
+      setExamplesReady(true);
+    }
+  }, [sceneExamples]);
 
   // Cleanup object URLs
   useEffect(() => {
@@ -406,35 +415,68 @@ export default function VideoCreateModal({
           </div>
 
           {/* Scene examples carousel — original + examples */}
-          {sceneExamples.length > 0 && (
-            <div>
-              <p className="text-xs text-white/40 font-semibold uppercase tracking-wider mb-2">{t('videoModal.moreExamples')}</p>
-              <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
-                {/* Original scene video — always first */}
+          <div>
+            <p className="text-xs text-white/40 font-semibold uppercase tracking-wider mb-2">{t('videoModal.moreExamples')}</p>
+            <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+              {/* Original scene video — always first */}
+              <button
+                key="original"
+                onClick={() => {
+                  setActiveTemplate({
+                    id: template.id,
+                    name: template.name,
+                    duration: template.duration,
+                    credits: template.credits,
+                    videoUrl: template.videoUrl,
+                    thumbnailUrl: template.thumbnailUrl,
+                    instructions: template.instructions,
+                    tags: template.tags,
+                    gradient: template.gradient,
+                    styleId: template.styleId,
+                  });
+                }}
+                className={`shrink-0 w-16 h-24 rounded-lg overflow-hidden border-2 transition-all ${
+                  activeTemplate.videoUrl === template.videoUrl
+                    ? 'border-[#EE5F96] ring-1 ring-[#EE5F96]/50'
+                    : 'border-[#1E2130] hover:border-white/30'
+                }`}
+              >
+                <video
+                  src={template.videoUrl}
+                  muted
+                  playsInline
+                  preload="metadata"
+                  className="w-full h-full object-cover"
+                  onLoadedMetadata={(e) => { (e.target as HTMLVideoElement).currentTime = 0; }}
+                />
+              </button>
+
+              {/* Database examples */}
+              {examplesReady ? sceneExamples.map((ex) => (
                 <button
-                  key="original"
+                  key={ex.id}
                   onClick={() => {
                     setActiveTemplate({
-                      id: template.id,
-                      name: template.name,
-                      duration: template.duration,
-                      credits: template.credits,
-                      videoUrl: template.videoUrl,
-                      thumbnailUrl: template.thumbnailUrl,
-                      instructions: template.instructions,
-                      tags: template.tags,
-                      gradient: template.gradient,
-                      styleId: template.styleId,
+                      id: ex.scene_id,
+                      name: ex.name || activeTemplate.name,
+                      duration: activeTemplate.duration,
+                      credits: activeTemplate.credits,
+                      videoUrl: ex.video_url,
+                      thumbnailUrl: ex.video_url,
+                      instructions: activeTemplate.instructions,
+                      tags: activeTemplate.tags,
+                      gradient: activeTemplate.gradient,
+                      styleId: activeTemplate.styleId,
                     });
                   }}
                   className={`shrink-0 w-16 h-24 rounded-lg overflow-hidden border-2 transition-all ${
-                    activeTemplate.videoUrl === template.videoUrl
+                    activeTemplate.videoUrl === ex.video_url
                       ? 'border-[#EE5F96] ring-1 ring-[#EE5F96]/50'
                       : 'border-[#1E2130] hover:border-white/30'
                   }`}
                 >
                   <video
-                    src={template.videoUrl}
+                    src={ex.video_url}
                     muted
                     playsInline
                     preload="metadata"
@@ -442,44 +484,11 @@ export default function VideoCreateModal({
                     onLoadedMetadata={(e) => { (e.target as HTMLVideoElement).currentTime = 0; }}
                   />
                 </button>
-
-                {/* Database examples */}
-                {sceneExamples.map((ex) => (
-                  <button
-                    key={ex.id}
-                    onClick={() => {
-                      setActiveTemplate({
-                        id: ex.scene_id,
-                        name: ex.name || activeTemplate.name,
-                        duration: activeTemplate.duration,
-                        credits: activeTemplate.credits,
-                        videoUrl: ex.video_url,
-                        thumbnailUrl: ex.video_url,
-                        instructions: activeTemplate.instructions,
-                        tags: activeTemplate.tags,
-                        gradient: activeTemplate.gradient,
-                        styleId: activeTemplate.styleId,
-                      });
-                    }}
-                    className={`shrink-0 w-16 h-24 rounded-lg overflow-hidden border-2 transition-all ${
-                      activeTemplate.videoUrl === ex.video_url
-                        ? 'border-[#EE5F96] ring-1 ring-[#EE5F96]/50'
-                        : 'border-[#1E2130] hover:border-white/30'
-                    }`}
-                  >
-                    <video
-                      src={ex.video_url}
-                      muted
-                      playsInline
-                      preload="metadata"
-                      className="w-full h-full object-cover"
-                      onLoadedMetadata={(e) => { (e.target as HTMLVideoElement).currentTime = 0; }}
-                    />
-                  </button>
-                ))}
-              </div>
+              )) : (
+                <div className="shrink-0 w-16 h-24 rounded-lg border border-[#1E2130] bg-[#161827] animate-pulse" />
+              )}
             </div>
-          )}
+          </div>
 
           {/* Error */}
           {error && (

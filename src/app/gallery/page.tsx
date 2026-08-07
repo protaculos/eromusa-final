@@ -226,7 +226,7 @@ function CompletedCard({
       {expiresDisplay && (
         <div className="absolute top-2 left-2 right-2 flex justify-center">
           <div className="bg-black/70 text-white/80 text-[10px] px-2 py-0.5 rounded-md">
-            {t('gallery.expiresIn')} {expiresDisplay}
+            {t('gallery.downloadBanner')}
           </div>
         </div>
       )}
@@ -485,7 +485,7 @@ function VideoPopup({
             {expiresDisplay && (
               <div className="flex justify-center">
                 <div className="bg-[#1E2130] text-white/70 text-xs px-3 py-1.5 rounded-lg">
-                  Expires in {expiresDisplay}
+                  {t('gallery.downloadBanner')}
                 </div>
               </div>
             )}
