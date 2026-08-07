@@ -8,9 +8,9 @@ export default function Footer() {
 
   return (
     <footer className="py-8 border-t border-[#1E2130] text-white/40 text-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center gap-4 text-center">
         <p>© {new Date().getFullYear()} EroMusa AI. All rights reserved.</p>
-        <div className="flex items-center gap-6">
+        <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-6">
           <Link href="/support" className="hover:text-white transition-colors">
             {t('footer.support')}
           </Link>

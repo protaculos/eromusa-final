@@ -42,3 +42,8 @@ export const localeLabels: Record<Locale, string> = {
   ru: "Русский",
   zh: "中文",
 };
+
+export const languageOptions: { code: Locale; label: string }[] = locales.map((code) => ({
+  code,
+  label: localeLabels[code],
+}));

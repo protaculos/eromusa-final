@@ -1,40 +1,11 @@
 "use client";
 import React, { useMemo, useState } from "react";
 import Link from "next/link";
+import { languageOptions, type Locale } from "@/i18n/config";
 import { useSettings } from "@/context/SettingsContext";
 import { useT } from "@/i18n/useT";
 
-const LANGUAGES = [
-  { code: "en", label: "English" },
-  { code: "pt", label: "Português (Brasil)" },
-  { code: "es", label: "Español" },
-  { code: "fr", label: "Français" },
-  { code: "de", label: "Deutsch" },
-  { code: "it", label: "Italiano" },
-  { code: "ja", label: "日本語" },
-  { code: "ko", label: "한국어" },
-  { code: "ar", label: "العربية" },
-  { code: "hi", label: "हिन्दी" },
-  { code: "ru", label: "Русский" },
-  { code: "zh", label: "中文" },
-];
-
-const LANG_LABELS: Record<string, string> = {
-  en: "English",
-  pt: "Português (Brasil)",
-  es: "Español",
-  fr: "Français",
-  de: "Deutsch",
-  it: "Italiano",
-  ja: "日本語",
-  ko: "한국어",
-  ar: "العربية",
-  hi: "हिन्दी",
-  ru: "Русский",
-  zh: "中文",
-};
-
-const SUPPORTED = new Set(LANGUAGES.map((l) => l.code));
+const SUPPORTED = new Set<string>(languageOptions.map((l) => l.code));
 
 function detectLanguage(): string {
   if (typeof navigator === "undefined") return "en";
@@ -64,7 +35,16 @@ export default function CookieConsentModal() {
   const [lang, setLang] = useState(initialLang);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  const currentLangLabel = LANG_LABELS[lang] ?? "English";
+  const currentLangLabel =
+    languageOptions.find((l) => l.code === lang)?.label ?? "English";
+
+  // Atualiza o idioma global imediatamente ao selecionar uma língua,
+  // para o conteúdo do modal (título, avisos, botão) trocar na hora.
+  const handleSelectLang = (code: string) => {
+    setLang(code);
+    updateSettings({ language: code as Locale });
+    setDropdownOpen(false);
+  };
 
   const handleContinue = () => {
     updateSettings({ language: lang });
@@ -128,7 +108,8 @@ export default function CookieConsentModal() {
         <div className="relative mb-4">
           <button
             onClick={() => setDropdownOpen((v) => !v)}
-            className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-[#161827] border border-[#1E2130] text-sm text-white/80 hover:text-white hover:border-white/20 transition-colors"
+            aria-expanded={dropdownOpen}
+            className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-[#161827] border border-[#1E2130] text-sm text-white/80 hover:text-white hover:border-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-[#EE5F96]/60"
           >
             <span className="flex items-center gap-2">
               <svg className="w-4 h-4 text-white/40" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -150,14 +131,11 @@ export default function CookieConsentModal() {
           </button>
 
           {dropdownOpen && (
-            <div className="absolute z-10 mt-2 w-full bg-[#0A0B14] border border-[#1E2130] rounded-xl shadow-2xl overflow-hidden">
-              {LANGUAGES.map((l) => (
+            <div className="absolute z-10 mt-2 w-full bg-[#0A0B14] border border-[#1E2130] rounded-xl shadow-2xl max-h-[240px] overflow-y-auto">
+              {languageOptions.map((l) => (
                 <button
                   key={l.code}
-                  onClick={() => {
-                    setLang(l.code);
-                    setDropdownOpen(false);
-                  }}
+                  onClick={() => handleSelectLang(l.code)}
                   className={`w-full text-left px-4 py-3 text-sm transition-colors ${
                     l.code === lang
                       ? "bg-[#EE5F96]/10 text-white"

@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useSettings } from '@/context/SettingsContext';
 import { useT } from '@/i18n/useT';
-import { localeLabels, type Locale } from '@/i18n/config';
+import { languageOptions, type Locale } from '@/i18n/config';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import PaymentModal from '@/components/PaymentModal';
@@ -15,12 +15,6 @@ const NAV_ITEMS = [
   { href: '/', labelKey: 'nav.discovery' },
   { href: '/gallery', labelKey: 'nav.gallery' },
   { href: '/pricing', labelKey: 'nav.pricing' },
-];
-
-const LANGUAGES: { code: Locale; label: string }[] = [
-  { code: 'en', label: 'English' },
-  { code: 'pt', label: 'Português' },
-  { code: 'es', label: 'Español' },
 ];
 
 export default function Navbar() {
@@ -205,8 +199,8 @@ export default function Navbar() {
 
                     {/* Sub-dropdown idiomas */}
                     {langOpen && (
-                      <div className="border-t border-[#1E2130] bg-[#0A0B14]">
-                        {LANGUAGES.map((lang) => (
+                      <div className="border-t border-[#1E2130] bg-[#0A0B14] max-h-[280px] overflow-y-auto">
+                        {languageOptions.map((lang) => (
                           <button
                             key={lang.code}
                             onClick={() => handleLanguageSelect(lang.code)}

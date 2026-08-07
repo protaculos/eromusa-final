@@ -309,6 +309,8 @@ function VideoPopup({
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(true);
   const [videoLoading, setVideoLoading] = useState(true);
+  // Armazena a proporção real do vídeo (ex.: "9 / 16") para o modal se adaptar.
+  const [videoRatio, setVideoRatio] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmDownload, setConfirmDownload] = useState(false);
@@ -338,6 +340,12 @@ function VideoPopup({
     }
     setPlaying(!playing);
   }, [playing]);
+
+  const handleVideoMetadata = useCallback(() => {
+    const el = videoRef.current;
+    if (!el || !el.videoWidth || !el.videoHeight) return;
+    setVideoRatio(`${el.videoWidth} / ${el.videoHeight}`);
+  }, []);
 
   const seekBy = useCallback((delta: number) => {
     const el = videoRef.current;
@@ -417,6 +425,7 @@ function VideoPopup({
       >
         <div
           className="relative bg-[#0A0B14] border border-[#1E2130] rounded-2xl w-full max-w-[90vw] max-h-[90vh] shadow-2xl overflow-hidden focus:outline-none focus:ring-2 focus:ring-[#EE5F96]/60"
+          style={videoRatio ? { aspectRatio: videoRatio } : undefined}
           onClick={(e) => e.stopPropagation()}
           tabIndex={-1}
         >
@@ -444,10 +453,11 @@ function VideoPopup({
                 loop
                 muted
                 playsInline
-                className="max-w-full max-h-[60vh] w-auto h-auto object-contain"
+                className="max-w-full max-h-[70vh] w-auto h-auto object-contain"
                 onClick={togglePlay}
                 onLoadedData={() => setVideoLoading(false)}
                 onCanPlay={() => setVideoLoading(false)}
+                onLoadedMetadata={handleVideoMetadata}
                 onError={() => setVideoLoading(false)}
               />
               {videoLoading && (
