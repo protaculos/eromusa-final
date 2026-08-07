@@ -11,6 +11,7 @@ import PaymentModal from '@/components/PaymentModal';
 import TemplateCard from '@/components/video/TemplateCard';
 import SceneEditModal from '@/components/admin/SceneEditModal';
 import ConfirmModal from '@/components/ConfirmModal';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 interface SceneData {
   id: string;
@@ -262,8 +263,9 @@ export default function DiscoverPage() {
   const displayTemplates = templates;
 
   return (
-    <div className="min-h-screen bg-[#0A0B14]">
+    <div className="min-h-screen bg-[#0A0A0B]">
       <div className="pt-8 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <ErrorBoundary sectionName="Discovery">
         {/* Admin: New Scene button */}
         {isAdmin && (
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 flex items-center gap-3">
@@ -349,6 +351,7 @@ export default function DiscoverPage() {
             </div>
           </div>
         )}
+        </ErrorBoundary>
       </div>
 
       {/* Modals */}

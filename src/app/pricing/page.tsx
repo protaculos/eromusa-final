@@ -4,6 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useT } from '@/i18n/useT';
 import LoginModal from '@/components/LoginModal';
 import PaymentMethodModal from '@/components/PaymentMethodModal';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 // ============================================
 // Pricing Card
@@ -131,7 +132,8 @@ const FAQItem = ({ question, answer }: { question: string; answer: string }) => 
     <div className="border-b border-white/10 last:border-none">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full py-6 flex items-center justify-between text-left text-white/80 hover:text-white transition-colors"
+        aria-expanded={isOpen}
+        className="w-full py-6 flex items-center justify-between text-left text-white/80 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-[#EE5F96]/50 rounded-lg"
       >
         <span className="text-lg font-medium">{question}</span>
         <svg
@@ -141,7 +143,10 @@ const FAQItem = ({ question, answer }: { question: string; answer: string }) => 
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
       </button>
-      <div className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-40 opacity-100 mb-6' : 'max-h-0 opacity-0'}`}>
+      <div
+        className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-40 opacity-100 mb-6' : 'max-h-0 opacity-0'}`}
+        role="region"
+      >
         <p className="text-white/50 leading-relaxed">
           {answer}
         </p>
@@ -221,6 +226,7 @@ export default function PricingPage() {
       />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12">
+        <ErrorBoundary sectionName="Pricing">
         {/* Pricing Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-32">
           {PLANS.map((plan) => (
@@ -250,6 +256,7 @@ export default function PricingPage() {
             />
           </div>
         </div>
+        </ErrorBoundary>
       </main>
     </div>
   );

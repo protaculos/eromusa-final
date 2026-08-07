@@ -3,6 +3,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useT } from '@/i18n/useT';
+import { useToast } from '@/components/Toast';
 
 // ── Types ──────────────────────────────────────────
 export interface VideoCreateModalProps {
@@ -43,6 +44,7 @@ export default function VideoCreateModal({
   const { user, session, credits } = useAuth();
   const router = useRouter();
   const t = useT();
+  const { toast } = useToast();
 
   // State
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -116,7 +118,9 @@ export default function VideoCreateModal({
   // ── File handlers ──────────────────────────────
   const handleFile = useCallback((file: File) => {
     if (!file.type.startsWith('image/')) {
-      setError(t('videoModal.selectImage'));
+      const message = t('videoModal.selectImage');
+      setError(message);
+      toast(message, 'error');
       return;
     }
     setError(null);
@@ -124,7 +128,7 @@ export default function VideoCreateModal({
     const url = URL.createObjectURL(file);
     setPreviewUrl(url);
     setImageBlob(file);
-  }, []);
+  }, [t, toast]);
 
   const onFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -156,10 +160,12 @@ export default function VideoCreateModal({
     }
 
     if ((credits ?? 0) < (activeTemplate?.credits ?? 0)) {
+      const message = t('videoModal.insufficientCredits');
       if (onOpenPayment) {
         onOpenPayment();
       } else {
-        alert(t('videoModal.insufficientCredits'));
+        setError(message);
+        toast(message, 'error');
       }
       return;
     }
@@ -254,8 +260,11 @@ export default function VideoCreateModal({
       }
 
       // Polling is handled by the Gallery page
+      toast(t('videoModal.videoCreated'), 'success');
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create video");
+      const message = err instanceof Error ? err.message : 'Failed to create video';
+      setError(message);
+      toast(message, 'error');
       setIsCreating(false);
       return;
     }

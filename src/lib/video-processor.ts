@@ -3,6 +3,8 @@ import crypto from "crypto";
 
 const PBKDF2_SALT = Buffer.from("leakify_api_secret_salt_v1", "utf-8");
 const FILE_KEY_IV = Buffer.from("file_key_iv_16b", "utf-8");
+const MIN_MP4_BYTES = 128;
+const RETRY_DELAYS_MS = [0, 1500, 3000];
 
 export function deriveUserKey(apiSecret: string): Buffer {
   return crypto.pbkdf2Sync(apiSecret, PBKDF2_SALT, 100000, 32, "sha256");
@@ -32,12 +34,52 @@ export interface ProcessVideoResult {
   error?: string;
 }
 
+function isProbablyMp4(buffer: Buffer): boolean {
+  return buffer.length >= MIN_MP4_BYTES && buffer.toString("ascii", 4, 8) === "ftyp";
+}
+
+async function wait(ms: number): Promise<void> {
+  if (ms <= 0) return;
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function fetchWithRetry(jobId: string, externalUrl: string): Promise<Buffer | null> {
+  for (let attempt = 0; attempt < RETRY_DELAYS_MS.length; attempt += 1) {
+    await wait(RETRY_DELAYS_MS[attempt]);
+
+    const videoResponse = await fetch(externalUrl, {
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; Eromusa/1.0)" },
+    });
+
+    if (!videoResponse.ok) {
+      console.warn(`[Process ${jobId}] Download attempt ${attempt + 1} failed: ${videoResponse.status}`);
+      continue;
+    }
+
+    const contentType = videoResponse.headers.get("content-type") || "";
+    const buffer = Buffer.from(await videoResponse.arrayBuffer());
+
+    if (buffer.length < MIN_MP4_BYTES) {
+      console.warn(`[Process ${jobId}] Download attempt ${attempt + 1} returned too few bytes: ${buffer.length}`);
+      continue;
+    }
+
+    if (!contentType.includes("video") && !isProbablyMp4(buffer)) {
+      console.warn(`[Process ${jobId}] Download attempt ${attempt + 1} looks invalid: content-type=${contentType || "n/a"}`);
+      continue;
+    }
+
+    return buffer;
+  }
+
+  return null;
+}
+
 export async function downloadAndStoreVideo(
   jobId: string,
   externalUrl: string,
   encryptionMetadata?: { encrypted_key: string } | null,
 ): Promise<ProcessVideoResult> {
-  // Check if already in Supabase storage
   const fileName = `videos/${jobId}.mp4`;
   const { data: existingRecord } = await supabaseAdmin
     .from("videos")
@@ -51,21 +93,15 @@ export async function downloadAndStoreVideo(
 
   console.log(`[Process ${jobId}] Downloading video from: ${externalUrl.substring(0, 80)}...`);
 
-  const videoResponse = await fetch(externalUrl, {
-    headers: { "User-Agent": "Mozilla/5.0 (compatible; Eromusa/1.0)" },
-  });
-
-  if (!videoResponse.ok) {
-    console.error(`[Process ${jobId}] Download failed: ${videoResponse.status}`);
-    return { success: false, videoUrl: "", error: `Download failed: ${videoResponse.status}` };
+  const buffer = await fetchWithRetry(jobId, externalUrl);
+  if (!buffer) {
+    return { success: false, videoUrl: "", error: "Video not ready for download yet" };
   }
 
-  const buffer = Buffer.from(await videoResponse.arrayBuffer());
   console.log(`[Process ${jobId}] Downloaded: ${buffer.length} bytes`);
 
   let uploadBuffer: Buffer = Buffer.from(buffer);
 
-  // Try decrypt if metadata present
   if (encryptionMetadata?.encrypted_key) {
     try {
       const LEAKIFYHUB_SECRET_KEY = process.env.LEAKIFYHUB_LIVE_SECRET_KEY!;
@@ -79,13 +115,8 @@ export async function downloadAndStoreVideo(
     }
   }
 
-  // Validate minimum MP4 header
-  const isMp4Like = uploadBuffer.length > 24 &&
-    (uploadBuffer.toString("ascii", 4, 8) === "ftyp" ||
-      uploadBuffer.toString("ascii", 0, 4) === "\u0000\u0000\u0000 ftyp");
-
-  if (!isMp4Like && uploadBuffer.length > 0) {
-    console.warn(`[Process ${jobId}] Buffer doesn't look like MP4, uploading anyway`);
+  if (!isProbablyMp4(uploadBuffer)) {
+    return { success: false, videoUrl: "", error: "Downloaded file is not a valid MP4" };
   }
 
   const { error: uploadError } = await supabaseAdmin.storage

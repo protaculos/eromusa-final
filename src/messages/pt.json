@@ -14,6 +14,8 @@
   "nav.logoutConfirm": "Tem certeza que deseja sair?",
   "nav.cancel": "Cancelar",
   "nav.confirm": "Confirmar",
+  "nav.terms": "Termos de Uso",
+  "nav.privacy": "Política de Privacidade",
 
   "login.title": "Entrar",
   "login.orContinue": "ou continue com email",
@@ -58,6 +60,7 @@
   "gallery.creditsRefunded": "Seus créditos foram reembolsados. Entre em contato com o suporte.",
   "gallery.support": "Suporte",
   "gallery.videoUnavailable": "Arquivo de vídeo indisponível",
+  "gallery.loadingVideo": "Carregando vídeo...",
   "gallery.reprocess": "Reprocessar",
   "gallery.expiresIn": "Expira em",
   "gallery.download": "Baixar",
@@ -157,7 +160,8 @@
   "cookie.warning1": "Conteúdo adulto 18+",
   "cookie.warning2": "Seus dados estão protegidos",
   "cookie.warning3": "Cookies e Termos se aplicam",
-  "cookie.policy": "Ao continuar, você confirma que tem 18 anos ou mais e concorda com nossos Termos de Uso e Política de Privacidade. Este site utiliza cookies e tecnologias semelhantes para fornecer, proteger e melhorar nossos serviços.",
+  "cookie.policy": "Ao continuar, você confirma que tem 18 anos ou mais e concorda com nossos",
+  "cookie.and": "e",
   "cookie.languageLabel": "Idioma",
   "cookie.continue": "Continuar",
 

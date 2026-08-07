@@ -4,6 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
 import LoginModal from "@/components/LoginModal";
 import { useT } from "@/i18n/useT";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 // ── Types ─────────────────────────────────────────────
 interface VideoData {
@@ -21,9 +22,25 @@ interface VideoData {
   expires_at?: string;
 }
 
+function SkeletonCard() {
+  return (
+    <div className="relative aspect-[9/16] rounded-2xl overflow-hidden bg-[#141417] border border-[#1E2130] animate-pulse">
+      <div className="absolute inset-0 bg-gradient-to-b from-white/5 via-white/0 to-black/20" />
+      <div className="absolute inset-0 p-3 flex flex-col justify-between">
+        <div className="flex justify-between">
+          <div className="h-4 w-16 rounded bg-white/10" />
+          <div className="h-4 w-10 rounded bg-white/10" />
+        </div>
+        <div className="space-y-2">
+          <div className="h-3 w-4/5 rounded bg-white/10" />
+          <div className="h-3 w-2/3 rounded bg-white/10" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Countdown hook ────────────────────────────────────
-// Returns total hours (not split into days) in format "72h:00m:00s"
-// Falls back to created_at + 72h if expires_at is not set
 function useCountdown(expiresAt: string | undefined, createdAt?: string): string {
   const getTimeLeft = useCallback(() => {
     const target = expiresAt || (createdAt
@@ -65,17 +82,13 @@ function ProcessingCard({ video }: { video: VideoData }) {
   if (isFailed) {
     return (
       <div className="relative aspect-[9/16] rounded-2xl overflow-hidden bg-[#0A0B14] border border-red-500/30 group">
-        {/* User image, dimmed */}
         <img
           src={video.user_image_url || video.template_thumbnail}
           alt=""
           className="absolute inset-0 w-full h-full object-cover brightness-[0.25]"
+          loading="lazy"
         />
-
-        {/* Dark gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-
-        {/* Error icon + message */}
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 p-4">
           <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
             <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -89,8 +102,6 @@ function ProcessingCard({ video }: { video: VideoData }) {
             {t('gallery.refunded')}
           </p>
         </div>
-
-        {/* Bottom info */}
         <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
           <a
             href="/support"
@@ -105,17 +116,13 @@ function ProcessingCard({ video }: { video: VideoData }) {
 
   return (
     <div className="relative aspect-[9/16] rounded-2xl overflow-hidden bg-[#0A0B14] border border-[#1E2130] group">
-      {/* User image, dimmed */}
       <img
         src={video.user_image_url || video.template_thumbnail}
         alt=""
         className="absolute inset-0 w-full h-full object-cover brightness-[0.35]"
+        loading="lazy"
       />
-
-      {/* Dark gradient overlay for depth */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-
-      {/* Spinner + text overlay */}
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-4">
         <div className="w-10 h-10 border-2 border-[#EE5F96] border-t-transparent rounded-full animate-spin" />
         <p className="text-white/90 text-sm font-semibold text-center drop-shadow-lg">
@@ -125,17 +132,10 @@ function ProcessingCard({ video }: { video: VideoData }) {
           {t('gallery.pleaseWait')}
         </p>
       </div>
-
-      {/* Bottom info */}
-      <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
-        {/* Processing badge removed */}
-      </div>
     </div>
   );
 }
 
-// Detect videos whose stored URL isn't a real Supabase Storage URL.
-// These are the ones saved as the raw encrypted LeakifyHub URL and show black.
 function needsReprocess(video: VideoData): boolean {
   return !video.video_url ||
     video.video_url.includes("api.leakifyhub.fun") ||
@@ -143,7 +143,6 @@ function needsReprocess(video: VideoData): boolean {
      !video.video_url.startsWith("blob:"));
 }
 
-// ── Completed card ──────────────────────────────────
 function CompletedCard({
   video,
   onSelect,
@@ -154,8 +153,6 @@ function CompletedCard({
   onReprocess: (jobId: string) => void;
 }) {
   const t = useT();
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [hovering, setHovering] = useState(false);
   const [reprocessing, setReprocessing] = useState(false);
   const broken = needsReprocess(video);
   const expiresDisplay = useCountdown(video.expires_at, video.created_at);
@@ -174,46 +171,26 @@ function CompletedCard({
     [video.job_id, reprocessing, onReprocess],
   );
 
-  // Play/pause based on hover
-  useEffect(() => {
-    if (!videoRef.current) return;
-    if (hovering) {
-      videoRef.current.currentTime = 0;
-      videoRef.current.play().catch(() => {});
-    } else {
-      videoRef.current.pause();
-    }
-  }, [hovering]);
-
   return (
     <div
-      className="relative aspect-[9/16] rounded-2xl overflow-hidden bg-[#0A0B14] border border-[#1E2130] group cursor-pointer"
-      onMouseEnter={() => setHovering(true)}
-      onMouseLeave={() => setHovering(false)}
+      className="relative aspect-[9/16] rounded-2xl overflow-hidden bg-[#0A0B14] border border-[#1E2130] group cursor-pointer focus-within:ring-2 focus-within:ring-[#EE5F96]/60"
       onClick={() => onSelect(video)}
+      tabIndex={0}
+      aria-label={video.template_name || t('gallery.videoFallback')}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSelect(video);
+        }
+      }}
     >
-      {/* Video element — always rendered, plays on hover */}
-      <video
-        ref={videoRef}
-        src={video.video_url}
-        loop
-        muted
-        playsInline
-        preload="none"
+      <img
+        src={video.user_image_url || video.template_thumbnail}
+        alt=""
         className="absolute inset-0 w-full h-full object-cover"
+        loading="lazy"
       />
-
-      {/* Thumbnail overlay — shown when not hovering */}
-      {!hovering && (
-        <img
-          src={video.user_image_url || video.template_thumbnail}
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-      )}
-
-      {/* Play icon hint on thumbnail — only when the URL is valid */}
-      {!hovering && !broken && (
+      {!broken && (
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="w-14 h-14 rounded-full bg-[#EE5F96]/90 flex items-center justify-center transition-transform hover:scale-110 shadow-lg">
             <svg className="w-6 h-6 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24">
@@ -223,7 +200,6 @@ function CompletedCard({
         </div>
       )}
 
-      {/* Broken URL warning + reprocess button */}
       {broken && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-4 bg-black/60">
           <svg className="w-10 h-10 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -235,7 +211,8 @@ function CompletedCard({
           <button
             onClick={handleReprocess}
             disabled={reprocessing}
-            className="bg-[#EE5F96] hover:bg-[#d94d7e] disabled:opacity-50 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors"
+            aria-label={t('gallery.reprocess')}
+            className="bg-[#EE5F96] hover:bg-[#d94d7e] disabled:opacity-50 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-[#EE5F96]/60"
           >
             {reprocessing ? (
               <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto" />
@@ -246,7 +223,6 @@ function CompletedCard({
         </div>
       )}
 
-      {/* Expires countdown — top area */}
       {expiresDisplay && (
         <div className="absolute top-2 left-2 right-2 flex justify-center">
           <div className="bg-black/70 text-white/80 text-[10px] px-2 py-0.5 rounded-md">
@@ -258,7 +234,6 @@ function CompletedCard({
   );
 }
 
-// ── Confirm modal ────────────────────────────────────
 function ConfirmModal({
   open,
   title,
@@ -294,14 +269,14 @@ function ConfirmModal({
         <div className="flex gap-3 justify-end">
           <button
             onClick={onCancel}
-            className="px-4 py-2 rounded-xl text-sm text-white/60 hover:text-white bg-white/5 hover:bg-white/10 transition-colors"
+            className="px-4 py-2 rounded-xl text-sm text-white/60 hover:text-white bg-white/5 hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-white/20"
           >
             {t('gallery.cancel')}
           </button>
           <button
             onClick={onConfirm}
             disabled={loading}
-            className={`px-4 py-2 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 ${
+            className={`px-4 py-2 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-[#EE5F96]/60 ${
               confirmDanger
                 ? "bg-red-500 hover:bg-red-600 text-white"
                 : "bg-[#EE5F96] hover:bg-pink-600 text-white"
@@ -319,7 +294,6 @@ function ConfirmModal({
   );
 }
 
-// ── Video popup modal ───────────────────────────────
 function VideoPopup({
   video,
   onClose,
@@ -334,16 +308,25 @@ function VideoPopup({
   const t = useT();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(true);
+  const [videoLoading, setVideoLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmDownload, setConfirmDownload] = useState(false);
   const expiresDisplay = useCountdown(video.expires_at, video.created_at);
 
-  // Start playing on mount
   useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.play().catch(() => {});
+    const el = videoRef.current;
+    if (!el) return;
+    const tryPlay = () => {
+      el.currentTime = 0;
+      el.play().catch(() => {});
+    };
+    if (el.readyState >= 3) {
+      tryPlay();
+    } else {
+      el.addEventListener("canplay", tryPlay, { once: true });
     }
+    return () => el.removeEventListener("canplay", tryPlay);
   }, []);
 
   const togglePlay = useCallback(() => {
@@ -355,6 +338,38 @@ function VideoPopup({
     }
     setPlaying(!playing);
   }, [playing]);
+
+  const seekBy = useCallback((delta: number) => {
+    const el = videoRef.current;
+    if (!el || !el.duration || isNaN(el.duration)) return;
+    el.currentTime = Math.min(Math.max(el.currentTime + delta, 0), el.duration - 0.1);
+  }, []);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+        return;
+      }
+      if (e.key === " ") {
+        e.preventDefault();
+        togglePlay();
+        return;
+      }
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        seekBy(-10);
+        return;
+      }
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        seekBy(10);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [onClose, togglePlay, seekBy]);
 
   const handleDelete = useCallback(async () => {
     if (deleting) return;
@@ -371,11 +386,10 @@ function VideoPopup({
         onClose();
       }
     } catch {
-      // Silently fail
     }
     setDeleting(false);
     setConfirmDelete(false);
-  }, [video.job_id, deleting, onDelete, onClose]);
+  }, [video.job_id, deleting, onDelete, onClose, accessToken]);
 
   const handleDownload = useCallback(async () => {
     try {
@@ -402,10 +416,10 @@ function VideoPopup({
         onClick={onClose}
       >
         <div
-          className="relative bg-[#0A0B14] border border-[#1E2130] rounded-2xl w-full max-w-[90vw] max-h-[90vh] shadow-2xl overflow-hidden"
+          className="relative bg-[#0A0B14] border border-[#1E2130] rounded-2xl w-full max-w-[90vw] max-h-[90vh] shadow-2xl overflow-hidden focus:outline-none focus:ring-2 focus:ring-[#EE5F96]/60"
           onClick={(e) => e.stopPropagation()}
+          tabIndex={-1}
         >
-          {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-[#1E2130]">
             <div className="min-w-0">
               <h2 className="font-bold text-white text-base truncate">{video.template_name || t('gallery.videoFallback')}</h2>
@@ -413,7 +427,8 @@ function VideoPopup({
             </div>
             <button
               onClick={onClose}
-              className="text-white/40 hover:text-white transition-colors p-1"
+              aria-label={t('gallery.close') || 'Close'}
+              className="text-white/40 hover:text-white transition-colors p-1 focus:outline-none focus:ring-2 focus:ring-[#EE5F96]/60 rounded-md"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -421,9 +436,7 @@ function VideoPopup({
             </button>
           </div>
 
-          {/* Body */}
           <div className="p-4 space-y-3">
-            {/* Video player — adapts to video's natural dimensions */}
             <div className="relative rounded-2xl overflow-hidden bg-black border border-[#1E2130] flex justify-center">
               <video
                 ref={videoRef}
@@ -433,9 +446,18 @@ function VideoPopup({
                 playsInline
                 className="max-w-full max-h-[60vh] w-auto h-auto object-contain"
                 onClick={togglePlay}
+                onLoadedData={() => setVideoLoading(false)}
+                onCanPlay={() => setVideoLoading(false)}
+                onError={() => setVideoLoading(false)}
               />
-
-              {/* Pause overlay indicator */}
+              {videoLoading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/60">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="w-10 h-10 border-2 border-[#EE5F96] border-t-transparent rounded-full animate-spin" />
+                    <p className="text-white/70 text-sm font-medium">{t('gallery.loadingVideo')}</p>
+                  </div>
+                </div>
+              )}
               {!playing && (
                 <div
                   className="absolute inset-0 flex items-center justify-center cursor-pointer"
@@ -448,10 +470,8 @@ function VideoPopup({
                   </div>
                 </div>
               )}
-
             </div>
 
-            {/* Expires countdown — between video and actions */}
             {expiresDisplay && (
               <div className="flex justify-center">
                 <div className="bg-[#1E2130] text-white/70 text-xs px-3 py-1.5 rounded-lg">
@@ -460,11 +480,11 @@ function VideoPopup({
               </div>
             )}
 
-            {/* Actions */}
             <div className="flex gap-2">
               <button
                 onClick={() => setConfirmDownload(true)}
-                className="flex-1 flex items-center justify-center gap-1.5 bg-white/10 hover:bg-white/20 text-white text-xs font-medium px-3 py-2.5 rounded-xl transition-colors"
+                aria-label="Download video"
+                className="flex-1 flex items-center justify-center gap-1.5 bg-white/10 hover:bg-white/20 text-white text-xs font-medium px-3 py-2.5 rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-[#EE5F96]/50"
               >
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -474,7 +494,8 @@ function VideoPopup({
               <button
                 onClick={() => setConfirmDelete(true)}
                 disabled={deleting}
-                className="flex-1 flex items-center justify-center gap-1.5 bg-red-500/20 hover:bg-red-500/40 text-red-400 text-xs font-medium px-3 py-2.5 rounded-xl transition-colors disabled:opacity-50"
+                aria-label="Delete video"
+                className="flex-1 flex items-center justify-center gap-1.5 bg-red-500/20 hover:bg-red-500/40 text-red-400 text-xs font-medium px-3 py-2.5 rounded-xl transition-colors disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-red-500/50"
               >
                 {deleting ? (
                   <div className="w-3.5 h-3.5 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
@@ -490,7 +511,6 @@ function VideoPopup({
         </div>
       </div>
 
-      {/* Confirm delete modal */}
       <ConfirmModal
         open={confirmDelete}
         title="Delete video"
@@ -502,7 +522,6 @@ function VideoPopup({
         onCancel={() => setConfirmDelete(false)}
       />
 
-      {/* Confirm download modal */}
       <ConfirmModal
         open={confirmDownload}
         title="Download video"
@@ -515,14 +534,12 @@ function VideoPopup({
   );
 }
 
-// ── Gallery page ─────────────────────────────────────
 export default function GalleryPage() {
   const { user, session, loading, refreshCredits } = useAuth();
   const [loginOpen, setLoginOpen] = useState(false);
   const [videos, setVideos] = useState<VideoData[]>([]);
   const [selectedVideo, setSelectedVideo] = useState<VideoData | null>(null);
 
-  // Fetch videos from Supabase
   const fetchVideos = useCallback(async () => {
     if (!session?.access_token) return;
     try {
@@ -534,22 +551,18 @@ export default function GalleryPage() {
         setVideos(data.videos ?? []);
       }
     } catch {
-      // Silently fail — will retry on next poll
     }
   }, [session]);
 
-  // Initial load
   useEffect(() => {
     if (!user) return;
     fetchVideos();
   }, [user, fetchVideos]);
 
-  // Poll for status changes every 5 seconds
   useEffect(() => {
     if (!user || !session?.access_token) return;
 
     const poll = async () => {
-      // Fetch current videos from API
       const res = await fetch("/api/videos", {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
@@ -558,10 +571,7 @@ export default function GalleryPage() {
       const currentVideos: VideoData[] = data.videos ?? [];
       setVideos(currentVideos);
 
-      // Track completed videos already being auto-reprocessed to avoid spamming
       const autoReprocessing = new Set<string>();
-
-      // Check API status for each processing video
       const processing = currentVideos.filter((v) => v.status === "processing");
 
       await Promise.allSettled(
@@ -571,34 +581,30 @@ export default function GalleryPage() {
             const genRes = await fetch(`/api/generate/${video.job_id}`);
             const genData = await genRes.json();
             if (genData.status === "completed" || genData.status === "failed") {
-              // Only mark as completed if we actually got a video URL
               const effectiveStatus = (genData.status === "completed" && !genData.videoUrl)
                 ? "processing"
                 : genData.status;
-              // Update via API — PATCH /api/videos/[jobId]
+              const patchPayload = {
+                status: effectiveStatus,
+                videoUrl: effectiveStatus === "completed" ? genData.videoUrl : "",
+              };
               const patchRes = await fetch(`/api/videos/${video.job_id}`, {
                 method: "PATCH",
                 headers: {
                   "Content-Type": "application/json",
                   Authorization: `Bearer ${session.access_token}`,
                 },
-                body: JSON.stringify({
-                  status: effectiveStatus,
-                  videoUrl: effectiveStatus === "completed" ? genData.videoUrl : "",
-                }),
+                body: JSON.stringify(patchPayload),
               });
-              // Refresh credits if video failed (refund was processed server-side)
               if (effectiveStatus === "failed" && patchRes.ok) {
                 refreshCredits();
               }
             }
           } catch {
-            // Network error — will retry next interval
           }
         })
       );
 
-      // Refresh list after updates
       const refreshRes = await fetch("/api/videos", {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
@@ -607,8 +613,6 @@ export default function GalleryPage() {
         setVideos(refreshData.videos ?? []);
       }
 
-      // Auto-reprocess completed videos whose stored URL is broken.
-      // Only one broken video per poll cycle, and never the same twice in a row.
       const brokenCompleted = currentVideos.filter(
         (v) => v.status === "completed" && needsReprocess(v) && !autoReprocessing.has(v.job_id),
       );
@@ -619,21 +623,18 @@ export default function GalleryPage() {
           method: "POST",
           headers: { Authorization: `Bearer ${session.access_token}` },
         }).catch(() => {
-          // Ignore — will retry on next poll cycle
         });
       }
     };
 
     const interval = setInterval(poll, 5000);
     return () => clearInterval(interval);
-  }, [user, session]);
+  }, [user, session, refreshCredits]);
 
   const handleDeleteVideo = useCallback((jobId: string) => {
     setVideos((prev) => prev.filter((v) => v.job_id !== jobId));
   }, []);
 
-  // Reprocess a completed video whose stored URL is broken.
-  // Re-downloads from LeakifyHub, decrypts, and stores it in Supabase again.
   const handleReprocess = useCallback(
     async (jobId: string) => {
       if (!session?.access_token) return;
@@ -643,7 +644,6 @@ export default function GalleryPage() {
           headers: { Authorization: `Bearer ${session.access_token}` },
         });
         if (res.ok) {
-          // Refresh the video list to show the new Supabase URL
           fetchVideos();
         } else {
           const data = await res.json().catch(() => ({}));
@@ -656,20 +656,21 @@ export default function GalleryPage() {
     [session, fetchVideos],
   );
 
-  // Enquanto carrega, mostra placeholder neutro
   if (loading) {
     return (
       <div className="min-h-screen">
         <div className="pt-8 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-          <div className="flex flex-col items-center justify-center py-24 text-white/30">
-            <div className="w-10 h-10 border-2 border-[#EE5F96] border-t-transparent rounded-full animate-spin" />
+          <div className="bg-[#1E2130]/40 rounded-2xl p-4 mb-8 h-12 animate-pulse" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {Array.from({ length: 10 }).map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
           </div>
         </div>
       </div>
     );
   }
 
-  // Não logado
   if (!user) {
     return (
       <div className="min-h-screen">
@@ -682,7 +683,8 @@ export default function GalleryPage() {
             <p className="text-sm mb-6">Log in to see all the videos you&apos;ve created</p>
             <button
               onClick={() => setLoginOpen(true)}
-              className="bg-[#EE5F96] hover:bg-[#d94d7e] text-white font-semibold px-8 py-3 rounded-xl transition-colors"
+              aria-label="Sign in"
+              className="bg-[#EE5F96] hover:bg-[#d94d7e] text-white font-semibold px-8 py-3 rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-[#EE5F96]/60"
             >
               Sign In
             </button>
@@ -693,18 +695,10 @@ export default function GalleryPage() {
     );
   }
 
-  // Logado — sem vídeos
   if (videos.length === 0) {
     return (
       <div className="min-h-screen">
         <div className="pt-8 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-          {/* Info banner */}
-          <div className="bg-[#EE5F96]/10 border border-[#EE5F96]/20 rounded-2xl p-4 mb-8 text-center">
-            <p className="text-white/70 text-sm">
-              <strong>Download your videos!</strong> We don&apos;t store your media permanently — videos are automatically deleted <strong>72 hours</strong> after creation.
-            </p>
-          </div>
-
           <div className="flex flex-col items-center justify-center py-24 text-white/50">
             <svg className="w-20 h-20 mb-6 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -713,7 +707,7 @@ export default function GalleryPage() {
             <p className="text-sm mb-6">Create your first video and it will appear here</p>
             <Link
               href="/"
-              className="bg-[#EE5F96] hover:bg-[#d94d7e] text-white font-semibold px-8 py-3 rounded-xl transition-colors"
+              className="bg-[#EE5F96] hover:bg-[#d94d7e] text-white font-semibold px-8 py-3 rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-[#EE5F96]/60"
             >
               Create a Video
             </Link>
@@ -723,38 +717,35 @@ export default function GalleryPage() {
     );
   }
 
-  // Logado — com vídeos — single grid ordered by creation
   return (
-    <div className="min-h-screen">
-      <div className="pt-8 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        {/* Info banner */}
-        <div className="bg-[#EE5F96]/10 border border-[#EE5F96]/20 rounded-2xl p-4 mb-8 text-center">
-          <p className="text-white/70 text-sm">
-            <strong>Download your videos!</strong> We don&apos;t store your media permanently — videos are automatically deleted <strong>72 hours</strong> after creation.
-          </p>
+    <ErrorBoundary sectionName="Gallery">
+      <div className="min-h-screen">
+        <div className="pt-8 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+          <div className="bg-[#EE5F96]/10 border border-[#EE5F96]/20 rounded-2xl p-4 mb-8 text-center">
+            <p className="text-white/70 text-sm">
+              <strong>Download your videos!</strong> We don&apos;t store your media permanently — videos are automatically deleted <strong>72 hours</strong> after creation.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {videos.map((v) =>
+              v.status === "processing" ? (
+                <ProcessingCard key={v.id} video={v} />
+              ) : (
+                <CompletedCard key={v.id} video={v} onSelect={setSelectedVideo} onReprocess={handleReprocess} />
+              )
+            )}
+          </div>
         </div>
 
-        {/* Single grid — all videos in creation order (newest first) */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {videos.map((v) =>
-            v.status === "processing" ? (
-              <ProcessingCard key={v.id} video={v} />
-            ) : (
-              <CompletedCard key={v.id} video={v} onSelect={setSelectedVideo} onReprocess={handleReprocess} />
-            )
-          )}
-        </div>
+        {selectedVideo && session?.access_token && (
+          <VideoPopup
+            video={selectedVideo}
+            onClose={() => setSelectedVideo(null)}
+            onDelete={handleDeleteVideo}
+            accessToken={session.access_token}
+          />
+        )}
       </div>
-
-      {/* Video popup */}
-      {selectedVideo && session?.access_token && (
-        <VideoPopup
-          video={selectedVideo}
-          onClose={() => setSelectedVideo(null)}
-          onDelete={handleDeleteVideo}
-          accessToken={session.access_token}
-        />
-      )}
-    </div>
+    </ErrorBoundary>
   );
 }

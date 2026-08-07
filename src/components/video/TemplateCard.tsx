@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/context/AuthContext';
 
 interface TemplateCardProps {
@@ -30,8 +30,32 @@ interface TemplateCardProps {
 export default function TemplateCard({ template, isAutoPlay = false, onClick, onEdit, onDelete, onReorderUp, onReorderDown, showReorderUp, showReorderDown }: TemplateCardProps) {
   const { isAdmin } = useAuth();
   const videoRef = useRef<HTMLVideoElement>(null);
+  const cardRef = useRef<HTMLButtonElement>(null);
   const [isHovered, setIsHovered] = useState(false);
-  const [loaded, setLoaded] = useState(false);
+  const [inView, setInView] = useState(false);
+
+  // Lazy-load: only set the video src once the card is near the viewport.
+  // This avoids loading every template video at page load.
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setInView(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: '300px' }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  const src = useMemo(
+    () => (inView ? template.videoUrl : undefined),
+    [inView, template.videoUrl]
+  );
 
   // Seek to very first frame once video metadata is loaded
   useEffect(() => {
@@ -39,7 +63,6 @@ export default function TemplateCard({ template, isAutoPlay = false, onClick, on
     if (!el) return;
     const onMeta = () => {
       el.currentTime = 0;
-      setLoaded(true);
     };
     el.addEventListener('loadedmetadata', onMeta);
     return () => el.removeEventListener('loadedmetadata', onMeta);
@@ -75,25 +98,35 @@ export default function TemplateCard({ template, isAutoPlay = false, onClick, on
     }
   };
 
+  const ariaLabel = `${template.title}${template.isFree ? ' (Free)' : ''}${template.isPopular ? ' — Popular' : ''}`;
+
   return (
     <button
+      ref={cardRef}
       onClick={onClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      aria-label={ariaLabel}
       className="group relative rounded-2xl overflow-hidden bg-[#161827] border border-[#1E2130] hover:border-[#EE5F96]/50 transition-all duration-300 text-left w-full focus:outline-none focus:ring-2 focus:ring-[#EE5F96]/50"
     >
       <div className="relative overflow-hidden">
-        {/* Video serves as both thumbnail and hover preview */}
+        {/* Video serves as both thumbnail and hover preview.
+            Only rendered when the card is close to the viewport (lazy-load). */}
         <video
           ref={videoRef}
-          src={template.videoUrl}
+          src={src}
           className={`w-full h-auto object-contain transition-transform duration-500 ${isHovered ? 'scale-110' : 'scale-100'}`}
           muted
           loop
           playsInline
-          preload="metadata"
+          preload={inView ? 'metadata' : 'none'}
           poster=""
         />
+
+        {/* Placeholder until video is lazy-loaded */}
+        {!inView && (
+          <div className="absolute inset-0 bg-[#1a1c2e] animate-pulse" />
+        )}
 
         {/* Play icon overlay — visible when video is NOT playing (autoplay off + no hover) */}
         {!isAutoPlay && !isHovered && (
@@ -113,6 +146,8 @@ export default function TemplateCard({ template, isAutoPlay = false, onClick, on
         {isAdmin && (
           <div
             onClick={(e) => { e.stopPropagation(); onEdit?.(); }}
+            role="button"
+            aria-label={`Edit ${template.title}`}
             className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-black/60 flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:bg-[#EE5F96] transition-all cursor-pointer"
           >
             <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -126,6 +161,8 @@ export default function TemplateCard({ template, isAutoPlay = false, onClick, on
         {isAdmin && onDelete && (
           <div
             onClick={(e) => { e.stopPropagation(); onDelete(); }}
+            role="button"
+            aria-label={`Delete ${template.title}`}
             className="absolute top-2 left-2 z-10 w-7 h-7 rounded-full bg-black/60 flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:bg-red-500 transition-all cursor-pointer"
           >
             <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -140,6 +177,7 @@ export default function TemplateCard({ template, isAutoPlay = false, onClick, on
             {onReorderUp && showReorderUp && (
               <button
                 onClick={(e) => { e.stopPropagation(); onReorderUp(); }}
+                aria-label={`Move ${template.title} up`}
                 className="pointer-events-auto w-6 h-6 rounded-full bg-black/80 flex items-center justify-center hover:bg-[#EE5F96] transition-colors shadow-lg border border-white/20"
                 title="Move up"
               >
@@ -151,6 +189,7 @@ export default function TemplateCard({ template, isAutoPlay = false, onClick, on
             {onReorderDown && showReorderDown && (
               <button
                 onClick={(e) => { e.stopPropagation(); onReorderDown(); }}
+                aria-label={`Move ${template.title} down`}
                 className="pointer-events-auto w-6 h-6 rounded-full bg-black/80 flex items-center justify-center hover:bg-[#EE5F96] transition-colors shadow-lg border border-white/20"
                 title="Move down"
               >

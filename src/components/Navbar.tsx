@@ -107,7 +107,7 @@ export default function Navbar() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors ${
+                  className={`px-4 py-2 rounded-full text-base font-semibold transition-colors ${
                     isActive
                       ? 'bg-[#EE5F96]/10 text-[#EE5F96]'
                       : 'text-white/60 hover:text-white hover:bg-[#161827]'
@@ -125,7 +125,7 @@ export default function Navbar() {
             {user ? (
               <Link
                 href="/pricing"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#161827] border border-[#1E2130] text-sm font-semibold text-white/80 hover:text-white hover:border-[#EE5F96]/50 transition-all"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#161827] border border-[#1E2130] text-base font-semibold text-white/80 hover:text-white hover:border-[#EE5F96]/50 transition-all"
               >
                 <svg className="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12z" />
@@ -138,7 +138,7 @@ export default function Navbar() {
             ) : (
               <button
                 onClick={() => setLoginOpen(true)}
-                className="bg-[#EE5F96] hover:bg-[#d94d7e] text-white text-sm font-semibold px-5 py-2 rounded-full transition-colors"
+                className="bg-[#EE5F96] hover:bg-[#d94d7e] text-white text-base font-semibold px-5 py-2 rounded-full transition-colors"
               >
                 {t('nav.signIn')}
               </button>

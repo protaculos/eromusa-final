@@ -37,6 +37,10 @@ export async function GET(
       : data.status === "failed" ? "failed"
       : "processing";
 
+    if (status === "failed") {
+      return NextResponse.json({ status: "failed", videoUrl: "", error: data.error || "Generation failed" });
+    }
+
     if (status !== "completed") {
       return NextResponse.json({ status, videoUrl: "", error: null });
     }
@@ -44,16 +48,30 @@ export async function GET(
     const externalUrl = data.result_url || data.video_url || data.output_url || data.url || data.download_url || data.video || data.result || "";
 
     if (!externalUrl) {
-      return NextResponse.json({ status, videoUrl: "", error: "No video URL in response" });
+      // Provider says completed but there's no URL yet — treat as still processing
+      // so the frontend keeps retrying instead of saving a broken state
+      console.warn(`[Poll ${jobId}] Provider says completed but no URL provided yet`);
+      return NextResponse.json({ status: "processing", videoUrl: "", error: null });
     }
 
     const result = await downloadAndStoreVideo(jobId, externalUrl, data.encryption_metadata);
 
     if (!result.success) {
-      // Keep status as processing so the frontend retries — but if the job is
-      // genuinely complete and we can't fetch the file, surface a helpful error.
+      if (result.error === "Video not ready for download yet") {
+        // The file isn't ready yet — keep as processing so the frontend retries
+        console.warn(`[Poll ${jobId}] Video not ready for download, will retry later`);
+        return NextResponse.json({ status: "processing", videoUrl: "", error: null });
+      }
+
+      if (result.error === "Downloaded file is not a valid MP4") {
+        // File was downloaded but isn't valid — mark as failed so user gets refund
+        console.error(`[Poll ${jobId}] Downloaded file is invalid, marking as failed`);
+        return NextResponse.json({ status: "failed", videoUrl: "", error: "Generated file is not a valid video" });
+      }
+
+      // Other errors (upload failed, etc) — keep as processing for retry
       console.error(`[Poll ${jobId}] Failed to store video: ${result.error}`);
-      return NextResponse.json({ status, videoUrl: "", error: result.error });
+      return NextResponse.json({ status: "processing", videoUrl: "", error: result.error });
     }
 
     return NextResponse.json({ status, videoUrl: result.videoUrl, error: null });

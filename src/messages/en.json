@@ -14,6 +14,8 @@
   "nav.logoutConfirm": "Are you sure you want to logout?",
   "nav.cancel": "Cancel",
   "nav.confirm": "Confirm",
+  "nav.terms": "Terms of Use",
+  "nav.privacy": "Privacy Policy",
 
   "login.title": "Sign In",
   "login.orContinue": "or continue with email",
@@ -58,6 +60,7 @@
   "gallery.creditsRefunded": "Your credits have been refunded. Please contact support.",
   "gallery.support": "Support",
   "gallery.videoUnavailable": "Video file unavailable",
+  "gallery.loadingVideo": "Loading video...",
   "gallery.reprocess": "Reprocessar",
   "gallery.expiresIn": "Expira em",
   "gallery.download": "Download",
@@ -157,7 +160,8 @@
   "cookie.warning1": "Adult content 18+",
   "cookie.warning2": "Your data is protected",
   "cookie.warning3": "Cookies & Terms apply",
-  "cookie.policy": "By continuing, you confirm that you are 18 years of age or older and agree to our Terms of Use and Privacy Policy. This site uses cookies and similar technologies to provide, protect, and improve our services.",
+  "cookie.policy": "By continuing, you confirm that you are 18 years of age or older and agree to our",
+  "cookie.and": "and",
   "cookie.languageLabel": "Language",
   "cookie.continue": "Continue",
 
