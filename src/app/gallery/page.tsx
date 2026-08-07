@@ -483,9 +483,12 @@ function VideoPopup({
             </div>
 
             {expiresDisplay && (
-              <div className="flex justify-center">
+              <div className="flex flex-col items-center gap-2">
                 <div className="bg-[#1E2130] text-white/70 text-xs px-3 py-1.5 rounded-lg">
                   {t('gallery.downloadBanner')}
+                </div>
+                <div className="text-white/60 text-sm font-mono">
+                  {t('gallery.expiresIn')}: {expiresDisplay}
                 </div>
               </div>
             )}

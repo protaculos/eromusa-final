@@ -1,19 +1,21 @@
 "use client";
 import React from 'react';
 import Link from 'next/link';
+import { useT } from '@/i18n/useT';
 
 export default function TermsOfUsePage() {
+  const t = useT();
   return (
     <div className="min-h-screen">
       <div className="pt-8 pb-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
         <div className="mb-8">
           <Link href="/" className="text-[#EE5F96] hover:text-[#d94d7e] text-sm font-semibold transition-colors">
-            &larr; Back to Home
+            &larr; {t('terms.backToHome')}
           </Link>
         </div>
 
-        <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">Terms of Use</h1>
-        <p className="text-white/40 text-sm mb-10">Last updated: 17 October 2025</p>
+        <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">{t('terms.title')}</h1>
+        <p className="text-white/40 text-sm mb-10">{t('terms.lastUpdated')}</p>
 
         <div className="space-y-8 text-white/70 leading-relaxed">
           <section>

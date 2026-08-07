@@ -136,7 +136,6 @@
   "privacy.title": "Política de Privacidade",
   "privacy.lastUpdated": "Última atualização: 17 de Outubro de 2025",
   "privacy.backToHome": "Voltar ao Início",
-
   "terms.title": "Termos de Uso",
   "terms.lastUpdated": "Última atualização: 17 de Outubro de 2025",
   "terms.backToHome": "Voltar ao Início",
@@ -160,10 +159,10 @@
   "paymentMethod.soon": "Em breve",
   "paymentMethod.secureBy": "Pagamentos seguros com a Vexutopia",
 
-  "cookie.title": "Aviso de Idade e Cookies",
-  "cookie.warning1": "Conteúdo adulto 18+",
-  "cookie.warning2": "Seus dados estão protegidos",
-  "cookie.warning3": "Cookies e Termos se aplicam",
+  "cookie.title": "Notícia Importante",
+  "cookie.warning1": "Você deve ter 18 anos ou mais para usar este site.",
+  "cookie.warning2": "Você não pode usar fotos de outras pessoas sem permissão.",
+  "cookie.warning3": "Você é o único responsável pelos vídeos e imagens que gerar.",
   "cookie.policy": "Ao continuar, você confirma que tem 18 anos ou mais e concorda com nossos",
   "cookie.and": "e",
   "cookie.languageLabel": "Idioma",
