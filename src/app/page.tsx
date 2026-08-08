@@ -124,8 +124,7 @@ export default function DiscoverPage() {
   }, []);
 
   const handleTemplateClick = async (template: Template) => {
-    setSelectedTemplate(template);
-    // Fetch examples for this scene
+    // Fetch examples before opening so the modal mounts with the correct list
     try {
       const res = await fetch(`/api/scenes/${template.id}/examples`);
       if (res.ok) {
@@ -137,6 +136,8 @@ export default function DiscoverPage() {
     } catch {
       setSceneExamples([]);
     }
+
+    setSelectedTemplate(template);
   };
 
   const handleOpenLogin = () => {

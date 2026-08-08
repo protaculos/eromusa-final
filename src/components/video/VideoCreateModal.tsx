@@ -421,12 +421,18 @@ export default function VideoCreateModal({
               <p className="text-[11px] text-white/70 font-bold uppercase tracking-wider mb-2">{t('videoModal.outputVideo')}</p>
               <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-[#161827] border border-[#1E2130] group">
                 <video
+                  ref={(el) => {
+                    if (el && el.readyState >= 2) {
+                      setTemplateVideoLoading(false);
+                    }
+                  }}
                   src={activeTemplate.videoUrl}
                   autoPlay
                   loop
                   muted
                   playsInline
                   className="absolute inset-0 w-full h-full object-cover"
+                  onLoadedMetadata={() => setTemplateVideoLoading(false)}
                   onLoadedData={() => setTemplateVideoLoading(false)}
                   onCanPlay={() => setTemplateVideoLoading(false)}
                   onPlaying={() => setTemplateVideoLoading(false)}
@@ -482,7 +488,10 @@ export default function VideoCreateModal({
                   playsInline
                   preload="metadata"
                   className="w-full h-full object-cover"
-                  onLoadedMetadata={(e) => { (e.target as HTMLVideoElement).currentTime = 0; }}
+                  onLoadedMetadata={(e) => {
+                    (e.target as HTMLVideoElement).currentTime = 0;
+                    setExampleVideoLoading((prev) => ({ ...prev, [template.id]: false }));
+                  }}
                   onCanPlay={() => setExampleVideoLoading((prev) => ({ ...prev, [template.id]: false }))}
                 />
                 {exampleVideoLoading[template.id] && (
@@ -522,7 +531,10 @@ export default function VideoCreateModal({
                     playsInline
                     preload="metadata"
                     className="w-full h-full object-cover"
-                    onLoadedMetadata={(e) => { (e.target as HTMLVideoElement).currentTime = 0; }}
+                    onLoadedMetadata={(e) => {
+                      (e.target as HTMLVideoElement).currentTime = 0;
+                      setExampleVideoLoading((prev) => ({ ...prev, [ex.id]: false }));
+                    }}
                     onCanPlay={() => setExampleVideoLoading((prev) => ({ ...prev, [ex.id]: false }))}
                   />
                   {exampleVideoLoading[ex.id] && (
