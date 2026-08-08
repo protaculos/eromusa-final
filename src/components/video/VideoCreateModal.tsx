@@ -60,7 +60,7 @@ export default function VideoCreateModal({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const initialTemplate = useMemo(() => template, [template]);
+  const [templateKey, setTemplateKey] = useState(template.id);
 
   // Reset state when modal opens/closes
   useEffect(() => {
@@ -78,14 +78,16 @@ export default function VideoCreateModal({
     }
   }, [isOpen, initialTemplate]);
 
-  // Sync activeTemplate when template changes (e.g. user clicks a different scene)
+  // Sync activeTemplate only when a different scene opens
   useEffect(() => {
-    if (isOpen) {
-      setActiveTemplate(initialTemplate);
+    if (!isOpen) return;
+    if (template.id !== templateKey) {
+      setTemplateKey(template.id);
+      setActiveTemplate(template);
       setSelectedExample(null);
       setExamplesReady(sceneExamples.length > 0);
     }
-  }, [initialTemplate, isOpen]);
+  }, [isOpen, template, sceneExamples.length, templateKey]);
 
   // Mark examples as ready when they're available
   useEffect(() => {
