@@ -427,43 +427,45 @@ export default function VideoCreateModal({
             </div>
           </div>
 
-          {/* Scene examples carousel — original + examples */}
+          {/* Scene examples carousel */}
           <div>
             <p className="text-xs text-white/40 font-semibold uppercase tracking-wider mb-2">{t('videoModal.moreExamples')}</p>
             <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
-              {/* Original scene video — always first */}
-              <button
-                key="original"
-                onClick={() => {
-                  setActiveTemplate({
-                    id: template.id,
-                    name: template.name,
-                    duration: template.duration,
-                    credits: template.credits,
-                    videoUrl: template.videoUrl,
-                    thumbnailUrl: template.thumbnailUrl,
-                    instructions: template.instructions,
-                    tags: template.tags,
-                    gradient: template.gradient,
-                    styleId: template.styleId,
-                  });
-                }}
-                className={`relative shrink-0 w-16 h-24 rounded-lg overflow-hidden border-2 transition-all ${
-                  activeTemplate.videoUrl === template.videoUrl
-                    ? 'border-[#EE5F96] ring-1 ring-[#EE5F96]/50'
-                    : 'border-[#1E2130] hover:border-white/30'
-                }`}
-              >
-                <video
-                  src={template.videoUrl}
-                  muted
-                  playsInline
-                  preload="metadata"
-                  className="w-full h-full object-cover"
-                  onLoadedMetadata={(e) => { (e.target as HTMLVideoElement).currentTime = 0; }}
-                />
-              </button>
-
+              {sceneExamples.map((ex) => (
+                <button
+                  key={ex.id}
+                  onClick={() => {
+                    setActiveTemplate({
+                      id: ex.scene_id,
+                      name: ex.name || template.name,
+                      duration: template.duration,
+                      credits: template.credits,
+                      videoUrl: ex.video_url,
+                      thumbnailUrl: ex.video_url,
+                      instructions: template.instructions,
+                      tags: template.tags,
+                      gradient: template.gradient,
+                      styleId: template.styleId,
+                    });
+                  }}
+                  className={`relative shrink-0 w-16 h-24 rounded-lg overflow-hidden border-2 transition-all ${
+                    activeTemplate.videoUrl === ex.video_url
+                      ? 'border-[#EE5F96] ring-1 ring-[#EE5F96]/50'
+                      : 'border-[#1E2130] hover:border-white/30'
+                  }`}
+                >
+                  <video
+                    src={ex.video_url}
+                    muted
+                    playsInline
+                    preload="metadata"
+                    className="w-full h-full object-cover"
+                    onLoadedMetadata={(e) => { (e.target as HTMLVideoElement).currentTime = 0; }}
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
               {/* Database examples */}
               {sceneExamples.map((ex) => (
                 <button
