@@ -37,8 +37,9 @@ export default function SceneEditModal({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Examples state
-  const [examples, setExamples] = useState<{ id: string; video_url: string; name: string }[]>([]);
+  // Unified scene video list
+  type SceneVideoItem = { id: string; video_url: string; name: string; order: number };
+  const [examples, setExamples] = useState<SceneVideoItem[]>([]);
   const [exampleVideoFile, setExampleVideoFile] = useState<File | null>(null);
   const [exampleName, setExampleName] = useState("");
   const [exampleUploading, setExampleUploading] = useState(false);
@@ -267,6 +268,7 @@ export default function SceneEditModal({
       }
 
       onSaved();
+      await saveOrder();
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save");
@@ -275,11 +277,34 @@ export default function SceneEditModal({
     }
   };
 
+  const moveExample = (index: number, direction: number) => {
+    const newExamples = [...examples];
+    const item = newExamples.splice(index, 1)[0];
+    newExamples.splice(index + direction, 0, item);
+    // Update local order values
+    const updated = newExamples.map((ex, i) => ({ ...ex, order: i }));
+    setExamples(updated);
+  };
+
+  const saveOrder = async () => {
+    if (!scene || !session?.access_token) return;
+    try {
+      const res = await fetch(`/api/admin/scenes/${scene.id}/examples`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ order: examples.sort((a, b) => a.order - b.order).map(e => e.id) }),
+      });
+      if (!res.ok) throw new Error("Failed to reorder");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const handleDelete = async () => {
     if (!scene || !session?.access_token) return;
-
-    setDeleting(true);
-    setError(null);
 
     try {
       const res = await fetch(`/api/admin/scenes/${scene.id}`, {
@@ -447,12 +472,15 @@ export default function SceneEditModal({
 
               {/* Examples list */}
               {examples.length === 0 ? (
-                <p className="text-white/30 text-xs">No examples yet</p>
+                <div className="bg-[#161827] rounded-xl p-4 text-center">
+                  <p className="text-white/30 text-xs">No video examples added yet. The main loop video will be used.</p>
+                </div>
               ) : (
-                <div className="space-y-2 max-h-[200px] overflow-y-auto">
-                  {examples.map((ex) => (
-                    <div key={ex.id} className="flex items-center gap-2 bg-[#161827] rounded-xl p-2">
-                      <div className="w-12 h-16 rounded-lg overflow-hidden bg-black shrink-0">
+                <div className="space-y-2 max-h-[240px] overflow-y-auto pr-1">
+                  <p className="text-[10px] text-white/40 mb-1">First video in the list automatically becomes the scene's official preview / main video.</p>
+                  {examples.sort((a, b) => a.order - b.order).map((ex, index) => (
+                    <div key={ex.id} className={`flex items-center gap-3 bg-[#161827] rounded-xl p-2.5 transition-all ${index === 0 ? "border-2 border-[#EE5F96]/50 shadow-lg shadow-[#EE5F96]/5" : "border border-[#1E2130]"}`}>
+                      <div className="w-12.5 h-16 rounded-lg overflow-hidden bg-black shrink-0 relative group">
                         <video
                           src={ex.video_url}
                           muted
@@ -461,15 +489,43 @@ export default function SceneEditModal({
                           className="w-full h-full object-cover"
                           onLoadedMetadata={(e) => { (e.target as HTMLVideoElement).currentTime = 0; }}
                         />
+                        {index === 0 && (
+                          <div className="absolute inset-0 bg-[#EE5F96]/20 flex items-center justify-center">
+                            <span className="bg-[#EE5F96] text-[8px] px-1.5 py-0.5 rounded text-white font-extrabold tracking-wider shadow">OFFICIAL</span>
+                          </div>
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-white text-xs truncate">{ex.name || "Untitled"}</p>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-bold text-white/40">#{index + 1}</span>
+                          <p className="text-white text-xs font-medium truncate">{ex.name || (index === 0 ? "Official Scene Video" : "Example Video")}</p>
+                        </div>
+                        {index === 0 && <p className="text-[10px] text-[#EE5F96] mt-0.5">Primary display & main loop</p>}
+                      </div>
+                      <div className="flex flex-col gap-0.5 bg-[#0A0B14] rounded-lg p-0.5 border border-[#1E2130]">
+                        <button
+                          onClick={() => moveExample(index, -1)}
+                          disabled={index === 0}
+                          title="Move up"
+                          className="w-6 h-6 flex items-center justify-center text-white/60 hover:text-white disabled:opacity-20 transition-colors"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" /></svg>
+                        </button>
+                        <button
+                          onClick={() => moveExample(index, 1)}
+                          disabled={index === examples.length - 1}
+                          title="Move down"
+                          className="w-6 h-6 flex items-center justify-center text-white/60 hover:text-white disabled:opacity-20 transition-colors"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                        </button>
                       </div>
                       <button
                         onClick={() => handleDeleteExample(ex.id)}
-                        className="w-6 h-6 rounded-full bg-red-500/20 flex items-center justify-center hover:bg-red-500/40 transition-colors shrink-0"
+                        title="Delete video"
+                        className="w-7 h-7 rounded-xl bg-red-500/10 hover:bg-red-500/20 flex items-center justify-center text-red-400 transition-colors shrink-0"
                       >
-                        <svg className="w-3 h-3 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
                       </button>

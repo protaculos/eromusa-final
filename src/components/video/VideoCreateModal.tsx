@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useT } from '@/i18n/useT';
@@ -63,6 +63,19 @@ export default function VideoCreateModal({
   const [templateVideoLoading, setTemplateVideoLoading] = useState(true);
   const [exampleVideoLoading, setExampleVideoLoading] = useState<Record<string, boolean>>({});
 
+  // Build a template with the unified list resolved: official video = first item of sceneExamples when available.
+  const resolvedTemplate = useMemo(() => {
+    if (sceneExamples.length > 0) {
+      const official = sceneExamples[0];
+      return {
+        ...template,
+        videoUrl: official.video_url,
+        thumbnailUrl: official.video_url,
+      };
+    }
+    return template;
+  }, [template, sceneExamples]);
+
   // Reset state when modal opens/closes
   useEffect(() => {
     if (isOpen) {
@@ -73,19 +86,19 @@ export default function VideoCreateModal({
       setError(null);
       setJobId(null);
       setDragOver(false);
-      setActiveTemplate(template);
+      setActiveTemplate(resolvedTemplate);
     }
-  }, [isOpen]);
+  }, [isOpen, resolvedTemplate]);
 
-  // Sync activeTemplate when template prop changes (e.g. user clicks a different scene)
+  // Sync activeTemplate when template changes (e.g. user clicks a different scene)
   useEffect(() => {
     if (isOpen) {
-      setActiveTemplate(template);
+      setActiveTemplate(resolvedTemplate);
       setExamplesReady(false);
       setTemplateVideoLoading(true);
       setExampleVideoLoading({});
     }
-  }, [template, isOpen]);
+  }, [resolvedTemplate, isOpen]);
 
   // Mark examples as ready when they're available
   useEffect(() => {
