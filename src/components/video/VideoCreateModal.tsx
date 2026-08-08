@@ -59,10 +59,6 @@ export default function VideoCreateModal({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Loading states for videos
-  const [templateVideoLoading, setTemplateVideoLoading] = useState(true);
-  const [exampleVideoLoading, setExampleVideoLoading] = useState<Record<string, boolean>>({});
-
   // Build a template with the unified list resolved: official video = first item of sceneExamples when available.
   const resolvedTemplate = useMemo(() => {
     if (sceneExamples.length > 0) {
@@ -427,15 +423,7 @@ export default function VideoCreateModal({
                   muted
                   playsInline
                   className="absolute inset-0 w-full h-full object-cover"
-                  onLoadedData={() => setTemplateVideoLoading(false)}
-                  onCanPlay={() => setTemplateVideoLoading(false)}
-                  onPlaying={() => setTemplateVideoLoading(false)}
                 />
-                {templateVideoLoading && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-[#0A0B14]/80">
-                     <div className="w-6 h-6 border-2 border-[#EE5F96] border-t-transparent rounded-full animate-spin" />
-                  </div>
-                )}
                 {/* Gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                 {/* Bottom badges */}
@@ -483,17 +471,11 @@ export default function VideoCreateModal({
                   preload="metadata"
                   className="w-full h-full object-cover"
                   onLoadedMetadata={(e) => { (e.target as HTMLVideoElement).currentTime = 0; }}
-                  onCanPlay={() => setExampleVideoLoading((prev) => ({ ...prev, [template.id]: false }))}
                 />
-                {exampleVideoLoading[template.id] && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-[#0A0B14]/80">
-                    <div className="w-4 h-4 border-2 border-[#EE5F96] border-t-transparent rounded-full animate-spin" />
-                  </div>
-                )}
               </button>
 
               {/* Database examples */}
-              {examplesReady ? sceneExamples.map((ex) => (
+              {sceneExamples.map((ex) => (
                 <button
                   key={ex.id}
                   onClick={() => {
@@ -523,17 +505,9 @@ export default function VideoCreateModal({
                     preload="metadata"
                     className="w-full h-full object-cover"
                     onLoadedMetadata={(e) => { (e.target as HTMLVideoElement).currentTime = 0; }}
-                    onCanPlay={() => setExampleVideoLoading((prev) => ({ ...prev, [ex.id]: false }))}
                   />
-                  {exampleVideoLoading[ex.id] && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-[#0A0B14]/80">
-                      <div className="w-4 h-4 border-2 border-[#EE5F96] border-t-transparent rounded-full animate-spin" />
-                    </div>
-                  )}
                 </button>
-              )) : (
-                <div className="shrink-0 w-16 h-24 rounded-lg border border-[#1E2130] bg-[#161827] animate-pulse" />
-              )}
+              ))}
             </div>
           </div>
 
