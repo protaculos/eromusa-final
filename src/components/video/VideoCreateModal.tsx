@@ -45,7 +45,6 @@ export default function VideoCreateModal({
   const router = useRouter();
   const t = useT();
   const { toast } = useToast();
-  const safeSceneExamples = Array.isArray(sceneExamples) ? sceneExamples : [];
 
   // State
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -60,49 +59,14 @@ export default function VideoCreateModal({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const safeVideoUrl = typeof activeTemplate?.videoUrl === 'string' ? activeTemplate.videoUrl.trim() : '';
-  const hasSafeVideoUrl = safeVideoUrl.length > 0;
-
   // Loading states for videos
   const [templateVideoLoading, setTemplateVideoLoading] = useState(true);
   const [exampleVideoLoading, setExampleVideoLoading] = useState<Record<string, boolean>>({});
 
-  const [fetchedExamples, setFetchedExamples] = useState<{ id: string; scene_id: string; video_url: string; name: string; order: number }[]>([]);
-  const [loadingExamples, setLoadingExamples] = useState(false);
-
-  // Use passed sceneExamples or fetched examples
-  const activeExamples = useMemo(() => {
-    if (sceneExamples && sceneExamples.length > 0) return sceneExamples;
-    return fetchedExamples;
-  }, [sceneExamples, fetchedExamples]);
-
-  // Fetch examples inside modal if not provided or empty
-  useEffect(() => {
-    if (isOpen && template?.id) {
-      setLoadingExamples(true);
-      fetch(`/api/scenes/${template.id}/examples`)
-        .then((res) => (res.ok ? res.json() : []))
-        .then((data) => {
-          if (Array.isArray(data)) {
-            setFetchedExamples(data);
-          }
-        })
-        .catch(() => {
-          setFetchedExamples([]);
-        })
-        .finally(() => {
-          setLoadingExamples(false);
-          setExamplesReady(true);
-        });
-    } else if (!isOpen) {
-      setFetchedExamples([]);
-    }
-  }, [isOpen, template?.id]);
-
-  // Build a template with the unified list resolved: official video = first item of activeExamples when available.
+  // Build a template with the unified list resolved: official video = first item of sceneExamples when available.
   const resolvedTemplate = useMemo(() => {
-    if (activeExamples.length > 0) {
-      const official = activeExamples[0];
+    if (sceneExamples.length > 0) {
+      const official = sceneExamples[0];
       return {
         ...template,
         videoUrl: official.video_url,
@@ -110,7 +74,7 @@ export default function VideoCreateModal({
       };
     }
     return template;
-  }, [template, activeExamples]);
+  }, [template, sceneExamples]);
 
   // Reset state when modal opens/closes
   useEffect(() => {
@@ -144,15 +108,15 @@ export default function VideoCreateModal({
   // Mark examples as ready when they're available
   useEffect(() => {
     if (isOpen) {
-      setExamplesReady(activeExamples.length > 0);
-      if (activeExamples.length === 0) {
+      setExamplesReady(sceneExamples.length > 0);
+      if (sceneExamples.length === 0) {
         setExampleVideoLoading({});
       }
     } else {
       setExamplesReady(false);
       setExampleVideoLoading({});
     }
-  }, [isOpen, activeExamples]);
+  }, [isOpen, sceneExamples]);
 
   // Cleanup object URLs
   useEffect(() => {
@@ -173,9 +137,9 @@ export default function VideoCreateModal({
 
   // Preload example videos when modal opens so they switch instantly
   useEffect(() => {
-    if (!isOpen || activeExamples.length === 0) return;
+    if (!isOpen || sceneExamples.length === 0) return;
     const links: HTMLLinkElement[] = [];
-    for (const ex of activeExamples) {
+    for (const ex of sceneExamples) {
       const link = document.createElement('link');
       link.rel = 'preload';
       link.as = 'video';
@@ -189,7 +153,7 @@ export default function VideoCreateModal({
         document.head.removeChild(link);
       }
     };
-  }, [isOpen, activeExamples]);
+  }, [isOpen, sceneExamples]);
 
   // ── File handlers ──────────────────────────────
   const handleFile = useCallback((file: File) => {
@@ -424,23 +388,14 @@ export default function VideoCreateModal({
                   </>
                 ) : (
                   <>
-                    {hasSafeVideoUrl ? (
-                      <video
-                        src={safeVideoUrl}
-                        muted
-                        playsInline
-                        preload="metadata"
-                        className="absolute inset-0 w-full h-full object-cover opacity-30"
-                        onLoadedMetadata={(e) => {
-                          try {
-                            (e.target as HTMLVideoElement).currentTime = 0;
-                          } catch {
-                            // Ignore browser-specific seek errors.
-                          }
-                        }}
-                        onError={() => setTemplateVideoLoading(false)}
-                      />
-                    ) : null}
+                    <video
+                      src={activeTemplate.videoUrl}
+                      muted
+                      playsInline
+                      preload="metadata"
+                      className="absolute inset-0 w-full h-full object-cover opacity-30"
+                      onLoadedMetadata={(e) => { (e.target as HTMLVideoElement).currentTime = 0; }}
+                    />
                     <div className="absolute inset-0 bg-black/60" />
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-white/60 p-4 text-center z-10">
                       <svg className="w-8 h-8 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -465,26 +420,17 @@ export default function VideoCreateModal({
             <div className="flex-1 min-w-0">
               <p className="text-[11px] text-white/70 font-bold uppercase tracking-wider mb-2">{t('videoModal.outputVideo')}</p>
               <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-[#161827] border border-[#1E2130] group">
-                {hasSafeVideoUrl ? (
-                  <video
-                    ref={(el) => {
-                      if (el && el.readyState >= 2) {
-                        setTemplateVideoLoading(false);
-                      }
-                    }}
-                    src={safeVideoUrl}
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="absolute inset-0 w-full h-full object-cover"
-                    onLoadedMetadata={() => setTemplateVideoLoading(false)}
-                    onLoadedData={() => setTemplateVideoLoading(false)}
-                    onCanPlay={() => setTemplateVideoLoading(false)}
-                    onPlaying={() => setTemplateVideoLoading(false)}
-                    onError={() => setTemplateVideoLoading(false)}
-                  />
-                ) : null}
+                <video
+                  src={activeTemplate.videoUrl}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="absolute inset-0 w-full h-full object-cover"
+                  onLoadedData={() => setTemplateVideoLoading(false)}
+                  onCanPlay={() => setTemplateVideoLoading(false)}
+                  onPlaying={() => setTemplateVideoLoading(false)}
+                />
                 {templateVideoLoading && (
                   <div className="absolute inset-0 flex items-center justify-center bg-[#0A0B14]/80">
                      <div className="w-6 h-6 border-2 border-[#EE5F96] border-t-transparent rounded-full animate-spin" />
@@ -536,10 +482,7 @@ export default function VideoCreateModal({
                   playsInline
                   preload="metadata"
                   className="w-full h-full object-cover"
-                  onLoadedMetadata={(e) => {
-                    try { (e.target as HTMLVideoElement).currentTime = 0; } catch {}
-                    setExampleVideoLoading((prev) => ({ ...prev, [template.id]: false }));
-                  }}
+                  onLoadedMetadata={(e) => { (e.target as HTMLVideoElement).currentTime = 0; }}
                   onCanPlay={() => setExampleVideoLoading((prev) => ({ ...prev, [template.id]: false }))}
                 />
                 {exampleVideoLoading[template.id] && (
@@ -550,7 +493,7 @@ export default function VideoCreateModal({
               </button>
 
               {/* Database examples */}
-              {examplesReady ? activeExamples.map((ex) => (
+              {examplesReady ? sceneExamples.map((ex) => (
                 <button
                   key={ex.id}
                   onClick={() => {
@@ -579,10 +522,7 @@ export default function VideoCreateModal({
                     playsInline
                     preload="metadata"
                     className="w-full h-full object-cover"
-                    onLoadedMetadata={(e) => {
-                      try { (e.target as HTMLVideoElement).currentTime = 0; } catch {}
-                      setExampleVideoLoading((prev) => ({ ...prev, [ex.id]: false }));
-                    }}
+                    onLoadedMetadata={(e) => { (e.target as HTMLVideoElement).currentTime = 0; }}
                     onCanPlay={() => setExampleVideoLoading((prev) => ({ ...prev, [ex.id]: false }))}
                   />
                   {exampleVideoLoading[ex.id] && (
