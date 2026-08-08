@@ -59,6 +59,10 @@ export default function VideoCreateModal({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Loading states for videos
+  const [templateVideoLoading, setTemplateVideoLoading] = useState(true);
+  const [exampleVideoLoading, setExampleVideoLoading] = useState<Record<string, boolean>>({});
+
   // Reset state when modal opens/closes
   useEffect(() => {
     if (isOpen) {
@@ -78,6 +82,8 @@ export default function VideoCreateModal({
     if (isOpen) {
       setActiveTemplate(template);
       setExamplesReady(false);
+      setTemplateVideoLoading(true);
+      setExampleVideoLoading({});
     }
   }, [template, isOpen]);
 
@@ -116,6 +122,7 @@ export default function VideoCreateModal({
       link.href = ex.video_url;
       document.head.appendChild(link);
       links.push(link);
+      setExampleVideoLoading((prev) => ({ ...prev, [ex.id]: true }));
     }
     return () => {
       for (const link of links) {
@@ -291,8 +298,8 @@ export default function VideoCreateModal({
       {/* Overlay */}
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
-      {/* Container — portrait/mobile-like, fixed aspect, responsive */}
-      <div className="relative bg-[#0A0B14] border border-[#1E2130] rounded-2xl w-full max-w-[420px] shadow-2xl overflow-hidden">
+      {/* Container — compact desktop popup */}
+      <div className="relative bg-[#0A0B14] border border-[#1E2130] rounded-2xl w-full max-w-[360px] shadow-2xl overflow-hidden md:scale-95">
         {/* Header with title + filters */}
         <div className="sticky top-0 bg-[#0A0B14] z-10 flex items-center justify-between p-5 border-b border-[#1E2130]">
           <div className="min-w-0">
@@ -320,25 +327,25 @@ export default function VideoCreateModal({
         </div>
 
         {/* Body */}
-        <div className="p-5 space-y-5">
+        <div className="p-5 space-y-4">
           {/* Side-by-side cards: Upload (left) + Template preview (right) */}
-          <div className="flex gap-3">
-            {/* Upload card — aspect-[3/4] portrait */}
+          <div className="flex gap-4">
+            {/* Upload card */}
             <div className="flex-1 min-w-0">
-              <p className="text-xs text-white/40 font-semibold uppercase tracking-wider mb-2">{t('videoModal.yourImage')}</p>
+              <p className="text-[11px] text-white/70 font-bold uppercase tracking-wider mb-2">{t('videoModal.yourImage')}</p>
               <div
                 onDrop={onDrop}
                 onDragOver={onDragOver}
                 onDragLeave={onDragLeave}
                 onClick={() => fileInputRef.current?.click()}
                 className={`
-                  relative aspect-[3/4] rounded-2xl border-2 border-dashed cursor-pointer
+                  relative aspect-[3/4] rounded-xl border-2 border-dashed cursor-pointer
                   transition-all duration-200 overflow-hidden
                   ${dragOver
                     ? 'border-[#EE5F96] bg-[#EE5F96]/10'
                     : previewUrl
                       ? 'border-emerald-500/50 bg-emerald-500/5'
-                      : 'border-[#1E2130] bg-[#0A0B14] hover:border-[#EE5F96]/50'
+                      : 'border-[#1E2130] bg-[#161827] hover:border-[#EE5F96]/50'
                   }
                 `}
               >
@@ -350,34 +357,31 @@ export default function VideoCreateModal({
                       className="absolute inset-0 w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                      <span className="bg-emerald-500 text-white text-xs font-semibold px-3 py-1.5 rounded-full">
+                      <span className="bg-emerald-500 text-white text-[11px] font-bold px-3 py-1.5 rounded-full shadow-lg">
                         {t('videoModal.imageSelected')}
                       </span>
                     </div>
                   </>
                 ) : (
                   <>
-                    {/* Template thumbnail (first frame, paused) as dimmed background reference */}
                     <video
                       src={activeTemplate.videoUrl}
                       muted
                       playsInline
                       preload="metadata"
-                      className="absolute inset-0 w-full h-full object-cover opacity-40"
+                      className="absolute inset-0 w-full h-full object-cover opacity-30"
                       onLoadedMetadata={(e) => { (e.target as HTMLVideoElement).currentTime = 0; }}
                     />
-                    {/* Dark overlay */}
-                    <div className="absolute inset-0 bg-black/50" />
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-white/40 p-4 text-center z-10">
-                      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="absolute inset-0 bg-black/60" />
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-white/60 p-4 text-center z-10">
+                      <svg className="w-8 h-8 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
-                      <p className="text-xs">{t('videoModal.uploadPhoto')}</p>
-                      <p className="text-[10px] text-white/20">{t('videoModal.jpegOrPng')}</p>
+                      <p className="text-[11px] font-medium text-white/90">{t('videoModal.uploadPhoto')}</p>
+                      <p className="text-[9px] text-white/40">{t('videoModal.jpegOrPng')}</p>
                     </div>
                   </>
                 )}
-
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -388,10 +392,10 @@ export default function VideoCreateModal({
               </div>
             </div>
 
-            {/* Template preview card — aspect-[3/4] portrait */}
+            {/* Template preview card */}
             <div className="flex-1 min-w-0">
-              <p className="text-xs text-white/40 font-semibold uppercase tracking-wider mb-2">{t('videoModal.outputVideo')}</p>
-              <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-[#0A0B14] border border-[#1E2130] group">
+              <p className="text-[11px] text-white/70 font-bold uppercase tracking-wider mb-2">{t('videoModal.outputVideo')}</p>
+              <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-[#161827] border border-[#1E2130] group">
                 <video
                   src={activeTemplate.videoUrl}
                   autoPlay
@@ -399,14 +403,19 @@ export default function VideoCreateModal({
                   muted
                   playsInline
                   className="absolute inset-0 w-full h-full object-cover"
+                  onLoadedData={() => setTemplateVideoLoading(false)}
                 />
+                {templateVideoLoading && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-[#0A0B14]/80">
+                     <div className="w-6 h-6 border-2 border-[#EE5F96] border-t-transparent rounded-full animate-spin" />
+                  </div>
+                )}
                 {/* Gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-
                 {/* Bottom badges */}
                 <div className="absolute bottom-2 left-2 right-2 flex items-end justify-between">
-                  <p className="text-white text-xs font-semibold truncate">{activeTemplate.name}</p>
-                  <span className="bg-black/60 text-white/80 text-[10px] px-2 py-0.5 rounded-md shrink-0 ml-2">
+                  <p className="text-white text-[11px] font-bold truncate">{activeTemplate.name}</p>
+                  <span className="bg-black/60 text-white/90 text-[9px] px-1.5 py-0.5 rounded-md shrink-0 ml-2">
                     {activeTemplate.duration}
                   </span>
                 </div>
@@ -435,7 +444,7 @@ export default function VideoCreateModal({
                     styleId: template.styleId,
                   });
                 }}
-                className={`shrink-0 w-16 h-24 rounded-lg overflow-hidden border-2 transition-all ${
+                className={`relative shrink-0 w-16 h-24 rounded-lg overflow-hidden border-2 transition-all ${
                   activeTemplate.videoUrl === template.videoUrl
                     ? 'border-[#EE5F96] ring-1 ring-[#EE5F96]/50'
                     : 'border-[#1E2130] hover:border-white/30'
@@ -448,7 +457,13 @@ export default function VideoCreateModal({
                   preload="metadata"
                   className="w-full h-full object-cover"
                   onLoadedMetadata={(e) => { (e.target as HTMLVideoElement).currentTime = 0; }}
+                  onCanPlay={() => setExampleVideoLoading((prev) => ({ ...prev, [template.id]: false }))}
                 />
+                {exampleVideoLoading[template.id] && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-[#0A0B14]/80">
+                    <div className="w-4 h-4 border-2 border-[#EE5F96] border-t-transparent rounded-full animate-spin" />
+                  </div>
+                )}
               </button>
 
               {/* Database examples */}
@@ -469,7 +484,7 @@ export default function VideoCreateModal({
                       styleId: activeTemplate.styleId,
                     });
                   }}
-                  className={`shrink-0 w-16 h-24 rounded-lg overflow-hidden border-2 transition-all ${
+                  className={`relative shrink-0 w-16 h-24 rounded-lg overflow-hidden border-2 transition-all ${
                     activeTemplate.videoUrl === ex.video_url
                       ? 'border-[#EE5F96] ring-1 ring-[#EE5F96]/50'
                       : 'border-[#1E2130] hover:border-white/30'
@@ -482,7 +497,13 @@ export default function VideoCreateModal({
                     preload="metadata"
                     className="w-full h-full object-cover"
                     onLoadedMetadata={(e) => { (e.target as HTMLVideoElement).currentTime = 0; }}
+                    onCanPlay={() => setExampleVideoLoading((prev) => ({ ...prev, [ex.id]: false }))}
                   />
+                  {exampleVideoLoading[ex.id] && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-[#0A0B14]/80">
+                      <div className="w-4 h-4 border-2 border-[#EE5F96] border-t-transparent rounded-full animate-spin" />
+                    </div>
+                  )}
                 </button>
               )) : (
                 <div className="shrink-0 w-16 h-24 rounded-lg border border-[#1E2130] bg-[#161827] animate-pulse" />
