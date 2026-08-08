@@ -87,6 +87,11 @@ export default function VideoCreateModal({
       setJobId(null);
       setDragOver(false);
       setActiveTemplate(resolvedTemplate);
+      setTemplateVideoLoading(true);
+    } else {
+      // Clear immediately on close to prevent ghosting when opening another scene
+      setTemplateVideoLoading(true);
+      setExampleVideoLoading({});
     }
   }, [isOpen, resolvedTemplate]);
 
@@ -102,10 +107,16 @@ export default function VideoCreateModal({
 
   // Mark examples as ready when they're available
   useEffect(() => {
-    if (sceneExamples.length > 0) {
-      setExamplesReady(true);
+    if (isOpen) {
+      setExamplesReady(sceneExamples.length > 0);
+      if (sceneExamples.length === 0) {
+        setExampleVideoLoading({});
+      }
+    } else {
+      setExamplesReady(false);
+      setExampleVideoLoading({});
     }
-  }, [sceneExamples]);
+  }, [isOpen, sceneExamples]);
 
   // Cleanup object URLs
   useEffect(() => {
@@ -417,6 +428,8 @@ export default function VideoCreateModal({
                   playsInline
                   className="absolute inset-0 w-full h-full object-cover"
                   onLoadedData={() => setTemplateVideoLoading(false)}
+                  onCanPlay={() => setTemplateVideoLoading(false)}
+                  onPlaying={() => setTemplateVideoLoading(false)}
                 />
                 {templateVideoLoading && (
                   <div className="absolute inset-0 flex items-center justify-center bg-[#0A0B14]/80">
