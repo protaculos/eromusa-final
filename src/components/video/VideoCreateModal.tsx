@@ -67,10 +67,42 @@ export default function VideoCreateModal({
   const [templateVideoLoading, setTemplateVideoLoading] = useState(true);
   const [exampleVideoLoading, setExampleVideoLoading] = useState<Record<string, boolean>>({});
 
-  // Build a template with the unified list resolved: official video = first item of sceneExamples when available.
+  const [fetchedExamples, setFetchedExamples] = useState<{ id: string; scene_id: string; video_url: string; name: string; order: number }[]>([]);
+  const [loadingExamples, setLoadingExamples] = useState(false);
+
+  // Use passed sceneExamples or fetched examples
+  const activeExamples = useMemo(() => {
+    if (sceneExamples && sceneExamples.length > 0) return sceneExamples;
+    return fetchedExamples;
+  }, [sceneExamples, fetchedExamples]);
+
+  // Fetch examples inside modal if not provided or empty
+  useEffect(() => {
+    if (isOpen && template?.id) {
+      setLoadingExamples(true);
+      fetch(`/api/scenes/${template.id}/examples`)
+        .then((res) => (res.ok ? res.json() : []))
+        .then((data) => {
+          if (Array.isArray(data)) {
+            setFetchedExamples(data);
+          }
+        })
+        .catch(() => {
+          setFetchedExamples([]);
+        })
+        .finally(() => {
+          setLoadingExamples(false);
+          setExamplesReady(true);
+        });
+    } else if (!isOpen) {
+      setFetchedExamples([]);
+    }
+  }, [isOpen, template?.id]);
+
+  // Build a template with the unified list resolved: official video = first item of activeExamples when available.
   const resolvedTemplate = useMemo(() => {
-    if (safeSceneExamples.length > 0) {
-      const official = safeSceneExamples[0];
+    if (activeExamples.length > 0) {
+      const official = activeExamples[0];
       return {
         ...template,
         videoUrl: official.video_url,
@@ -78,7 +110,7 @@ export default function VideoCreateModal({
       };
     }
     return template;
-  }, [template, safeSceneExamples]);
+  }, [template, activeExamples]);
 
   // Reset state when modal opens/closes
   useEffect(() => {
@@ -112,15 +144,15 @@ export default function VideoCreateModal({
   // Mark examples as ready when they're available
   useEffect(() => {
     if (isOpen) {
-      setExamplesReady(safeSceneExamples.length > 0);
-      if (safeSceneExamples.length === 0) {
+      setExamplesReady(activeExamples.length > 0);
+      if (activeExamples.length === 0) {
         setExampleVideoLoading({});
       }
     } else {
       setExamplesReady(false);
       setExampleVideoLoading({});
     }
-  }, [isOpen, safeSceneExamples]);
+  }, [isOpen, activeExamples]);
 
   // Cleanup object URLs
   useEffect(() => {
@@ -141,9 +173,9 @@ export default function VideoCreateModal({
 
   // Preload example videos when modal opens so they switch instantly
   useEffect(() => {
-    if (!isOpen || safeSceneExamples.length === 0) return;
+    if (!isOpen || activeExamples.length === 0) return;
     const links: HTMLLinkElement[] = [];
-    for (const ex of safeSceneExamples) {
+    for (const ex of activeExamples) {
       const link = document.createElement('link');
       link.rel = 'preload';
       link.as = 'video';
@@ -157,7 +189,7 @@ export default function VideoCreateModal({
         document.head.removeChild(link);
       }
     };
-  }, [isOpen, safeSceneExamples]);
+  }, [isOpen, activeExamples]);
 
   // ── File handlers ──────────────────────────────
   const handleFile = useCallback((file: File) => {
@@ -518,7 +550,7 @@ export default function VideoCreateModal({
               </button>
 
               {/* Database examples */}
-              {examplesReady ? safeSceneExamples.map((ex) => (
+              {examplesReady ? activeExamples.map((ex) => (
                 <button
                   key={ex.id}
                   onClick={() => {
