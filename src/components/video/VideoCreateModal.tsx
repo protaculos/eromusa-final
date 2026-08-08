@@ -60,18 +60,7 @@ export default function VideoCreateModal({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Build a template with the unified list resolved: official video = first item of sceneExamples when available.
-  const resolvedTemplate = useMemo(() => {
-    if (sceneExamples.length > 0) {
-      const official = sceneExamples[0];
-      return {
-        ...template,
-        videoUrl: official.video_url,
-        thumbnailUrl: official.video_url,
-      };
-    }
-    return template;
-  }, [template, sceneExamples]);
+  const initialTemplate = useMemo(() => template, [template]);
 
   // Reset state when modal opens/closes
   useEffect(() => {
@@ -83,7 +72,7 @@ export default function VideoCreateModal({
       setError(null);
       setJobId(null);
       setDragOver(false);
-      setActiveTemplate(resolvedTemplate);
+      setActiveTemplate(initialTemplate);
     } else {
       // Clear immediately on close to prevent ghosting when opening another scene
     }
@@ -92,9 +81,9 @@ export default function VideoCreateModal({
   // Sync activeTemplate when template changes (e.g. user clicks a different scene)
   useEffect(() => {
     if (isOpen) {
-      setActiveTemplate(resolvedTemplate);
+      setActiveTemplate(initialTemplate);
       setSelectedExample(null);
-      setExamplesReady(false);
+      setExamplesReady(sceneExamples.length > 0);
     }
   }, [resolvedTemplate, isOpen]);
 
@@ -103,7 +92,7 @@ export default function VideoCreateModal({
     if (isOpen) {
       setExamplesReady(sceneExamples.length > 0);
     } else {
-      setExamplesReady(false);
+      setExamplesReady(sceneExamples.length > 0);
     }
   }, [isOpen, sceneExamples]);
 
