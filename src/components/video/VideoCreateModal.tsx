@@ -100,12 +100,8 @@ export default function VideoCreateModal({
   useEffect(() => {
     if (isOpen) {
       setExamplesReady(sceneExamples.length > 0);
-      if (sceneExamples.length === 0) {
-        setExampleVideoLoading({});
-      }
     } else {
       setExamplesReady(false);
-      setExampleVideoLoading({});
     }
   }, [isOpen, sceneExamples]);
 
@@ -137,7 +133,6 @@ export default function VideoCreateModal({
       link.href = ex.video_url;
       document.head.appendChild(link);
       links.push(link);
-      setExampleVideoLoading((prev) => ({ ...prev, [ex.id]: true }));
     }
     return () => {
       for (const link of links) {
