@@ -76,7 +76,7 @@ export default function VideoCreateModal({
     } else {
       // Clear immediately on close to prevent ghosting when opening another scene
     }
-  }, [isOpen, resolvedTemplate]);
+  }, [isOpen, initialTemplate]);
 
   // Sync activeTemplate when template changes (e.g. user clicks a different scene)
   useEffect(() => {
@@ -85,14 +85,14 @@ export default function VideoCreateModal({
       setSelectedExample(null);
       setExamplesReady(sceneExamples.length > 0);
     }
-  }, [resolvedTemplate, isOpen]);
+  }, [initialTemplate, isOpen]);
 
   // Mark examples as ready when they're available
   useEffect(() => {
     if (isOpen) {
       setExamplesReady(sceneExamples.length > 0);
     } else {
-      setExamplesReady(sceneExamples.length > 0);
+      setExamplesReady(false);
     }
   }, [isOpen, sceneExamples]);
 
