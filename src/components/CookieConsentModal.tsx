@@ -36,10 +36,14 @@ export default function CookieConsentModal() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [ready, setReady] = useState(false);
 
-  // Ao montar, garante que o idioma global corresponda ao idioma detectado/exibido,
-  // para que useT() traduza o modal no mesmo idioma do seletor.
+  // Ao montar, garante que o idioma global e o estado local
+  // correspondam ao idioma detectado, para sincronizar tudo.
   useEffect(() => {
-    updateSettings({ language: lang as Locale });
+    const detected = detectLanguage();
+    if (detected !== lang) {
+      setLang(detected);
+    }
+    updateSettings({ language: detected as Locale });
     setReady(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
