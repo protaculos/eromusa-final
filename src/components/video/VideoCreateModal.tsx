@@ -60,6 +60,9 @@ export default function VideoCreateModal({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const safeVideoUrl = typeof activeTemplate?.videoUrl === 'string' ? activeTemplate.videoUrl.trim() : '';
+  const hasSafeVideoUrl = safeVideoUrl.length > 0;
+
   // Loading states for videos
   const [templateVideoLoading, setTemplateVideoLoading] = useState(true);
   const [exampleVideoLoading, setExampleVideoLoading] = useState<Record<string, boolean>>({});
@@ -389,14 +392,23 @@ export default function VideoCreateModal({
                   </>
                 ) : (
                   <>
-                    <video
-                      src={activeTemplate.videoUrl}
-                      muted
-                      playsInline
-                      preload="metadata"
-                      className="absolute inset-0 w-full h-full object-cover opacity-30"
-                      onLoadedMetadata={(e) => { (e.target as HTMLVideoElement).currentTime = 0; }}
-                    />
+                    {hasSafeVideoUrl ? (
+                      <video
+                        src={safeVideoUrl}
+                        muted
+                        playsInline
+                        preload="metadata"
+                        className="absolute inset-0 w-full h-full object-cover opacity-30"
+                        onLoadedMetadata={(e) => {
+                          try {
+                            (e.target as HTMLVideoElement).currentTime = 0;
+                          } catch {
+                            // Ignore browser-specific seek errors.
+                          }
+                        }}
+                        onError={() => setTemplateVideoLoading(false)}
+                      />
+                    ) : null}
                     <div className="absolute inset-0 bg-black/60" />
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-white/60 p-4 text-center z-10">
                       <svg className="w-8 h-8 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -421,23 +433,26 @@ export default function VideoCreateModal({
             <div className="flex-1 min-w-0">
               <p className="text-[11px] text-white/70 font-bold uppercase tracking-wider mb-2">{t('videoModal.outputVideo')}</p>
               <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-[#161827] border border-[#1E2130] group">
-                <video
-                  ref={(el) => {
-                    if (el && el.readyState >= 2) {
-                      setTemplateVideoLoading(false);
-                    }
-                  }}
-                  src={activeTemplate.videoUrl}
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  className="absolute inset-0 w-full h-full object-cover"
-                  onLoadedMetadata={() => setTemplateVideoLoading(false)}
-                  onLoadedData={() => setTemplateVideoLoading(false)}
-                  onCanPlay={() => setTemplateVideoLoading(false)}
-                  onPlaying={() => setTemplateVideoLoading(false)}
-                />
+                {hasSafeVideoUrl ? (
+                  <video
+                    ref={(el) => {
+                      if (el && el.readyState >= 2) {
+                        setTemplateVideoLoading(false);
+                      }
+                    }}
+                    src={safeVideoUrl}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="absolute inset-0 w-full h-full object-cover"
+                    onLoadedMetadata={() => setTemplateVideoLoading(false)}
+                    onLoadedData={() => setTemplateVideoLoading(false)}
+                    onCanPlay={() => setTemplateVideoLoading(false)}
+                    onPlaying={() => setTemplateVideoLoading(false)}
+                    onError={() => setTemplateVideoLoading(false)}
+                  />
+                ) : null}
                 {templateVideoLoading && (
                   <div className="absolute inset-0 flex items-center justify-center bg-[#0A0B14]/80">
                      <div className="w-6 h-6 border-2 border-[#EE5F96] border-t-transparent rounded-full animate-spin" />
@@ -490,7 +505,7 @@ export default function VideoCreateModal({
                   preload="metadata"
                   className="w-full h-full object-cover"
                   onLoadedMetadata={(e) => {
-                    (e.target as HTMLVideoElement).currentTime = 0;
+                    try { (e.target as HTMLVideoElement).currentTime = 0; } catch {}
                     setExampleVideoLoading((prev) => ({ ...prev, [template.id]: false }));
                   }}
                   onCanPlay={() => setExampleVideoLoading((prev) => ({ ...prev, [template.id]: false }))}
@@ -533,7 +548,7 @@ export default function VideoCreateModal({
                     preload="metadata"
                     className="w-full h-full object-cover"
                     onLoadedMetadata={(e) => {
-                      (e.target as HTMLVideoElement).currentTime = 0;
+                      try { (e.target as HTMLVideoElement).currentTime = 0; } catch {}
                       setExampleVideoLoading((prev) => ({ ...prev, [ex.id]: false }));
                     }}
                     onCanPlay={() => setExampleVideoLoading((prev) => ({ ...prev, [ex.id]: false }))}
