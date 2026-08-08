@@ -72,11 +72,11 @@ export default function VideoCreateModal({
       setError(null);
       setJobId(null);
       setDragOver(false);
-      setActiveTemplate(initialTemplate);
+      setActiveTemplate(template);
     } else {
       // Clear immediately on close to prevent ghosting when opening another scene
     }
-  }, [isOpen, initialTemplate]);
+  }, [isOpen, template]);
 
   // Sync activeTemplate only when a different scene opens
   useEffect(() => {
