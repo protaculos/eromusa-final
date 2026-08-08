@@ -26,27 +26,20 @@ export default function CookieConsentModal() {
   const { settings, updateSettings } = useSettings();
   const t = useT();
 
+  const detectedLanguage = useMemo(() => detectLanguage(), []);
   const initialLang = useMemo(() => {
-    if (SUPPORTED.has(settings.language)) return settings.language;
-    return detectLanguage();
-  }, [settings.language]);
+    if (SUPPORTED.has(detectedLanguage)) return detectedLanguage;
+    if (SUPPORTED.has(settings.language) && settings.language !== "en") return settings.language;
+    return "en";
+  }, [detectedLanguage, settings.language]);
 
   const [isOpen, setIsOpen] = useState(true);
   const [lang, setLang] = useState(initialLang);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [ready, setReady] = useState(false);
 
-  // Ao montar, garante que o idioma global e o estado local
-  // correspondam ao idioma detectado, para sincronizar tudo.
   useEffect(() => {
-    const detected = detectLanguage();
-    if (detected !== lang) {
-      setLang(detected);
-    }
-    updateSettings({ language: detected as Locale });
-    setReady(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    updateSettings({ language: initialLang as Locale });
+  }, [initialLang, updateSettings]);
 
   const currentLangLabel =
     languageOptions.find((l) => l.code === lang)?.label ?? "English";
