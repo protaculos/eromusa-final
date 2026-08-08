@@ -55,6 +55,7 @@ export default function VideoCreateModal({
   const [jobId, setJobId] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [activeTemplate, setActiveTemplate] = useState(template);
+  const [selectedExample, setSelectedExample] = useState<(typeof sceneExamples)[number] | null>(null);
   const [examplesReady, setExamplesReady] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -92,6 +93,7 @@ export default function VideoCreateModal({
   useEffect(() => {
     if (isOpen) {
       setActiveTemplate(resolvedTemplate);
+      setSelectedExample(null);
       setExamplesReady(false);
     }
   }, [resolvedTemplate, isOpen]);
@@ -435,6 +437,7 @@ export default function VideoCreateModal({
                 <button
                   key={ex.id}
                   onClick={() => {
+                    setSelectedExample(ex);
                     setActiveTemplate({
                       id: ex.scene_id,
                       name: ex.name || template.name,
@@ -453,6 +456,7 @@ export default function VideoCreateModal({
                       ? 'border-[#EE5F96] ring-1 ring-[#EE5F96]/50'
                       : 'border-[#1E2130] hover:border-white/30'
                   }`}
+                  type="button"
                 >
                   <video
                     src={ex.video_url}
