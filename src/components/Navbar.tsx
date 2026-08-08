@@ -74,9 +74,14 @@ export default function Navbar() {
     setMenuOpen(false);
   };
 
+  const closeMenus = () => {
+    setMenuOpen(false);
+    setLangOpen(false);
+  };
+
   return (
     <div className="relative">
-    <nav className="fixed top-0 left-0 right-0 z-40 bg-[#0A0B14]/80 backdrop-blur-xl border-b border-[#1E2130]">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0A0B14]/80 backdrop-blur-xl border-b border-[#1E2130]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Primeira linha: logo, créditos/login, ferramentas */}
         <div className="flex items-center justify-between h-16">
@@ -304,6 +309,7 @@ export default function Navbar() {
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={closeMenus}
                 className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors ${
                   isActive
                     ? 'bg-[#EE5F96]/10 text-[#EE5F96]'
