@@ -45,6 +45,7 @@ export default function VideoCreateModal({
   const router = useRouter();
   const t = useT();
   const { toast } = useToast();
+  const safeSceneExamples = Array.isArray(sceneExamples) ? sceneExamples : [];
 
   // State
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -65,8 +66,8 @@ export default function VideoCreateModal({
 
   // Build a template with the unified list resolved: official video = first item of sceneExamples when available.
   const resolvedTemplate = useMemo(() => {
-    if (sceneExamples.length > 0) {
-      const official = sceneExamples[0];
+    if (safeSceneExamples.length > 0) {
+      const official = safeSceneExamples[0];
       return {
         ...template,
         videoUrl: official.video_url,
@@ -74,7 +75,7 @@ export default function VideoCreateModal({
       };
     }
     return template;
-  }, [template, sceneExamples]);
+  }, [template, safeSceneExamples]);
 
   // Reset state when modal opens/closes
   useEffect(() => {
@@ -108,15 +109,15 @@ export default function VideoCreateModal({
   // Mark examples as ready when they're available
   useEffect(() => {
     if (isOpen) {
-      setExamplesReady(sceneExamples.length > 0);
-      if (sceneExamples.length === 0) {
+      setExamplesReady(safeSceneExamples.length > 0);
+      if (safeSceneExamples.length === 0) {
         setExampleVideoLoading({});
       }
     } else {
       setExamplesReady(false);
       setExampleVideoLoading({});
     }
-  }, [isOpen, sceneExamples]);
+  }, [isOpen, safeSceneExamples]);
 
   // Cleanup object URLs
   useEffect(() => {
@@ -137,9 +138,9 @@ export default function VideoCreateModal({
 
   // Preload example videos when modal opens so they switch instantly
   useEffect(() => {
-    if (!isOpen || sceneExamples.length === 0) return;
+    if (!isOpen || safeSceneExamples.length === 0) return;
     const links: HTMLLinkElement[] = [];
-    for (const ex of sceneExamples) {
+    for (const ex of safeSceneExamples) {
       const link = document.createElement('link');
       link.rel = 'preload';
       link.as = 'video';
@@ -153,7 +154,7 @@ export default function VideoCreateModal({
         document.head.removeChild(link);
       }
     };
-  }, [isOpen, sceneExamples]);
+  }, [isOpen, safeSceneExamples]);
 
   // ── File handlers ──────────────────────────────
   const handleFile = useCallback((file: File) => {
@@ -502,7 +503,7 @@ export default function VideoCreateModal({
               </button>
 
               {/* Database examples */}
-              {examplesReady ? sceneExamples.map((ex) => (
+              {examplesReady ? safeSceneExamples.map((ex) => (
                 <button
                   key={ex.id}
                   onClick={() => {
