@@ -83,11 +83,8 @@ export default function VideoCreateModal({
       setJobId(null);
       setDragOver(false);
       setActiveTemplate(resolvedTemplate);
-      setTemplateVideoLoading(true);
     } else {
       // Clear immediately on close to prevent ghosting when opening another scene
-      setTemplateVideoLoading(true);
-      setExampleVideoLoading({});
     }
   }, [isOpen, resolvedTemplate]);
 
@@ -96,8 +93,6 @@ export default function VideoCreateModal({
     if (isOpen) {
       setActiveTemplate(resolvedTemplate);
       setExamplesReady(false);
-      setTemplateVideoLoading(true);
-      setExampleVideoLoading({});
     }
   }, [resolvedTemplate, isOpen]);
 
