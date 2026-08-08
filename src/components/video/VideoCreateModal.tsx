@@ -54,15 +54,28 @@ export default function VideoCreateModal({
   const [error, setError] = useState<string | null>(null);
   const [jobId, setJobId] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
-  const [activeTemplate, setActiveTemplate] = useState(template);
+
+  // Refatoração: separar template oficial de exemplo selecionado
   const [selectedExample, setSelectedExample] = useState<(typeof sceneExamples)[number] | null>(null);
   const [examplesReady, setExamplesReady] = useState(false);
 
+  // Deriva o que exibir
+  const displayTemplate = useMemo(() => {
+    if (selectedExample) {
+      return {
+        ...template,
+        id: selectedExample.scene_id,
+        name: selectedExample.name || template.name,
+        videoUrl: selectedExample.video_url,
+        thumbnailUrl: selectedExample.video_url,
+      };
+    }
+    return template;
+  }, [template, selectedExample]);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [templateKey, setTemplateKey] = useState(template.id);
-
-  // Reset state when modal opens/closes
+  // Reset apenas quando a cena pai mudar
   useEffect(() => {
     if (isOpen) {
       setSelectedFile(null);
@@ -72,22 +85,9 @@ export default function VideoCreateModal({
       setError(null);
       setJobId(null);
       setDragOver(false);
-      setActiveTemplate(template);
-    } else {
-      // Clear immediately on close to prevent ghosting when opening another scene
-    }
-  }, [isOpen, template]);
-
-  // Sync activeTemplate only when a different scene opens
-  useEffect(() => {
-    if (!isOpen) return;
-    if (template.id !== templateKey) {
-      setTemplateKey(template.id);
-      setActiveTemplate(template);
       setSelectedExample(null);
-      setExamplesReady(sceneExamples.length > 0);
     }
-  }, [isOpen, template, sceneExamples.length, templateKey]);
+  }, [isOpen, template.id]);
 
   // Mark examples as ready when they're available
   useEffect(() => {
@@ -178,7 +178,7 @@ export default function VideoCreateModal({
       return;
     }
 
-    if ((credits ?? 0) < (activeTemplate?.credits ?? 0)) {
+    if ((credits ?? 0) < (displayTemplate?.credits ?? 0)) {
       const message = t('videoModal.insufficientCredits');
       if (onOpenPayment) {
         onOpenPayment();
@@ -199,7 +199,7 @@ export default function VideoCreateModal({
       return;
     }
 
-    if (!activeTemplate?.styleId) {
+    if (!displayTemplate?.styleId) {
       setError(t('videoModal.invalidTemplate'));
       setIsCreating(false);
       return;
@@ -230,12 +230,12 @@ export default function VideoCreateModal({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           imageBase64,
-          styleId: activeTemplate.styleId,
-          templateId: activeTemplate.id,
-          templateName: activeTemplate.name,
-          templateThumbnail: activeTemplate.thumbnailUrl,
-          templateDuration: activeTemplate.duration,
-          templateCredits: activeTemplate.credits,
+          styleId: displayTemplate.styleId,
+          templateId: displayTemplate.id,
+          templateName: displayTemplate.name,
+          templateThumbnail: displayTemplate.thumbnailUrl,
+          templateDuration: displayTemplate.duration,
+          templateCredits: displayTemplate.credits,
         }),
       });
 
@@ -308,14 +308,14 @@ export default function VideoCreateModal({
           <div className="min-w-0">
             <h2
               className="font-bold text-white whitespace-nowrap"
-              style={{ fontSize: activeTemplate.name.length > 30 ? '0.9rem' : activeTemplate.name.length > 20 ? '1.05rem' : '1.125rem' }}
-            >{activeTemplate.name}</h2>
-            {activeTemplate.tags.length > 0 && (
+              style={{ fontSize: displayTemplate.name.length > 30 ? '0.9rem' : displayTemplate.name.length > 20 ? '1.05rem' : '1.125rem' }}
+            >{displayTemplate.name}</h2>
+            {displayTemplate.tags.length > 0 && (
               <p
                 className="text-white/40 mt-0.5 whitespace-nowrap"
-                style={{ fontSize: activeTemplate.tags.join(', ').length > 50 ? '0.65rem' : '0.75rem' }}
+                style={{ fontSize: displayTemplate.tags.join(', ').length > 50 ? '0.65rem' : '0.75rem' }}
               >
-                {t('videoModal.filtersLabel').replace('{tags}', activeTemplate.tags.join(', '))}
+                {t('videoModal.filtersLabel').replace('{tags}', displayTemplate.tags.join(', '))}
               </p>
             )}
           </div>
@@ -368,7 +368,7 @@ export default function VideoCreateModal({
                 ) : (
                   <>
                     <video
-                      src={activeTemplate.videoUrl}
+                      src={displayTemplate.videoUrl}
                       muted
                       playsInline
                       preload="metadata"
@@ -400,7 +400,7 @@ export default function VideoCreateModal({
               <p className="text-[11px] text-white/70 font-bold uppercase tracking-wider mb-2">{t('videoModal.outputVideo')}</p>
               <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-[#161827] border border-[#1E2130] group">
                 <video
-                  src={activeTemplate.videoUrl}
+                  src={displayTemplate.videoUrl}
                   autoPlay
                   loop
                   muted
@@ -411,9 +411,9 @@ export default function VideoCreateModal({
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                 {/* Bottom badges */}
                 <div className="absolute bottom-2 left-2 right-2 flex items-end justify-between">
-                  <p className="text-white text-[11px] font-bold truncate">{activeTemplate.name}</p>
+                  <p className="text-white text-[11px] font-bold truncate">{displayTemplate.name}</p>
                   <span className="bg-black/60 text-white/90 text-[9px] px-1.5 py-0.5 rounded-md shrink-0 ml-2">
-                    {activeTemplate.duration}
+                    {displayTemplate.duration}
                   </span>
                 </div>
               </div>
@@ -429,21 +429,9 @@ export default function VideoCreateModal({
                   key={ex.id}
                   onClick={() => {
                     setSelectedExample(ex);
-                    setActiveTemplate({
-                      id: ex.scene_id,
-                      name: ex.name || template.name,
-                      duration: template.duration,
-                      credits: template.credits,
-                      videoUrl: ex.video_url,
-                      thumbnailUrl: ex.video_url,
-                      instructions: template.instructions,
-                      tags: template.tags,
-                      gradient: template.gradient,
-                      styleId: template.styleId,
-                    });
                   }}
                   className={`relative shrink-0 w-16 h-24 rounded-lg overflow-hidden border-2 transition-all ${
-                    activeTemplate.videoUrl === ex.video_url
+                    displayTemplate.videoUrl === ex.video_url
                       ? 'border-[#EE5F96] ring-1 ring-[#EE5F96]/50'
                       : 'border-[#1E2130] hover:border-white/30'
                   }`}
