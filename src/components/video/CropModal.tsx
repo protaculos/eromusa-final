@@ -81,11 +81,21 @@ export default function CropModal({ isOpen, imageSrc, onConfirm, onCancel }: Cro
             crop={crop}
             zoom={zoom}
             aspect={9 / 16}
+            rotation={0}
+            minZoom={1}
+            maxZoom={3}
+            zoomSpeed={1}
+            cropShape="rect"
+            showGrid={false}
+            restrictPosition={true}
+            style={{}}
+            classes={{}}
+            mediaProps={{}}
+            cropperProps={{}}
+            keyboardStep={1}
             onCropChange={setCrop}
             onZoomChange={setZoom}
             onCropComplete={onCropComplete}
-            cropShape="rect"
-            showGrid={false}
           />
         </div>
 
