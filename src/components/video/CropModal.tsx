@@ -75,12 +75,12 @@ export default function CropModal({ isOpen, imageSrc, onConfirm, onCancel }: Cro
         </div>
 
         {/* Cropper Area */}
-        <div className="relative flex-1 bg-[#161827]">
+        <div className="relative flex-1 min-h-[300px] bg-[#161827]">
           <Cropper
             image={imageSrc}
             crop={crop}
             zoom={zoom}
-            aspect={0}
+            aspect={1}
             rotation={0}
             minZoom={1}
             maxZoom={3}
