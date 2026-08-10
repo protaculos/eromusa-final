@@ -80,7 +80,7 @@ export default function CropModal({ isOpen, imageSrc, onConfirm, onCancel }: Cro
             image={imageSrc}
             crop={crop}
             zoom={zoom}
-            aspect={9 / 16}
+            
             rotation={0}
             minZoom={1}
             maxZoom={3}
@@ -116,7 +116,7 @@ export default function CropModal({ isOpen, imageSrc, onConfirm, onCancel }: Cro
             onClick={handleConfirm}
             className="w-full py-3 rounded-xl font-semibold text-sm bg-[#EE5F96] hover:bg-pink-600 text-white transition-all"
           >
-            {t('videoModal.continue')}
+            Continue
           </button>
         </div>
       </div>
