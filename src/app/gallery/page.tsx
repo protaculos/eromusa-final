@@ -127,10 +127,10 @@ function ProcessingCard({ video }: { video: VideoData }) {
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-4">
         <div className="w-10 h-10 border-2 border-[#EE5F96] border-t-transparent rounded-full animate-spin" />
         <p className="text-white/90 text-sm font-semibold text-center drop-shadow-lg">
-          {t('gallery.creatingTitle')}
+          {t('gallery.processing')}
         </p>
         <p className="text-white/50 text-xs text-center drop-shadow">
-          {t('gallery.pleaseWait')}
+          {t('gallery.processingWait')}
         </p>
       </div>
     </div>
@@ -426,8 +426,8 @@ function VideoPopup({
         onClick={onClose}
       >
         <div
-          className="relative bg-[#0A0B14] border border-[#1E2130] rounded-2xl w-full max-w-[90vw] max-h-[90vh] shadow-2xl overflow-hidden focus:outline-none focus:ring-2 focus:ring-[#EE5F96]/60"
-          style={videoRatio ? { aspectRatio: videoRatio } : undefined}
+          className="relative bg-[#0A0B14] border border-[#1E2130] rounded-2xl w-full shadow-2xl overflow-hidden focus:outline-none focus:ring-2 focus:ring-[#EE5F96]/60"
+          style={{ maxWidth: 'min(90vw, 480px)', maxHeight: '90vh', ...(videoRatio ? { aspectRatio: videoRatio } : {}) }}
           onClick={(e) => e.stopPropagation()}
           tabIndex={-1}
         >
@@ -486,9 +486,6 @@ function VideoPopup({
 
             {expiresDisplay && (
               <div className="flex flex-col items-center gap-2">
-                <div className="bg-[#1E2130] text-white/70 text-xs px-3 py-1.5 rounded-lg">
-                  {t('gallery.downloadBanner')}
-                </div>
                 <div className="text-white/60 text-sm font-mono">
                   {t('gallery.expiresIn')}: {expiresDisplay}
                 </div>
