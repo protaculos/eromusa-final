@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useT } from '@/i18n/useT';
 import { useToast } from '@/components/Toast';
 import { useModalUrlSync } from '@/hooks/useModalUrlSync';
+import CropModal from './CropModal';
 
 // ── Types ──────────────────────────────────────────
 export interface VideoCreateModalProps {
@@ -52,6 +53,8 @@ export default function VideoCreateModal({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [imageBlob, setImageBlob] = useState<Blob | null>(null);
+  const [isCropOpen, setIsCropOpen] = useState(false);
+  const [tempFile, setTempFile] = useState<File | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [jobId, setJobId] = useState<string | null>(null);
@@ -141,15 +144,31 @@ export default function VideoCreateModal({
       return;
     }
     setError(null);
-    setSelectedFile(file);
+    setTempFile(file);
     const url = URL.createObjectURL(file);
     setPreviewUrl(url);
-    setImageBlob(file);
+    setIsCropOpen(true);
   }, [t, toast]);
+
+  const handleCropConfirm = (croppedBlob: Blob) => {
+    setImageBlob(croppedBlob);
+    setSelectedFile(tempFile);
+    setIsCropOpen(false);
+  };
 
   const onFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) handleFile(file);
+  };
+
+  const handleRemovePhoto = () => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setSelectedFile(null);
+    setPreviewUrl(null);
+    setImageBlob(null);
+    setTempFile(null);
+    setIsCropOpen(false);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const onDrop = (e: React.DragEvent) => {
@@ -299,6 +318,14 @@ export default function VideoCreateModal({
       {/* Overlay */}
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
+      {isCropOpen && previewUrl && (
+        <CropModal
+          isOpen={isCropOpen}
+          imageSrc={previewUrl}
+          onConfirm={handleCropConfirm}
+          onCancel={() => setIsCropOpen(false)}
+        />
+      )}
       {/* Container — portrait/mobile-like, fixed aspect, responsive */}
       <div className="relative bg-[#0A0B14] border border-[#1E2130] rounded-2xl w-full max-w-[420px] shadow-2xl overflow-hidden">
         {/* Header with title + filters */}
@@ -357,8 +384,17 @@ export default function VideoCreateModal({
                       alt="Selected"
                       className="absolute inset-0 w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                      <span className="bg-emerald-500 text-white text-xs font-semibold px-3 py-1.5 rounded-full">
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); handleRemovePhoto(); }}
+                      className="absolute top-2 right-2 z-20 rounded-full bg-black/70 p-1.5 text-white hover:bg-black"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                    <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                      <span className="bg-emerald-500 text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg">
                         {t('videoModal.imageSelected')}
                       </span>
                     </div>
@@ -371,17 +407,17 @@ export default function VideoCreateModal({
                       muted
                       playsInline
                       preload="metadata"
-                      className="absolute inset-0 w-full h-full object-cover opacity-40"
+                      className="absolute inset-0 w-full h-full object-cover opacity-25"
                       onLoadedMetadata={(e) => { (e.target as HTMLVideoElement).currentTime = 0; }}
                     />
                     {/* Dark overlay */}
-                    <div className="absolute inset-0 bg-black/50" />
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-white/40 p-4 text-center z-10">
-                      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="absolute inset-0 bg-black/30" />
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-white p-4 text-center z-10">
+                      <svg className="w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
-                      <p className="text-xs">{t('videoModal.uploadPhoto')}</p>
-                      <p className="text-[10px] text-white/20">{t('videoModal.jpegOrPng')}</p>
+                      <p className="text-sm font-semibold text-white">{t('videoModal.uploadPhoto')}</p>
+                      <p className="text-xs text-white/80">{t('videoModal.jpegOrPng')}</p>
                     </div>
                   </>
                 )}
