@@ -155,6 +155,12 @@
   "paymentMethod.chooseTitle": "Elige el Método de Pago",
   "paymentMethod.soon": "Próximamente",
   "paymentMethod.secureBy": "Pagos seguros con Vexutopia",
+  "paymentMethod.fiatLabel": "🇧🇷 PIX / 🇦🇷 C2C / 🇷🇺 SBP",
+  "paymentMethod.fiatDesc": "Paga con tu método local: PIX brasileño, C2C argentino, SBP ruso",
+  "paymentMethod.cryptoLabel": "Criptomoneda",
+  "paymentMethod.cryptoDesc": "Paga con Bitcoin, Ethereum, USDT y más",
+  "paymentMethod.telegramLabel": "Telegram Stars (Tarjeta)",
+  "paymentMethod.telegramDesc": "Paga usando Telegram Stars a través de Google Play o Apple Store (tarjeta de crédito aceptada)",
 
   "cookie.title": "Noticia Importante",
   "cookie.warning1": "Debes tener 18 años o más para usar este sitio web.",

@@ -225,8 +225,8 @@ function CompletedCard({
 
       {expiresDisplay && (
         <div className="absolute top-2 left-2 right-2 flex justify-center">
-          <div className="bg-black/70 text-white/80 text-[10px] px-2 py-0.5 rounded-md">
-            {t('gallery.downloadBanner')}
+          <div className="bg-black/80 text-white/90 text-xs font-mono font-bold px-2.5 py-1 rounded-lg backdrop-blur-sm border border-white/10 shadow-lg">
+            ⏱️ {expiresDisplay}
           </div>
         </div>
       )}

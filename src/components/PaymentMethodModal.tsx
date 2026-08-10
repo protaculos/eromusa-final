@@ -14,23 +14,23 @@ interface PaymentMethodModalProps {
 
 type PaymentOption = 'fiat' | 'crypto' | 'telegram';
 
-const OPTIONS: { id: PaymentOption; label: string; desc: string; icon: string; comingSoon?: boolean }[] = [
+const OPTIONS: { id: PaymentOption; labelKey: string; descKey: string; icon: string; comingSoon?: boolean }[] = [
   {
     id: 'fiat',
-    label: '🇧🇷 PIX / 🇦🇷 C2C / 🇷🇺 SBP',
-    desc: 'Pay with your local method: Brazilian PIX, Argentine C2C, Russian SBP',
+    labelKey: 'paymentMethod.fiatLabel',
+    descKey: 'paymentMethod.fiatDesc',
     icon: '💳',
   },
   {
     id: 'crypto',
-    label: 'Cryptocurrency',
-    desc: 'Pay with Bitcoin, Ethereum, USDT and more',
+    labelKey: 'paymentMethod.cryptoLabel',
+    descKey: 'paymentMethod.cryptoDesc',
     icon: '₿',
   },
   {
     id: 'telegram',
-    label: 'Telegram Stars',
-    desc: 'Pay using Telegram Stars',
+    labelKey: 'paymentMethod.telegramLabel',
+    descKey: 'paymentMethod.telegramDesc',
     icon: '⭐',
   },
 ];
@@ -148,14 +148,14 @@ export default function PaymentMethodModal({
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-white font-bold text-sm">{opt.label}</span>
+                  <span className="text-white font-bold text-sm">{t(opt.labelKey)}</span>
                   {opt.comingSoon && (
                     <span className="text-[10px] uppercase tracking-wider text-white/30 bg-white/5 px-2 py-0.5 rounded-full font-semibold">
                       {t('paymentMethod.soon')}
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-white/50 mt-0.5">{opt.desc}</p>
+                <p className="text-xs text-white/50 mt-0.5">{t(opt.descKey)}</p>
               </div>
 
               {loading && (
