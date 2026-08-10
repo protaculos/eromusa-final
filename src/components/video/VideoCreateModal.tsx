@@ -5,7 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useT } from '@/i18n/useT';
 import { useToast } from '@/components/Toast';
 import { useModalUrlSync } from '@/hooks/useModalUrlSync';
-import CropModal from './CropModal';
+
 
 // ── Types ──────────────────────────────────────────
 export interface VideoCreateModalProps {
@@ -53,8 +53,7 @@ export default function VideoCreateModal({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [imageBlob, setImageBlob] = useState<Blob | null>(null);
-  const [isCropOpen, setIsCropOpen] = useState(false);
-  const [tempFile, setTempFile] = useState<File | null>(null);
+
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [jobId, setJobId] = useState<string | null>(null);
@@ -144,17 +143,11 @@ export default function VideoCreateModal({
       return;
     }
     setError(null);
-    setTempFile(file);
+    setSelectedFile(file);
+    setImageBlob(file);
     const url = URL.createObjectURL(file);
     setPreviewUrl(url);
-    setIsCropOpen(true);
   }, [t, toast]);
-
-  const handleCropConfirm = (croppedBlob: Blob) => {
-    setImageBlob(croppedBlob);
-    setSelectedFile(tempFile);
-    setIsCropOpen(false);
-  };
 
   const onFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -166,8 +159,6 @@ export default function VideoCreateModal({
     setSelectedFile(null);
     setPreviewUrl(null);
     setImageBlob(null);
-    setTempFile(null);
-    setIsCropOpen(false);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -318,14 +309,6 @@ export default function VideoCreateModal({
       {/* Overlay */}
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
-      {isCropOpen && previewUrl && (
-        <CropModal
-          isOpen={isCropOpen}
-          imageSrc={previewUrl}
-          onConfirm={handleCropConfirm}
-          onCancel={() => setIsCropOpen(false)}
-        />
-      )}
       {/* Container — portrait/mobile-like, fixed aspect, responsive */}
       <div className="relative bg-[#0A0B14] border border-[#1E2130] rounded-2xl w-full max-w-[420px] shadow-2xl overflow-hidden">
         {/* Header with title + filters */}
