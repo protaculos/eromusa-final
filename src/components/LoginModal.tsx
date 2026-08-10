@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useT } from '@/i18n/useT';
+import { useModalUrlSync } from '@/hooks/useModalUrlSync';
 
 interface LoginModalProps {
   open: boolean;
@@ -10,6 +11,7 @@ interface LoginModalProps {
 
 export default function LoginModal({ open, onClose }: LoginModalProps) {
   const t = useT();
+  useModalUrlSync(open, onClose);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);

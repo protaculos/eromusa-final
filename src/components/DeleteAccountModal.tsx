@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import { useT } from '@/i18n/useT';
+import { useModalUrlSync } from '@/hooks/useModalUrlSync';
 
 interface DeleteAccountModalProps {
   open: boolean;
@@ -12,6 +13,7 @@ export default function DeleteAccountModal({ open, onClose, onConfirm }: DeleteA
   const t = useT();
   const [typed, setTyped] = useState('');
   const [deleting, setDeleting] = useState(false);
+  useModalUrlSync(open, onClose);
 
   if (!open) return null;
 

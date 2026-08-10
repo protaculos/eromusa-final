@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/components/Toast';
 import { useT } from '@/i18n/useT';
+import { useModalUrlSync } from '@/hooks/useModalUrlSync';
 
 interface Plan {
   id: string;
@@ -34,6 +35,7 @@ export default function PaymentModal({ isOpen, onClose }: { isOpen: boolean; onC
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const t = useT();
+  useModalUrlSync(isOpen, onClose);
 
   if (!isOpen) return null;
 

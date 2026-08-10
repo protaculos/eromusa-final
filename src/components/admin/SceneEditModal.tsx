@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import ConfirmModal from "@/components/ConfirmModal";
+import { useModalUrlSync } from '@/hooks/useModalUrlSync';
 
 interface SceneData {
   id: string;
@@ -26,6 +27,7 @@ export default function SceneEditModal({
   onSaved,
 }: SceneEditModalProps) {
   const { session } = useAuth();
+  useModalUrlSync(isOpen, onClose);
   const [name, setName] = useState("");
   const [credits, setCredits] = useState(10);
   const [styleId, setStyleId] = useState("");

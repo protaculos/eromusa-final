@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
 import SceneEditModal from "./SceneEditModal";
+import { useModalUrlSync } from '@/hooks/useModalUrlSync';
 
 interface Scene {
   id: string;
@@ -30,6 +31,7 @@ export default function AddScenePopup({
   onAdded,
 }: AddScenePopupProps) {
   const { session } = useAuth();
+  useModalUrlSync(isOpen, onClose);
   const [allScenes, setAllScenes] = useState<Scene[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);

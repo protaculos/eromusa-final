@@ -4,6 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
 import LoginModal from "@/components/LoginModal";
 import { useT } from "@/i18n/useT";
+import { useModalUrlSync } from '@/hooks/useModalUrlSync';
 import ErrorBoundary from "@/components/ErrorBoundary";
 
 // ── Types ─────────────────────────────────────────────
@@ -306,6 +307,7 @@ function VideoPopup({
   accessToken: string;
 }) {
   const t = useT();
+  useModalUrlSync(true, onClose);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(true);
   const [videoLoading, setVideoLoading] = useState(true);

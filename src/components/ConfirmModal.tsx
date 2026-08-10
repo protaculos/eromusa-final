@@ -1,6 +1,7 @@
 "use client";
 import React from 'react';
 import { useT } from '@/i18n/useT';
+import { useModalUrlSync } from '@/hooks/useModalUrlSync';
 
 interface ActionButton {
   label: string;
@@ -31,6 +32,7 @@ export default function ConfirmModal({
   actions,
 }: ConfirmModalProps) {
   const t = useT();
+  useModalUrlSync(open, onClose);
   if (!open) return null;
 
   return (

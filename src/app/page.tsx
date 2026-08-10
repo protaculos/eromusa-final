@@ -124,6 +124,7 @@ export default function DiscoverPage() {
   }, []);
 
   const handleTemplateClick = async (template: Template) => {
+    window.history.pushState(null, '', '/createvideo');
     setSelectedTemplate(template);
     // Fetch examples for this scene
     try {
@@ -138,6 +139,21 @@ export default function DiscoverPage() {
       setSceneExamples([]);
     }
   };
+
+  const handleCloseModal = () => {
+    window.history.replaceState(null, '', '/');
+    setSelectedTemplate(null);
+  };
+
+  useEffect(() => {
+    const handlePopState = () => {
+      if (selectedTemplate) {
+        setSelectedTemplate(null);
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [selectedTemplate]);
 
   const handleOpenLogin = () => {
     setSelectedTemplate(null);
@@ -358,7 +374,7 @@ export default function DiscoverPage() {
       {selectedTemplate && (
         <VideoCreateModal
           isOpen={!!selectedTemplate}
-          onClose={() => setSelectedTemplate(null)}
+          onClose={handleCloseModal}
           onOpenLogin={handleOpenLogin}
           onOpenPayment={handleOpenPayment}
           sceneExamples={sceneExamples}

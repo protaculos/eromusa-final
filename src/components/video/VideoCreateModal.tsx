@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useT } from '@/i18n/useT';
 import { useToast } from '@/components/Toast';
+import { useModalUrlSync } from '@/hooks/useModalUrlSync';
 
 // ── Types ──────────────────────────────────────────
 export interface VideoCreateModalProps {
@@ -45,6 +46,7 @@ export default function VideoCreateModal({
   const router = useRouter();
   const t = useT();
   const { toast } = useToast();
+  useModalUrlSync(isOpen, onClose);
 
   // State
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
