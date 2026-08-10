@@ -80,7 +80,7 @@ export default function CropModal({ isOpen, imageSrc, onConfirm, onCancel }: Cro
             image={imageSrc}
             crop={crop}
             zoom={zoom}
-            
+            aspect={0}
             rotation={0}
             minZoom={1}
             maxZoom={3}
