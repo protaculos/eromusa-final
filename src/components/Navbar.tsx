@@ -181,33 +181,36 @@ export default function Navbar() {
                   <div className="border-b border-[#1E2130]" />
 
                   {/* Idioma */}
-                  <div className="relative">
+                  <div className="relative border-t border-[#1E2130]">
                     <button
                       onClick={() => setLangOpen(!langOpen)}
-                      className="w-full flex items-center justify-between px-4 py-3 text-sm text-white/80 hover:text-white hover:bg-[#161827] transition-colors"
+                      className="w-full flex items-center justify-between px-4 py-3 text-sm text-white/90 hover:text-white hover:bg-[#161827] transition-colors font-medium"
                     >
                       <div className="flex items-center gap-3">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5 text-[#EE5F96]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        {t('nav.language')}
+                        <span>{t('nav.languageLabel')}: <strong className="text-white">{languageOptions.find(l => l.code === settings.language)?.label || 'English'}</strong></span>
                       </div>
-                      <svg className={`w-4 h-4 transition-transform ${langOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className={`w-4 h-4 transition-transform text-[#EE5F96] ${langOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                       </svg>
                     </button>
 
-                    {/* Sub-dropdown idiomas */}
+                    {/* Sub-dropdown idiomas - Altamente destacado */}
                     {langOpen && (
-                      <div className="border-t border-[#1E2130] bg-[#0A0B14] max-h-[280px] overflow-y-auto">
+                      <div className="bg-[#121422] border-2 border-[#EE5F96]/60 rounded-xl my-2 mx-2 p-1.5 shadow-2xl max-h-[260px] overflow-y-auto z-50">
+                        <div className="px-3 py-1.5 text-[11px] font-bold text-[#EE5F96] uppercase tracking-wider border-b border-[#1E2130] mb-1">
+                          {t('nav.languageLabel')}
+                        </div>
                         {languageOptions.map((lang) => (
                           <button
                             key={lang.code}
                             onClick={() => handleLanguageSelect(lang.code)}
-                            className={`w-full text-left px-4 py-2.5 pl-12 text-sm transition-colors ${
+                            className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                               settings.language === lang.code
-                                ? 'text-[#EE5F96] font-semibold'
-                                : 'text-white/60 hover:text-white hover:bg-[#161827]'
+                                ? 'bg-[#EE5F96] text-white shadow-md'
+                                : 'text-white/70 hover:text-white hover:bg-[#1E2130]'
                             }`}
                           >
                             {lang.label}

@@ -692,14 +692,14 @@ export default function GalleryPage() {
             <svg className="w-20 h-20 mb-6 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
-            <p className="text-xl font-semibold text-white/70 mb-2">Sign in to view your gallery</p>
-            <p className="text-sm mb-6">Log in to see all the videos you&apos;ve created</p>
+            <p className="text-xl font-semibold text-white/70 mb-2">{t('gallery.signInTitle')}</p>
+            <p className="text-sm mb-6">{t('gallery.signInDesc')}</p>
             <button
               onClick={() => setLoginOpen(true)}
               aria-label="Sign in"
               className="bg-[#EE5F96] hover:bg-[#d94d7e] text-white font-semibold px-8 py-3 rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-[#EE5F96]/60"
             >
-              Sign In
+              {t('gallery.signIn')}
             </button>
           </div>
         </div>
@@ -716,13 +716,13 @@ export default function GalleryPage() {
             <svg className="w-20 h-20 mb-6 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
             </svg>
-            <p className="text-xl font-semibold text-white/70 mb-2">No videos yet</p>
-            <p className="text-sm mb-6">Create your first video and it will appear here</p>
+            <p className="text-xl font-semibold text-white/70 mb-2">{t('gallery.noVideos')}</p>
+            <p className="text-sm mb-6">{t('gallery.noVideosDesc')}</p>
             <Link
               href="/"
               className="bg-[#EE5F96] hover:bg-[#d94d7e] text-white font-semibold px-8 py-3 rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-[#EE5F96]/60"
             >
-              Create a Video
+              {t('gallery.createVideo')}
             </Link>
           </div>
         </div>
