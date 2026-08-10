@@ -14,7 +14,7 @@ interface SettingsContextType {
 const STORAGE_KEY = 'eromusa-settings';
 
 const DEFAULT_SETTINGS: Settings = {
-  autoPlayVideos: true,
+  autoPlayVideos: false,
   language: 'en',
 };
 

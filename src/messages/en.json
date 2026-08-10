@@ -9,6 +9,7 @@
   "nav.settings": "Settings",
   "nav.deleteAccount": "Delete Account",
   "nav.language": "Language",
+  "nav.languageLabel": "Language",
   "nav.autoplay": "Autoplay Videos",
   "nav.logout": "Logout",
   "nav.logoutConfirm": "Are you sure you want to logout?",
