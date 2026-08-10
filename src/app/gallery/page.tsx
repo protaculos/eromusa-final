@@ -426,12 +426,12 @@ function VideoPopup({
         onClick={onClose}
       >
         <div
-          className="relative bg-[#0A0B14] border border-[#1E2130] rounded-2xl w-full shadow-2xl overflow-hidden focus:outline-none focus:ring-2 focus:ring-[#EE5F96]/60"
-          style={{ maxWidth: 'min(90vw, 480px)', maxHeight: '90vh', ...(videoRatio ? { aspectRatio: videoRatio } : {}) }}
+          className="relative bg-[#0A0B14] border border-[#1E2130] rounded-2xl w-full shadow-2xl overflow-hidden focus:outline-none focus:ring-2 focus:ring-[#EE5F96]/60 flex flex-col"
+          style={{ maxWidth: 'min(90vw, 420px)', maxHeight: '90vh' }}
           onClick={(e) => e.stopPropagation()}
           tabIndex={-1}
         >
-          <div className="flex items-center justify-between p-4 border-b border-[#1E2130]">
+          <div className="flex items-center justify-between p-4 border-b border-[#1E2130] shrink-0">
             <div className="min-w-0">
               <h2 className="font-bold text-white text-base truncate">{video.template_name || t('gallery.videoFallback')}</h2>
               <p className="text-white/40 text-[11px] mt-0.5">{video.template_duration}</p>
@@ -447,15 +447,15 @@ function VideoPopup({
             </button>
           </div>
 
-          <div className="p-4 space-y-3">
-            <div className="relative rounded-2xl overflow-hidden bg-black border border-[#1E2130] flex justify-center">
+          <div className="p-4 space-y-3 flex-1 min-h-0 flex flex-col">
+            <div className="relative rounded-2xl overflow-hidden bg-black border border-[#1E2130] flex justify-center flex-1 min-h-0">
               <video
                 ref={videoRef}
                 src={video.video_url}
                 loop
                 muted
                 playsInline
-                className="max-w-full max-h-[70vh] w-auto h-auto object-contain"
+                className="max-w-full max-h-full w-auto h-auto object-contain"
                 onClick={togglePlay}
                 onLoadedData={() => setVideoLoading(false)}
                 onCanPlay={() => setVideoLoading(false)}
