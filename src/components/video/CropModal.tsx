@@ -86,7 +86,7 @@ export default function CropModal({ isOpen, imageSrc, onConfirm, onCancel }: Cro
             maxZoom={3}
             zoomSpeed={1}
             cropShape="rect"
-            showGrid={false}
+            showGrid={true}
             restrictPosition={true}
             style={{}}
             classes={{}}
@@ -114,7 +114,7 @@ export default function CropModal({ isOpen, imageSrc, onConfirm, onCancel }: Cro
           </div>
           <button
             onClick={handleConfirm}
-            className="w-full py-3 rounded-xl font-semibold text-sm bg-white hover:bg-gray-100 text-gray-900 transition-all"
+            className="w-full py-3 rounded-xl font-semibold text-sm bg-[#EE5F96] hover:bg-pink-600 text-white transition-all"
           >
             {t('videoModal.continue')}
           </button>
