@@ -189,7 +189,7 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 rounded-xl font-semibold text-sm bg-[#EE5F96] hover:bg-[#d94d7e] text-white disabled:opacity-50 transition-all"
+            className="w-full py-2.5 rounded-xl font-semibold text-sm bg-white hover:bg-gray-100 text-gray-900 disabled:opacity-50 transition-all"
           >
             {loading ? t('login.loading') : t('login.continue')}
           </button>

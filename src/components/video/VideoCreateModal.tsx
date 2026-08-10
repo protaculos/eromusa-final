@@ -83,6 +83,11 @@ export default function VideoCreateModal({
     }
   }, [template, isOpen]);
 
+  // Filter out duplicates from sceneExamples based on video_url to prevent repeated examples
+  const uniqueExamples = sceneExamples.filter(
+    (ex, idx, arr) => arr.findIndex(e => e.video_url === ex.video_url) === idx
+  );
+
   // Mark examples as ready when they're available
   useEffect(() => {
     if (sceneExamples.length > 0) {
@@ -454,7 +459,7 @@ export default function VideoCreateModal({
               </button>
 
               {/* Database examples */}
-              {examplesReady ? sceneExamples.map((ex) => (
+              {examplesReady ? uniqueExamples.map((ex) => (
                 <button
                   key={ex.id}
                   onClick={() => {
