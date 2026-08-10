@@ -549,6 +549,7 @@ function VideoPopup({
 
 export default function GalleryPage() {
   const { user, session, loading, refreshCredits } = useAuth();
+  const t = useT();
   const [loginOpen, setLoginOpen] = useState(false);
   const [videos, setVideos] = useState<VideoData[]>([]);
   const [selectedVideo, setSelectedVideo] = useState<VideoData | null>(null);
