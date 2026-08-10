@@ -59,6 +59,8 @@
   "gallery.noVideosDesc": "Create your first video and it will appear here",
   "gallery.createVideo": "Create a Video",
   "gallery.downloadBanner": "Download your videos! We don't store your media permanently — videos are automatically deleted 72 hours after creation.",
+  "gallery.downloadBannerTitle": "Download your videos!",
+  "gallery.downloadBannerText": "We don't store your media permanently — videos are automatically deleted 72 hours after creation.",
   "gallery.processing": "Your video is being created",
   "gallery.processingWait": "Please wait 2–5 minutes",
   "gallery.generationFailed": "Generation failed",
@@ -77,6 +79,7 @@
   "gallery.cancel": "Cancel",
 
   "support.title": "Support",
+  "support.navLabel": "Support / FAQ",
   "support.backToHome": "Back to Home",
   "support.contactUs": "Contact Us",
   "support.contactDesc": "Need help? Reach out to our support team and we'll get back to you as soon as possible.",

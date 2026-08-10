@@ -226,7 +226,7 @@ function CompletedCard({
       {expiresDisplay && (
         <div className="absolute top-2 left-2 right-2 flex justify-center">
           <div className="bg-black/80 text-white/90 text-xs font-mono font-bold px-2.5 py-1 rounded-lg backdrop-blur-sm border border-white/10 shadow-lg">
-            ⏱️ {expiresDisplay}
+            {expiresDisplay}
           </div>
         </div>
       )}
@@ -737,7 +737,7 @@ export default function GalleryPage() {
         <div className="pt-8 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
           <div className="bg-[#EE5F96]/10 border border-[#EE5F96]/20 rounded-2xl p-4 mb-8 text-center">
             <p className="text-white/70 text-sm">
-              <strong>Download your videos!</strong> We don&apos;t store your media permanently — videos are automatically deleted <strong>72 hours</strong> after creation.
+              <strong>{t('gallery.downloadBannerTitle')}</strong> {t('gallery.downloadBannerText')}
             </p>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">

@@ -55,6 +55,8 @@
   "gallery.noVideosDesc": "Crea tu primer vídeo y aparecerá aquí",
   "gallery.createVideo": "Crear un Vídeo",
   "gallery.downloadBanner": "¡Descarga tus vídeos! No almacenamos tu contenido de forma permanente — los vídeos se eliminan automáticamente 72 horas después de crearse.",
+  "gallery.downloadBannerTitle": "¡Descarga tus vídeos!",
+  "gallery.downloadBannerText": "No almacenamos tu contenido de forma permanente — los vídeos se eliminan automáticamente 72 horas después de crearse.",
   "gallery.processing": "Tu vídeo se está creando",
   "gallery.processingWait": "Espera 2–5 minutos",
   "gallery.generationFailed": "Falló la generación",
@@ -73,6 +75,7 @@
   "gallery.cancel": "Cancelar",
 
   "support.title": "Soporte",
+  "support.navLabel": "Soporte / Dudas",
   "support.backToHome": "Volver al Inicio",
   "support.contactUs": "Contáctanos",
   "support.contactDesc": "¿Necesitas ayuda? Ponte en contacto con nuestro equipo de soporte y te responderemos lo antes posible.",
