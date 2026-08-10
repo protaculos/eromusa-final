@@ -76,6 +76,20 @@ export default function CropModal({ isOpen, imageSrc, onConfirm, onCancel }: Cro
 
         {/* Cropper Area */}
         <div className="relative flex-1 min-h-[300px] bg-[#161827]">
+          <style>{`
+            .crop-area {
+              border: 3px solid white !important;
+              box-shadow: 0 0 0 9999px rgba(0,0,0,0.65) !important;
+            }
+            .crop-area::before,
+            .crop-area::after,
+            .crop-area .crop-area-child-1::before,
+            .crop-area .crop-area-child-1::after {
+              content: '' !important;
+              position: absolute !important;
+              background: white !important;
+            }
+          `}</style>
           <Cropper
             image={imageSrc}
             crop={crop}
@@ -88,8 +102,14 @@ export default function CropModal({ isOpen, imageSrc, onConfirm, onCancel }: Cro
             cropShape="rect"
             showGrid={true}
             restrictPosition={true}
-            style={{}}
-            classes={{}}
+            classes={{
+              cropAreaClassName: 'crop-area',
+            }}
+            style={{
+              containerStyle: { borderRadius: '12px', overflow: 'hidden' },
+              cropAreaStyle: { border: '3px solid white', borderRadius: '4px' },
+              mediaStyle: {},
+            }}
             mediaProps={{}}
             cropperProps={{}}
             keyboardStep={1}
