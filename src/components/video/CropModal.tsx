@@ -1,6 +1,8 @@
 "use client";
+import dynamic from 'next/dynamic';
 import React, { useState, useCallback } from 'react';
-import Cropper from 'react-easy-crop';
+
+const Cropper = dynamic(() => import('react-easy-crop'), { ssr: false });
 import { useT } from '@/i18n/useT';
 import { useModalUrlSync } from '@/hooks/useModalUrlSync';
 
