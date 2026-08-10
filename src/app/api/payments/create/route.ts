@@ -149,36 +149,55 @@ export async function POST(request: NextRequest) {
           customer_id: userId,
         }),
       });
-    } else {
-      // Standard fiat / card / PIX
-      // Docs: https://vexutopia.com/docs/payments#create
-      const checkoutBody: Record<string, unknown> = {
-        amount: amountStr,
-        currency: 'USD',
-        return_url: `${SITE_URL}/success`,
-        webhook_url: `${SITE_URL}/api/webhooks/vexutopia`,
-        metadata: {
-          user_id: userId,
-          plan,
-          credits: credits.toString(),
-        },
-        customer_email: userEmail,
-        customer_id: userId,
-      };
-
-      // Pre-select PIX on hosted checkout for Brazilian users
-      if (country === 'BR') {
-        checkoutBody.country = 'BR';
-        checkoutBody.locale = 'pt-BR';
-      }
-
+    } else if (paymentMethod === 'fiat' && country === 'BR') {
+      // Brazilian users: use Direct PIX mode — skips hosted checkout entirely,
+      // sends customer straight to PIX payment page (no Telegram Stars option shown)
+      // Docs: https://vexutopia.com/docs/payments#direct-integration
+      const brlAmount = (amount / 100 * 5.7).toFixed(2); // approximate USD→BRL conversion
       vexutopiaResponse = await fetch(VEXUTOPIA_API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'X-API-Key': VEXUTOPIA_API_KEY,
         },
-        body: JSON.stringify(checkoutBody),
+        body: JSON.stringify({
+          amount: brlAmount,
+          currency: 'BRL',
+          country: 'BR',
+          direct: true,
+          return_url: `${SITE_URL}/success`,
+          webhook_url: `${SITE_URL}/api/webhooks/vexutopia`,
+          metadata: {
+            user_id: userId,
+            plan,
+            credits: credits.toString(),
+          },
+          customer_email: userEmail,
+          customer_id: userId,
+        }),
+      });
+    } else {
+      // Standard fiat / card / PIX (non-Brazilian users get the hosted checkout)
+      // Docs: https://vexutopia.com/docs/payments#create
+      vexutopiaResponse = await fetch(VEXUTOPIA_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': VEXUTOPIA_API_KEY,
+        },
+        body: JSON.stringify({
+          amount: amountStr,
+          currency: 'USD',
+          return_url: `${SITE_URL}/success`,
+          webhook_url: `${SITE_URL}/api/webhooks/vexutopia`,
+          metadata: {
+            user_id: userId,
+            plan,
+            credits: credits.toString(),
+          },
+          customer_email: userEmail,
+          customer_id: userId,
+        }),
       });
     }
 
