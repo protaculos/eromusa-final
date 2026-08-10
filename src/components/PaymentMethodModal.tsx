@@ -17,8 +17,8 @@ type PaymentOption = 'fiat' | 'crypto' | 'telegram';
 const OPTIONS: { id: PaymentOption; label: string; desc: string; icon: string; comingSoon?: boolean }[] = [
   {
     id: 'fiat',
-    label: 'Credit Card / Bank Transfer / PIX',
-    desc: 'Pay with card, bank transfer or PIX via Vexutopia',
+    label: '🇧🇷 PIX / 🇦🇷 C2C / 🇷🇺 SBP',
+    desc: 'Pay with your local method: Brazilian PIX, Argentine C2C, Russian SBP',
     icon: '💳',
   },
   {
