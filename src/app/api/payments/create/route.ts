@@ -99,6 +99,9 @@ export async function POST(request: NextRequest) {
     const paymentMethod = body.payment_method || 'standard';
     const amountStr = (amount / 100).toString(); // frontend sends cents (e.g. 1999), Vexutopia expects "19.99"
 
+    // Detect Brazilian users so we can pre-select PIX on the hosted checkout
+    const country = request.headers.get('x-vercel-ip-country') || 'US';
+
     let vexutopiaResponse: Response;
 
     if (paymentMethod === 'telegram') {
@@ -149,25 +152,33 @@ export async function POST(request: NextRequest) {
     } else {
       // Standard fiat / card / PIX
       // Docs: https://vexutopia.com/docs/payments#create
+      const checkoutBody: Record<string, unknown> = {
+        amount: amountStr,
+        currency: 'USD',
+        return_url: `${SITE_URL}/success`,
+        webhook_url: `${SITE_URL}/api/webhooks/vexutopia`,
+        metadata: {
+          user_id: userId,
+          plan,
+          credits: credits.toString(),
+        },
+        customer_email: userEmail,
+        customer_id: userId,
+      };
+
+      // Pre-select PIX on hosted checkout for Brazilian users
+      if (country === 'BR') {
+        checkoutBody.country = 'BR';
+        checkoutBody.locale = 'pt-BR';
+      }
+
       vexutopiaResponse = await fetch(VEXUTOPIA_API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'X-API-Key': VEXUTOPIA_API_KEY,
         },
-        body: JSON.stringify({
-          amount: amountStr,
-          currency: 'USD',
-          return_url: `${SITE_URL}/success`,
-          webhook_url: `${SITE_URL}/api/webhooks/vexutopia`,
-          metadata: {
-            user_id: userId,
-            plan,
-            credits: credits.toString(),
-          },
-          customer_email: userEmail,
-          customer_id: userId,
-        }),
+        body: JSON.stringify(checkoutBody),
       });
     }
 
