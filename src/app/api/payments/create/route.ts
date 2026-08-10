@@ -149,11 +149,19 @@ export async function POST(request: NextRequest) {
           customer_id: userId,
         }),
       });
-    } else if (paymentMethod === 'fiat' && country === 'BR') {
-      // Brazilian users: use Direct PIX mode — skips hosted checkout entirely,
-      // sends customer straight to PIX payment page (no Telegram Stars option shown)
+    } else if (paymentMethod === 'fiat' && ['BR', 'AR', 'RU'].includes(country)) {
+      // Direct regional payment — skips hosted checkout entirely
+      // BR → PIX, AR → C2C, RU → SBP
       // Docs: https://vexutopia.com/docs/payments#direct-integration
-      const brlAmount = (amount / 100 * 5.7).toFixed(2); // approximate USD→BRL conversion
+      const REGION_CONFIG: Record<string, { currency: string; rate: number }> = {
+        BR: { currency: 'BRL', rate: 5.7 },   // USD→BRL approximate
+        AR: { currency: 'ARS', rate: 1200 },  // USD→ARS approximate
+        RU: { currency: 'RUB', rate: 90 },    // USD→RUB approximate
+      };
+
+      const region = REGION_CONFIG[country];
+      const localAmount = (amount / 100 * region.rate).toFixed(2);
+
       vexutopiaResponse = await fetch(VEXUTOPIA_API_URL, {
         method: 'POST',
         headers: {
@@ -161,9 +169,9 @@ export async function POST(request: NextRequest) {
           'X-API-Key': VEXUTOPIA_API_KEY,
         },
         body: JSON.stringify({
-          amount: brlAmount,
-          currency: 'BRL',
-          country: 'BR',
+          amount: localAmount,
+          currency: region.currency,
+          country,
           direct: true,
           return_url: `${SITE_URL}/success`,
           webhook_url: `${SITE_URL}/api/webhooks/vexutopia`,
