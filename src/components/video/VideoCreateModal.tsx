@@ -84,9 +84,10 @@ export default function VideoCreateModal({
   }, [template, isOpen]);
 
   // Filter out duplicates from sceneExamples based on video_url to prevent repeated examples
-  const uniqueExamples = sceneExamples.filter(
-    (ex, idx, arr) => arr.findIndex(e => e.video_url === ex.video_url) === idx
-  );
+  // Also filter out the main template video to avoid redundancy
+  const uniqueExamples = sceneExamples
+    .filter((ex, idx, arr) => arr.findIndex(e => e.video_url === ex.video_url) === idx)
+    .filter(ex => ex.video_url !== template.videoUrl);
 
   // Mark examples as ready when they're available
   useEffect(() => {
