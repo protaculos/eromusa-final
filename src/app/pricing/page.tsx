@@ -14,11 +14,8 @@ interface PlanData {
   price: string;
   credits: number;
   amount: number;
-  templates: string;       // ex: "10 (1/3)"
   totalVideos: number;     // quantos vídeos consegue fazer
-  costPerVideo: string;   // custo por vídeo com desconto
-  simultaneous: number;   // vídeos simultâneos
-  queue: string;          // fila de prioridade
+  costPerVideo: string;   // custo por vídeo
   isPopular?: boolean;
 }
 
@@ -46,65 +43,23 @@ const PricingCard = ({ data, onBuy }: {
     </div>
 
     {/* Features */}
-    <ul className="space-y-4 mb-8 flex-1">
+    <ul className="space-y-3 mb-8 flex-1">
       {/* 1. Créditos */}
-      <li className="flex items-start gap-3 text-sm text-white/60">
-        <div className="mt-1 flex-shrink-0 w-4 h-4 rounded-full bg-[#EE5F96]/20 flex items-center justify-center">
-          <svg className="w-3 h-3 text-[#EE5F96]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-          </svg>
-        </div>
-        <span><strong className="text-white">{data.credits.toLocaleString()}</strong> {t('pricing.creditsPerMonth')}</span>
+      <li className="flex items-center gap-3 text-sm text-white/60">
+        <span className="text-white font-bold">{data.credits.toLocaleString()}</span>
+        <span>{t('pricing.creditsPerMonth')}</span>
       </li>
 
-      {/* 2. Templates */}
-      <li className="flex items-start gap-3 text-sm text-white/60">
-        <div className="mt-1 flex-shrink-0 w-4 h-4 rounded-full bg-[#EE5F96]/20 flex items-center justify-center">
-          <svg className="w-3 h-3 text-[#EE5F96]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-          </svg>
-        </div>
-        <span><strong className="text-white">{data.templates}</strong> {t('pricing.videosOnDiscovery')}</span>
+      {/* 2. Vídeos que consegue fazer */}
+      <li className="flex items-center gap-3 text-sm text-white/60">
+        <span className="text-white font-bold">{data.totalVideos}</span>
+        <span>{t('pricing.upTo')} {t('pricing.videosPerMonth')}</span>
       </li>
 
-      {/* 3. Vídeos que consegue fazer */}
-      <li className="flex items-start gap-3 text-sm text-white/60">
-        <div className="mt-1 flex-shrink-0 w-4 h-4 rounded-full bg-[#EE5F96]/20 flex items-center justify-center">
-          <svg className="w-3 h-3 text-[#EE5F96]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-          </svg>
-        </div>
-        <span>{t('pricing.upTo')} <strong className="text-white">{data.totalVideos}</strong> {t('pricing.videosPerMonth')}</span>
-      </li>
-
-      {/* 4. Custo por vídeo */}
-      <li className="flex items-start gap-3 text-sm text-white/60">
-        <div className="mt-1 flex-shrink-0 w-4 h-4 rounded-full bg-[#EE5F96]/20 flex items-center justify-center">
-          <svg className="w-3 h-3 text-[#EE5F96]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-          </svg>
-        </div>
-        <span>{t('pricing.just')} <strong className="text-white">${data.costPerVideo}</strong> {t('pricing.perVideo')}</span>
-      </li>
-
-      {/* 5. Vídeos simultâneos */}
-      <li className="flex items-start gap-3 text-sm text-white/60">
-        <div className="mt-1 flex-shrink-0 w-4 h-4 rounded-full bg-[#EE5F96]/20 flex items-center justify-center">
-          <svg className="w-3 h-3 text-[#EE5F96]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-          </svg>
-        </div>
-        <span><strong className="text-white">{data.simultaneous}</strong> {t('pricing.simultaneousRenders')}</span>
-      </li>
-
-      {/* 6. Fila de prioridade */}
-      <li className="flex items-start gap-3 text-sm text-white/60">
-        <div className="mt-1 flex-shrink-0 w-4 h-4 rounded-full bg-[#EE5F96]/20 flex items-center justify-center">
-          <svg className="w-3 h-3 text-[#EE5F96]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-          </svg>
-        </div>
-        <span><strong className="text-white">{data.queue}</strong> {t('pricing.priorityQueue')}</span>
+      {/* 3. Custo por vídeo */}
+      <li className="flex items-center gap-3 text-sm text-white/60">
+        <span className="text-white font-bold">1 {t('pricing.perVideo')}</span>
+        <span>= ${data.costPerVideo}</span>
       </li>
     </ul>
 
@@ -160,26 +115,28 @@ const FAQItem = ({ question, answer }: { question: string; answer: string }) => 
 // ============================================
 const PLANS: PlanData[] = [
   {
+    plan: 'Starter',
+    price: '2.99',
+    credits: 60,
+    amount: 299,
+    totalVideos: 2,
+    costPerVideo: '1.50',
+  },
+  {
     plan: 'Basic',
     price: '9.99',
     credits: 300,
     amount: 999,
-    templates: '10 (1/3)',
     totalVideos: 10,
     costPerVideo: '1.00',
-    simultaneous: 3,
-    queue: 'Normal',
   },
   {
     plan: 'Plus',
     price: '29.99',
     credits: 1500,
     amount: 2999,
-    templates: '20 (2/3)',
     totalVideos: 50,
     costPerVideo: '0.60',
-    simultaneous: 10,
-    queue: 'Alta',
     isPopular: true,
   },
   {
@@ -187,11 +144,8 @@ const PLANS: PlanData[] = [
     price: '49.99',
     credits: 3000,
     amount: 4999,
-    templates: '30 (3/3)',
     totalVideos: 100,
     costPerVideo: '0.50',
-    simultaneous: 15,
-    queue: 'Elite',
   },
 ];
 
@@ -228,7 +182,7 @@ export default function PricingPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12">
         <ErrorBoundary sectionName="Pricing">
         {/* Pricing Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-32">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-32">
           {PLANS.map((plan) => (
             <PricingCard key={plan.plan} data={plan} onBuy={handleBuy} />
           ))}
