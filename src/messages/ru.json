@@ -152,5 +152,7 @@
   "cookie.continue": "Продолжить",
   "common.loading": "Загрузка...",
   "common.error": "Ошибка",
-  "common.success": "Успех"
+  "common.success": "Успех",
+  "pricing.credits": "кредитов",
+  "pricing.createXVideos": "Создайте {count} видео"
 }

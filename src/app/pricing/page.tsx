@@ -43,15 +43,35 @@ const PricingCard = ({ data, onBuy }: {
     </div>
 
     {/* Features */}
-    <ul className="space-y-3 mb-8 flex-1 border-t border-white/10 pt-6">
-      <li className="text-white text-sm font-medium">
-        {data.credits.toLocaleString()} {t('pricing.creditsPerMonth')}
+    <ul className="space-y-4 mb-8 flex-1 border-t border-white/10 pt-6">
+      {/* 1. Créditos */}
+      <li className="flex items-center gap-3 text-sm text-white/60">
+        <div className="flex-shrink-0 w-4 h-4 rounded-full bg-[#EE5F96]/20 flex items-center justify-center">
+          <svg className="w-3 h-3 text-[#EE5F96]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <span><strong className="text-white">{data.credits.toLocaleString()}</strong> {t('pricing.credits')}</span>
       </li>
-      <li className="text-white text-sm font-medium">
-        {t('pricing.upTo')} {data.totalVideos} {t('pricing.videosPerMonth')}
+
+      {/* 2. Vídeos */}
+      <li className="flex items-center gap-3 text-sm text-white/60">
+        <div className="flex-shrink-0 w-4 h-4 rounded-full bg-[#EE5F96]/20 flex items-center justify-center">
+          <svg className="w-3 h-3 text-[#EE5F96]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <span>{t('pricing.createXVideos').replace('{count}', String(data.totalVideos))}</span>
       </li>
-      <li className="text-white/70 text-sm">
-        1 vídeo = ${data.costPerVideo}
+
+      {/* 3. Custo por vídeo */}
+      <li className="flex items-center gap-3 text-sm text-white/60">
+        <div className="flex-shrink-0 w-4 h-4 rounded-full bg-[#EE5F96]/20 flex items-center justify-center">
+          <svg className="w-3 h-3 text-[#EE5F96]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <span>1 vídeo = <strong className="text-white">${data.costPerVideo}</strong></span>
       </li>
     </ul>
 

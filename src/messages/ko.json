@@ -152,5 +152,7 @@
   "cookie.continue": "계속",
   "common.loading": "로딩 중...",
   "common.error": "오류",
-  "common.success": "성공"
+  "common.success": "성공",
+  "pricing.credits": "크레딧",
+  "pricing.createXVideos": "{count}개 동영상 만들기"
 }

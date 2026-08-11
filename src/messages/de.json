@@ -152,5 +152,7 @@
   "cookie.continue": "Weiter",
   "common.loading": "Wird geladen...",
   "common.error": "Fehler",
-  "common.success": "Erfolg"
+  "common.success": "Erfolg",
+  "pricing.credits": "Guthaben",
+  "pricing.createXVideos": "Erstelle {count} Videos"
 }

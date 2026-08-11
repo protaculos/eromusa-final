@@ -17,7 +17,6 @@
   "nav.confirm": "Confirm",
   "nav.terms": "Terms of Use",
   "nav.privacy": "Privacy Policy",
-
   "login.title": "Sign In",
   "login.orContinue": "or continue with email",
   "login.email": "Email",
@@ -30,7 +29,6 @@
   "login.signInWithApple": "Sign in with Apple",
   "login.signInWithGithub": "Sign in with GitHub",
   "login.signInWithDiscord": "Sign in with Discord",
-
   "pricing.title": "Pricing",
   "pricing.mostPopular": "Most Popular",
   "pricing.creditsPerMonth": "credits per month",
@@ -51,7 +49,6 @@
   "pricing.faq3a": "We accept credit cards, bank transfers, and PIX through our secure payment partner Vexutopia.",
   "pricing.faq4q": "Is there a free trial for Plus and Prime?",
   "pricing.faq4a": "We offer a 7-day free trial for our Plus plan for new users to explore all the premium features.",
-
   "gallery.signInTitle": "Sign in to view your gallery",
   "gallery.signInDesc": "Log in to see all the videos you've created",
   "gallery.signIn": "Sign In",
@@ -77,7 +74,6 @@
   "gallery.downloadTitle": "Download video",
   "gallery.downloadMessage": "Download \"{name}\" to your device?",
   "gallery.cancel": "Cancel",
-
   "support.title": "Support",
   "support.navLabel": "Support / FAQ",
   "support.backToHome": "Back to Home",
@@ -93,14 +89,12 @@
   "support.faq3a": "Yes, you can cancel at any time from your account settings. Your credits remain valid until used.",
   "support.faq4q": "What payment methods do you accept?",
   "support.faq4a": "We accept credit cards, bank transfers, and PIX through our secure payment partner.",
-
   "payment.title": "Get More Credits",
   "payment.securePayments": "Secure Payments powered by Vexutopia",
   "payment.free": "FREE",
   "payment.credits": "credits",
   "payment.success": "Successfully added {credits} credits!",
   "payment.loginRequired": "You must be logged in to make a purchase",
-
   "videoModal.uploadPhoto": "Upload your photo",
   "videoModal.jpegOrPng": "JPEG or PNG",
   "videoModal.yourImage": "Your Image",
@@ -118,7 +112,6 @@
   "videoModal.filters": "Filters",
   "videoModal.filtersLabel": "Filters: {tags}",
   "videoModal.credits": "Credits",
-
   "admin.newScene": "New Scene",
   "admin.addScene": "Add Scene",
   "admin.clearAll": "Clear all",
@@ -136,19 +129,15 @@
   "admin.noScenes": "No scenes in the database.",
   "admin.visible": "Visible",
   "admin.add": "Add",
-
   "privacy.title": "Privacy Policy",
   "privacy.lastUpdated": "Last updated: 17 October 2025",
   "privacy.backToHome": "Back to Home",
-
   "terms.title": "Terms of Use",
   "terms.lastUpdated": "Last updated: 17 October 2025",
   "terms.backToHome": "Back to Home",
-
   "footer.support": "Support",
   "footer.terms": "Terms of Use",
   "footer.privacy": "Privacy Policy",
-
   "deleteAccount.title": "Delete Account",
   "deleteAccount.warningStart": "This action is ",
   "deleteAccount.irreversible": "irreversible",
@@ -157,9 +146,7 @@
   "deleteAccount.typeDeleteEnd": " to confirm",
   "deleteAccount.cancel": "Cancel",
   "deleteAccount.deleting": "Deleting...",
-
   "confirm.cancel": "Cancel",
-
   "paymentMethod.chooseTitle": "Choose Payment Method",
   "paymentMethod.soon": "Soon",
   "paymentMethod.secureBy": "Secure payments powered by Vexutopia",
@@ -169,7 +156,6 @@
   "paymentMethod.cryptoDesc": "Pay with Bitcoin, Ethereum, USDT and more",
   "paymentMethod.telegramLabel": "Telegram Stars (Card)",
   "paymentMethod.telegramDesc": "Pay using Telegram Stars with Google Play or Apple Store (credit card supported)",
-
   "cookie.title": "Important Notice",
   "cookie.warning1": "You must be 18+ to use this website.",
   "cookie.warning2": "You can't use other people's photos without their permission.",
@@ -178,8 +164,9 @@
   "cookie.and": "and",
   "cookie.languageLabel": "Language",
   "cookie.continue": "Continue",
-
   "common.loading": "Loading...",
   "common.error": "Error",
-  "common.success": "Success"
+  "common.success": "Success",
+  "pricing.credits": "credits",
+  "pricing.createXVideos": "Create {count} videos"
 }

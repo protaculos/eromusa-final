@@ -152,5 +152,7 @@
   "cookie.continue": "继续",
   "common.loading": "加载中...",
   "common.error": "错误",
-  "common.success": "成功"
+  "common.success": "成功",
+  "pricing.credits": "积分",
+  "pricing.createXVideos": "创建 {count} 个视频"
 }

@@ -152,5 +152,7 @@
   "cookie.continue": "متابعة",
   "common.loading": "جارٍ التحميل...",
   "common.error": "خطأ",
-  "common.success": "نجاح"
+  "common.success": "نجاح",
+  "pricing.credits": "رصيد",
+  "pricing.createXVideos": "أنشئ {count} فيديوهات"
 }

@@ -152,5 +152,7 @@
   "cookie.continue": "जारी रखें",
   "common.loading": "लोड हो रहा है...",
   "common.error": "त्रुटि",
-  "common.success": "सफलता"
+  "common.success": "सफलता",
+  "pricing.credits": "क्रेडिट",
+  "pricing.createXVideos": "{count} वीडियो बनाएं"
 }

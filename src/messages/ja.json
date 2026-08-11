@@ -152,5 +152,7 @@
   "cookie.continue": "続行",
   "common.loading": "読み込み中...",
   "common.error": "エラー",
-  "common.success": "成功"
+  "common.success": "成功",
+  "pricing.credits": "クレジット",
+  "pricing.createXVideos": "{count}本の動画を作成"
 }

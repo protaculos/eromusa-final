@@ -17,7 +17,6 @@
   "nav.confirm": "Confirmar",
   "nav.terms": "Términos de Uso",
   "nav.privacy": "Política de Privacidad",
-
   "login.title": "Iniciar Sesión",
   "login.orContinue": "o continúa con email",
   "login.email": "Email",
@@ -26,7 +25,6 @@
   "login.loading": "Cargando...",
   "login.checkEmail": "¡Revisa tu email para confirmar tu cuenta!",
   "login.invalidCredentials": "Ya existe una cuenta con este email. Por favor revisa tu contraseña.",
-
   "pricing.title": "Precios",
   "pricing.mostPopular": "Más Popular",
   "pricing.creditsPerMonth": "créditos por mes",
@@ -47,7 +45,6 @@
   "pricing.faq3a": "Aceptamos tarjetas de crédito, transferencias bancarias y PIX a través de nuestro socio de pago seguro Vexutopia.",
   "pricing.faq4q": "¿Hay prueba gratuita para Plus y Prime?",
   "pricing.faq4a": "Ofrecemos una prueba gratuita de 7 días para nuestro plan Plus para que los nuevos usuarios exploren todas las funciones premium.",
-
   "gallery.signInTitle": "Inicia sesión para ver tu galería",
   "gallery.signInDesc": "Inicia sesión para ver todos los vídeos que has creado",
   "gallery.signIn": "Iniciar Sesión",
@@ -73,7 +70,6 @@
   "gallery.downloadTitle": "Descargar vídeo",
   "gallery.downloadMessage": "¿Descargar \"{name}\" a tu dispositivo?",
   "gallery.cancel": "Cancelar",
-
   "support.title": "Soporte",
   "support.navLabel": "Soporte / Dudas",
   "support.backToHome": "Volver al Inicio",
@@ -89,14 +85,12 @@
   "support.faq3a": "Sí, puedes cancelar en cualquier momento desde la configuración de tu cuenta. Tus créditos siguen siendo válidos hasta que se usen.",
   "support.faq4q": "¿Qué métodos de pago aceptan?",
   "support.faq4a": "Aceptamos tarjetas de crédito, transferencias bancarias y PIX a través de nuestro socio de pago seguro.",
-
   "payment.title": "Obtener Más Créditos",
   "payment.securePayments": "Pagos Seguros impulsados por Vexutopia",
   "payment.free": "GRATIS",
   "payment.credits": "créditos",
   "payment.success": "¡Se agregaron correctamente {credits} créditos!",
   "payment.loginRequired": "Debes iniciar sesión para realizar una compra",
-
   "videoModal.uploadPhoto": "Sube tu foto",
   "videoModal.jpegOrPng": "JPEG o PNG",
   "videoModal.yourImage": "Tu Imagen",
@@ -114,7 +108,6 @@
   "videoModal.filters": "Filtros",
   "videoModal.filtersLabel": "Filtros: {tags}",
   "videoModal.credits": "Créditos",
-
   "admin.newScene": "Nueva Escena",
   "admin.addScene": "Agregar Escena",
   "admin.clearAll": "Limpiar todo",
@@ -132,19 +125,15 @@
   "admin.noScenes": "No hay escenas en la base de datos.",
   "admin.visible": "Visible",
   "admin.add": "Agregar",
-
   "privacy.title": "Política de Privacidad",
   "privacy.lastUpdated": "Última actualización: 17 de Octubre de 2025",
   "privacy.backToHome": "Volver al Inicio",
-
   "terms.title": "Términos de Uso",
   "terms.lastUpdated": "Última actualización: 17 de Octubre de 2025",
   "terms.backToHome": "Volver al Inicio",
-
   "footer.support": "Soporte",
   "footer.terms": "Términos de Uso",
   "footer.privacy": "Política de Privacidad",
-
   "deleteAccount.title": "Eliminar Cuenta",
   "deleteAccount.warningStart": "Esta acción es ",
   "deleteAccount.irreversible": "irreversible",
@@ -153,9 +142,7 @@
   "deleteAccount.typeDeleteEnd": " para confirmar",
   "deleteAccount.cancel": "Cancelar",
   "deleteAccount.deleting": "Eliminando...",
-
   "confirm.cancel": "Cancelar",
-
   "paymentMethod.chooseTitle": "Elige el Método de Pago",
   "paymentMethod.soon": "Próximamente",
   "paymentMethod.secureBy": "Pagos seguros con Vexutopia",
@@ -165,7 +152,6 @@
   "paymentMethod.cryptoDesc": "Paga con Bitcoin, Ethereum, USDT y más",
   "paymentMethod.telegramLabel": "Telegram Stars (Tarjeta)",
   "paymentMethod.telegramDesc": "Paga usando Telegram Stars a través de Google Play o Apple Store (tarjeta de crédito aceptada)",
-
   "cookie.title": "Noticia Importante",
   "cookie.warning1": "Debes tener 18 años o más para usar este sitio web.",
   "cookie.warning2": "No puedes usar fotos de otras personas sin su permiso.",
@@ -174,8 +160,9 @@
   "cookie.and": "y",
   "cookie.languageLabel": "Idioma",
   "cookie.continue": "Continuar",
-
   "common.loading": "Cargando...",
   "common.error": "Error",
-  "common.success": "Éxito"
+  "common.success": "Éxito",
+  "pricing.credits": "créditos",
+  "pricing.createXVideos": "Crea {count} vídeos"
 }
