@@ -237,18 +237,18 @@ export default function PricingPage() {
         onClose={() => { setShowPaymentMethod(false); setSelectedPlan(null); }}
       />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-10">
         <ErrorBoundary sectionName="Pricing">
         {/* Pricing Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-32">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16 lg:mb-20">
           {PLANS.map((plan) => (
             <PricingCard key={plan.plan} data={plan} onBuy={handleBuy} />
           ))}
         </div>
 
         {/* FAQ */}
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl font-bold text-white text-center mb-12">{t('pricing.faq')}</h2>
+        <div className="max-w-3xl mx-auto mt-2 lg:mt-4">
+          <h2 className="text-3xl font-bold text-white text-center mb-8">{t('pricing.faq')}</h2>
           <div className="bg-[#141417] rounded-3xl p-8 border border-white/10">
             <FAQItem
               question={t('pricing.faq1q')}
