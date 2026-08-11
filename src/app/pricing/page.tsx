@@ -34,34 +34,38 @@ const PricingCard = ({ data, onBuy }: {
     'border-white/15 bg-[#141417]',
     // Plus — glow rosa
     'border-[#EE5F96] bg-[#1a1a1e] shadow-[0_0_30px_-5px_rgba(238,95,150,0.25)]',
-    // Prime — glow dourado
-    'border-yellow-500/50 bg-gradient-to-b from-[#1f1d15] to-[#141417] shadow-[0_0_40px_-5px_rgba(234,179,8,0.3)]',
+    // Prime — glow rosa + efeito 3D
+    'border-[#EE5F96] bg-[#1a1a1e] shadow-[0_0_40px_-5px_rgba(238,95,150,0.35)]',
   ];
 
-  const checkBg = tier === 3 ? 'bg-yellow-500/20' : 'bg-[#EE5F96]/20';
-  const checkColor = tier === 3 ? 'text-yellow-400' : 'text-[#EE5F96]';
+  const checkBg = 'bg-[#EE5F96]/20';
+  const checkColor = 'text-[#EE5F96]';
 
   return (
-  <div className={`relative p-6 sm:p-8 rounded-3xl border flex flex-col h-full transition-all duration-300 hover:scale-[1.02] ${tierStyles[tier]}`}>
+  <div className={`relative p-6 sm:p-8 rounded-3xl border flex flex-col h-full overflow-hidden transition-all duration-300 hover:scale-[1.02] ${tierStyles[tier]} ${tier === 3 ? 'prime-3d-card' : ''}`}>
 
-    {data.isPopular && (
+    {tier === 3 && (
+      <div className="absolute inset-0 pointer-events-none prime-3d-overlay" aria-hidden="true" />
+    )}
+
+    {data.isPopular && tier !== 3 && (
       <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#EE5F96] text-white text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider">
         {t('pricing.mostPopular')}
       </div>
     )}
     {tier === 3 && (
-      <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-yellow-500 text-black text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider">
+      <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#EE5F96] text-white text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider">
         Premium
       </div>
     )}
 
     {/* Header */}
-    <div className="mb-5 text-center">
-      <h3 className={`text-xl sm:text-2xl font-bold mb-2 ${tier === 3 ? 'text-yellow-300' : tier === 2 ? 'text-[#EE5F96]' : 'text-white'}`}>
+    <div className="relative z-10 mb-5 text-center">
+      <h3 className={`text-xl sm:text-2xl font-bold mb-2 ${tier >= 2 ? 'text-[#EE5F96]' : 'text-white'}`}>
         {data.plan}
       </h3>
       <div className="flex items-baseline justify-center gap-1">
-        <span className="text-5xl sm:text-6xl font-extrabold text-white">${data.price}</span>
+        <span className="text-4xl sm:text-5xl font-bold text-white">${data.price}</span>
       </div>
     </div>
 
@@ -98,13 +102,7 @@ const PricingCard = ({ data, onBuy }: {
     {/* CTA */}
     <button
       onClick={() => onBuy(data.plan, data.credits, data.amount)}
-      className={`w-full py-3.5 rounded-xl font-semibold text-base transition-all ${
-        tier === 3
-          ? 'bg-gradient-to-r from-yellow-500 to-amber-600 text-black hover:from-yellow-400 hover:to-amber-500 shadow-lg shadow-yellow-500/20'
-          : tier === 2
-            ? 'bg-[#EE5F96] text-white hover:bg-[#d94d7e] shadow-lg shadow-[#EE5F96]/20'
-            : 'bg-white/10 text-white hover:bg-white/20'
-      }`}
+      className="w-full py-3.5 rounded-xl font-semibold text-base bg-[#EE5F96] text-white hover:bg-[#d94d7e] shadow-lg shadow-[#EE5F96]/20 transition-all"
     >
       {t('pricing.getStarted')}
     </button>
@@ -208,6 +206,28 @@ export default function PricingPage() {
 
   return (
     <div className="min-h-screen selection:bg-[#EE5F96]/30">
+      <style>{`
+        .prime-3d-card { position: relative; }
+        .prime-3d-overlay {
+          background: linear-gradient(
+            135deg,
+            rgba(238, 95, 150, 0.08) 0%,
+            rgba(139, 92, 246, 0.06) 25%,
+            rgba(238, 95, 150, 0.10) 50%,
+            rgba(59, 130, 246, 0.06) 75%,
+            rgba(238, 95, 150, 0.08) 100%
+          );
+          background-size: 400% 400%;
+          animation: prime-3d-shift 8s ease-in-out infinite;
+        }
+        @keyframes prime-3d-shift {
+          0%   { background-position: 0% 0%; opacity: 0.7; }
+          25%  { background-position: 100% 0%; opacity: 1; }
+          50%  { background-position: 100% 100%; opacity: 0.7; }
+          75%  { background-position: 0% 100%; opacity: 1; }
+          100% { background-position: 0% 0%; opacity: 0.7; }
+        }
+      `}</style>
       <LoginModal open={showLogin} onClose={() => setShowLogin(false)} />
       <PaymentMethodModal
         isOpen={showPaymentMethod}
