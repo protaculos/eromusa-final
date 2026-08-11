@@ -43,23 +43,15 @@ const PricingCard = ({ data, onBuy }: {
     </div>
 
     {/* Features */}
-    <ul className="space-y-3 mb-8 flex-1">
-      {/* 1. Créditos */}
-      <li className="flex items-center gap-3 text-sm text-white/60">
-        <span className="text-white font-bold">{data.credits.toLocaleString()}</span>
-        <span>{t('pricing.creditsPerMonth')}</span>
+    <ul className="space-y-3 mb-8 flex-1 border-t border-white/10 pt-6">
+      <li className="text-white text-sm font-medium">
+        {data.credits.toLocaleString()} {t('pricing.creditsPerMonth')}
       </li>
-
-      {/* 2. Vídeos que consegue fazer */}
-      <li className="flex items-center gap-3 text-sm text-white/60">
-        <span className="text-white font-bold">{data.totalVideos}</span>
-        <span>{t('pricing.upTo')} {t('pricing.videosPerMonth')}</span>
+      <li className="text-white text-sm font-medium">
+        {t('pricing.upTo')} {data.totalVideos} {t('pricing.videosPerMonth')}
       </li>
-
-      {/* 3. Custo por vídeo */}
-      <li className="flex items-center gap-3 text-sm text-white/60">
-        <span className="text-white font-bold">1 {t('pricing.perVideo')}</span>
-        <span>= ${data.costPerVideo}</span>
+      <li className="text-white/70 text-sm">
+        1 vídeo = ${data.costPerVideo}
       </li>
     </ul>
 
