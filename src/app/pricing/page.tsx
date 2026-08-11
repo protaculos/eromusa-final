@@ -48,6 +48,14 @@ const PricingCard = ({ data, onBuy }: {
       <div className="absolute inset-0 pointer-events-none prime-3d-overlay" aria-hidden="true" />
     )}
 
+    {tier >= 2 && tier < 3 && (
+      <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(180deg,rgba(238,95,150,0.14)_0%,rgba(238,95,150,0.06)_22%,transparent_52%)]" aria-hidden="true" />
+    )}
+
+    {tier === 3 && (
+      <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(180deg,rgba(238,95,150,0.18)_0%,rgba(238,95,150,0.08)_20%,transparent_50%),linear-gradient(135deg,rgba(238,95,150,0.06),rgba(255,255,255,0.02),rgba(238,95,150,0.1))]" aria-hidden="true" />
+    )}
+
     {data.isPopular && tier !== 3 && (
       <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#EE5F96] text-white text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider">
         {t('pricing.mostPopular')}
@@ -102,7 +110,7 @@ const PricingCard = ({ data, onBuy }: {
     {/* CTA */}
     <button
       onClick={() => onBuy(data.plan, data.credits, data.amount)}
-      className="w-full py-3.5 rounded-xl font-semibold text-base bg-[#EE5F96] text-white hover:bg-[#d94d7e] shadow-lg shadow-[#EE5F96]/20 transition-all"
+      className="w-full py-4 rounded-xl font-bold text-lg sm:text-xl bg-[#EE5F96] text-white hover:bg-[#d94d7e] shadow-lg shadow-[#EE5F96]/20 transition-all"
     >
       {t('pricing.getStarted')}
     </button>
@@ -240,7 +248,7 @@ export default function PricingPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-10">
         <ErrorBoundary sectionName="Pricing">
         {/* Pricing Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16 lg:mb-20">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-10 sm:mt-12 lg:mt-16 mb-16 lg:mb-20">
           {PLANS.map((plan) => (
             <PricingCard key={plan.plan} data={plan} onBuy={handleBuy} />
           ))}
